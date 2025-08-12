@@ -55,7 +55,7 @@ function Navbar() {
       x: "100%",
       transition: {
         duration: 0.3,
-        ease: "easeInOut",
+        ease: "easeInOut" as const,
       },
     },
     open: {
@@ -63,7 +63,7 @@ function Navbar() {
       x: 0,
       transition: {
         duration: 0.3,
-        ease: "easeInOut",
+        ease: "easeInOut" as const,
         staggerChildren: 0.1,
         delayChildren: 0.1,
       },
