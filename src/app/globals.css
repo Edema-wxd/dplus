@@ -77,10 +77,11 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
   --coal-grey: #121212;
-
+  --dsp-red: oklch(0.6679 0.183 23.45);
+  --dsp-blue: oklch(0.8425 0.1354 212.43);
+  --dsp-green: oklch(0.7937 0.2054 133.1);
+  --dsp-yellow: oklch(0.8488 0.1502 81.14);
 }
-
-
 
 @layer base {
   * {
