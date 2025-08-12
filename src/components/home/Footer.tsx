@@ -40,11 +40,21 @@ function Footer() {
   };
 
   const socialLinks = [
-    { icon: FaFacebookF, href: "#", label: "Facebook" },
-    { icon: FaTwitter, href: "#", label: "Twitter" },
-    { icon: FaInstagram, href: "#", label: "Instagram" },
-    { icon: FaLinkedinIn, href: "#", label: "LinkedIn" },
-    { icon: FaYoutube, href: "#", label: "YouTube" },
+    {
+      icon: FaInstagram,
+      href: "https://www.instagram.com/de.sign_plus",
+      label: "Instagram",
+    },
+    {
+      icon: FaFacebookF,
+      href: "https://www.facebook.com/De.SignPlusNig/",
+      label: "Facebook",
+    },
+    {
+      icon: FaLinkedinIn,
+      href: "https://www.linkedin.com/company/de-sign-plus/",
+      label: "LinkedIn",
+    },
   ];
 
   const quickLinks = [
@@ -185,19 +195,7 @@ function Footer() {
                 >
                   <FaEnvelope className="w-4 h-4 text-gray-400 flex-shrink-0" />
                   <span className="text-gray-300 text-sm">
-                    hello@designplus.com
-                  </span>
-                </motion.div>
-
-                <motion.div
-                  whileHover={{ x: 5 }}
-                  className="flex items-start space-x-3"
-                >
-                  <FaMapMarkerAlt className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-300 text-sm">
-                    123 Design Street
-                    <br />
-                    Creative City, CC 12345
+                    support@de-signplus.com
                   </span>
                 </motion.div>
               </div>
