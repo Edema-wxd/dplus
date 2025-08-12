@@ -6,6 +6,8 @@ import "./globals.css";
 // Components
 import Navbar from "@/components/home/Navbar";
 import Footer from "@/components/home/Footer";
+import { Toaster } from "@/components/ui/sonner";
+ 
 
 const raleway = Raleway({
   variable: "--font-raleway",
@@ -59,6 +61,7 @@ export default function RootLayout({
         <Navbar />
         {children}
         <Footer />
+        <Toaster />
       </body>
     </html>
   );
