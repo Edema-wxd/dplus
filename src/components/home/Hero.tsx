@@ -142,7 +142,7 @@ function Hero() {
 
               <Button
                 variant="outline"
-                className="border-white/30 text-white hover:bg-white/10 font-sarlotte px-8 py-4 text-lg backdrop-blur-sm"
+                className="border-white/30 text-white hover:bg-white hover:text-black font-sarlotte px-8 py-4 text-lg backdrop-blur-sm"
                 size="lg"
                 onClick={() => {
                   window.location.href = "/portfolio";
@@ -173,56 +173,16 @@ function Hero() {
             variants={itemVariants}
             className="relative flex items-center justify-center"
           >
-            <motion.div
-              animate={floatingAnimation as unknown as TargetAndTransition}
-              className="relative w-full max-w-lg aspect-square"
-            >
-              {/* Placeholder for hero image - you can replace this with your actual image */}
-              <div className="w-full h-full bg-gradient-to-br from-white/10 to-white/5 rounded-3xl backdrop-blur-sm border border-white/20 flex items-center justify-center">
-                <div className="text-center text-white/60">
-                  <div className="w-24 h-24 mx-auto mb-4 bg-white/10 rounded-full flex items-center justify-center">
-                    <Sparkles className="w-12 h-12" />
-                  </div>
-                  <p className="font-sarlotte text-lg">Hero Image</p>
-                  <p className="text-sm mt-2">Add your hero image here</p>
-                </div>
-              </div>
-
-              {/* Decorative elements */}
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                className="absolute -top-4 -right-4 w-8 h-8 border-2 border-yellow-400/30 rounded-full"
-              />
-              <motion.div
-                animate={{ rotate: -360 }}
-                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                className="absolute -bottom-4 -left-4 w-6 h-6 border-2 border-white/20 rounded-full"
-              />
-            </motion.div>
+            <Image
+              src="/letters.svg"
+              alt="Hero Image"
+              width={1000}
+              height={1000}
+              className=" max-h-90vh"
+            />
           </motion.div>
         </motion.div>
       </div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.5, duration: 0.8 }}
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-      >
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center"
-        >
-          <motion.div
-            animate={{ y: [0, 12, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="w-1 h-3 bg-white/60 rounded-full mt-2"
-          />
-        </motion.div>
-      </motion.div>
     </section>
   );
 }

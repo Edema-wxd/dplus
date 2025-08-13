@@ -179,17 +179,14 @@ function Footer() {
               className="lg:col-span-1"
             >
               <div className="flex items-center space-x-3 mb-6">
-                <div className="relative w-12 h-12">
+                <div className="relative w-24 h-12 lg:w-40 lg:h-16">
                   <Image
-                    src="/logo.png"
+                    src="/logo-w.svg"
                     alt="De-Sign Plus"
                     fill
                     className="object-contain"
                   />
                 </div>
-                <span className="font-sarlotte text-2xl font-bold">
-                  De-Sign Plus
-                </span>
               </div>
               <p className="text-gray-300 font-raleway text-sm leading-relaxed mb-6">
                 We create exceptional experiences that inspire, engage, and
@@ -308,7 +305,7 @@ function Footer() {
                 </p>
               </div>
 
-              <div className="flex w-full font-raleway lg:w-auto space-x-2">
+              <div className="flex w-full flex-wrap gap-2 font-raleway lg:w-auto space-x-2">
                 <input
                   type="email"
                   placeholder="Enter your email"

@@ -85,18 +85,16 @@ function Navbar() {
             {/* Logo */}
             <motion.div variants={itemVariants} className="flex items-center">
               <Link href="/" className="flex items-center space-x-2">
-                <div className="relative w-12 h-12 lg:w-16 lg:h-16">
+                <div className="relative w-24  h-12 lg:w-32 lg:h-16">
                   <Image
-                    src="/logo.png"
+                    src="/logo-w.svg"
                     alt="De-Sign Plus"
                     fill
                     className="object-contain"
                     priority
                   />
                 </div>
-                <span className="font-sarlotte text-white text-xl lg:text-2xl font-bold">
-                  De-Sign Plus
-                </span>
+                
               </Link>
             </motion.div>
 
