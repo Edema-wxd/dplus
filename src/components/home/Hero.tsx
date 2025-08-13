@@ -101,7 +101,7 @@ function Hero() {
             {/* Main heading */}
             <motion.h1
               variants={itemVariants}
-              className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-sarlotte font-bold text-white leading-tight"
+              className="text-4xl leading-tight sm:text-5xl lg:text-6xl xl:text-7xl font-sarlotte font-bold text-white "
             >
               Transforming{" "}
               <span className="bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">

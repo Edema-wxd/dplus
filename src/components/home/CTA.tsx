@@ -49,7 +49,7 @@ function CTA() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          className="text-center"
+          className="text-left"
         >
           {/* Badge */}
           <motion.div
@@ -75,7 +75,7 @@ function CTA() {
           {/* Description */}
           <motion.p
             variants={itemVariants as Variants}
-            className="text-lg sm:text-xl text-gray-300 font-raleway leading-relaxed max-w-3xl mx-auto mb-10"
+            className="text-lg text-left sm:text-xl text-gray-300 font-raleway leading-relaxed max-w-3xl   mb-10"
           >
             Ready to elevate your brand with our exclusive curation? Whether you&apos;re looking 
             for the perfect corporate gift, luxury brand experience, or bespoke partnership, 
