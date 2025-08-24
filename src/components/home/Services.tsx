@@ -10,6 +10,7 @@ import {
 } from "framer-motion";
 import { ArrowRight, Gift, Palette, Package, Handshake } from "lucide-react";
 import { Button } from "../ui/button";
+import Image from "next/image";
 
 const services = [
   {
@@ -19,6 +20,7 @@ const services = [
       "Handcrafted corporate gifts sourced exclusively from South African artisans. Each piece carries cultural significance and rarity, designed to leave lasting impressions on C-suite executives.",
     link: "Explore Collection",
     icon: Gift,
+    image: "/corporate.png",
   },
   {
     number: "02",
@@ -27,6 +29,7 @@ const services = [
       "Complete luxury brand identity creation that resonates with affluent markets. We craft visual narratives that position your company as the pinnacle of excellence.",
     link: "Start Project",
     icon: Palette,
+    image: "/brand.png",
   },
   {
     number: "03",
@@ -35,6 +38,7 @@ const services = [
       "Limited-edition corporate merchandise featuring authentic South African materials. Perfect for strengthening relationships with high-net-worth individuals and corporate leaders.",
     link: "View Catalog",
     icon: Package,
+    image: "/merchandise.png",
   },
   {
     number: "04",
@@ -43,6 +47,7 @@ const services = [
       "Precisely timed gift experiences that align with your business objectives. Our discretion and cultural insight help secure partnerships worth millions in Naira.",
     link: "Learn More",
     icon: Handshake,
+    image: "/partnership.png",
   },
 ];
 
@@ -112,18 +117,6 @@ function Services() {
         {/* Animated border effect */}
         <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-        {/* Service number */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={
-            isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }
-          }
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-black font-sarlotte font-bold text-lg"
-        >
-          {service.number}
-        </motion.div>
-
         {/* Icon */}
         <motion.div
           initial={{ opacity: 0, rotate: -10 }}
@@ -133,7 +126,17 @@ function Services() {
           transition={{ delay: 0.3, duration: 0.5 }}
           className="mb-6"
         >
-          <service.icon className="w-12 h-12 text-yellow-400" />
+  
+          <div className="relative w-full aspect-[1/1]">
+            <Image
+              src={service.image}
+              alt={service.title}
+              fill
+              className="rounded w-full h-full object-cover"
+              sizes="(max-width: 768px) 100vw, 200px"
+              priority={index === 0}
+            />
+          </div>
         </motion.div>
 
         {/* Content */}
