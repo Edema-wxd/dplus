@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed:admin": "tsx scripts/seed-admin.ts"
+    "seed:admin": "tsx scripts/seed-admin.ts",
+    "seed:amrod": "tsx scripts/amrod-seed.ts"
   },
   "dependencies": {
     "@radix-ui/react-navigation-menu": "^1.2.13",
@@ -25,6 +26,7 @@
     "react-dom": "19.1.0",
     "react-icons": "^5.5.0",
     "sonner": "^2.0.7",
+    "stream-json": "^3.4.0",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {

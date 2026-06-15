@@ -24,6 +24,7 @@ function Navbar() {
   const navItems = [
     { href: "/", label: "Home" },
     { href: "/services", label: "Services" },
+    { href: "/products", label: "Products" },
     { href: "/portfolio", label: "Portfolio" },
     { href: "/contact-us", label: "Contact" },
   ];
