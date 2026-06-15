@@ -6,7 +6,14 @@ import Link from "next/link";
 import { motion, Variants } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { FaHome } from "react-icons/fa";
+import { useTheme } from "next-themes";
+
 function NotFound() {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  useEffect(() => setMounted(true), []);
+
   // Auto-redirect after 10 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -48,7 +55,7 @@ function NotFound() {
         <motion.div variants={itemVariants} className="mb-8">
           <div className="relative w-32 h-16 mx-auto">
             <Image
-              src="/logo-w.svg"
+              src={mounted && resolvedTheme === "light" ? "/logo-b.svg" : "/logo-w.svg"}
               alt="De-Sign Plus"
               fill
               className="object-contain"
@@ -59,14 +66,14 @@ function NotFound() {
 
         {/* 404 Number */}
         <motion.div variants={itemVariants} className="mb-6">
-          <h1 className="text-8xl font-sarlotte md:text-9xl font-bold    text-white opacity-80">
+          <h1 className="text-8xl font-sarlotte md:text-9xl font-bold    text-foreground opacity-80">
             404
           </h1>
         </motion.div>
 
         {/* Error Message */}
         <motion.div variants={itemVariants} className="mb-8">
-          <h2 className="text-2xl md:text-3xl font-raleway font-semibold text-white opacity-80 mb-4">
+          <h2 className="text-2xl md:text-3xl font-raleway font-semibold text-foreground opacity-80 mb-4">
             Page Not Found
           </h2>
           <p className="text-muted-foreground font-raleway text-lg leading-relaxed">

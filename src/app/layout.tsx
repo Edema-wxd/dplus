@@ -4,10 +4,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 
 // Components
-import Navbar from "@/components/home/Navbar";
-import Footer from "@/components/home/Footer";
-import { Toaster } from "@/components/ui/sonner";
- 
+import { ThemeProvider } from "@/components/theme-provider";
+
 
 const raleway = Raleway({
   variable: "--font-raleway",
@@ -56,12 +54,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${raleway.variable} ${sarlotte.variable} antialiased`}>
-        <Navbar />
-        {children}
-        <Footer />
-        <Toaster richColors />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

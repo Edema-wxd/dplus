@@ -72,9 +72,9 @@ function Hero() {
 
       {/* Animated background elements */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-white/5 rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-24 h-24 bg-white/3 rounded-full blur-lg animate-pulse delay-1000"></div>
-        <div className="absolute bottom-40 left-1/4 w-40 h-40 bg-white/2 rounded-full blur-2xl animate-pulse delay-2000"></div>
+        <div className="absolute top-20 left-10 w-32 h-32 bg-foreground/5 rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 bg-foreground/3 rounded-full blur-lg animate-pulse delay-1000"></div>
+        <div className="absolute bottom-40 left-1/4 w-40 h-40 bg-foreground/2 rounded-full blur-2xl animate-pulse delay-2000"></div>
       </div>
 
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -95,7 +95,7 @@ function Hero() {
           {/* Hero Title */}
           <motion.h1
             variants={itemVariants}
-            className="font-sarlotte text-5xl sm:text-6xl lg:text-7xl font-normal leading-tight mb-10 tracking-tight text-white"
+            className="font-sarlotte text-5xl sm:text-6xl lg:text-7xl font-normal leading-tight mb-10 tracking-tight text-foreground"
           >
             Let&apos;s Create Something Extraordinary Together
           </motion.h1>
@@ -103,7 +103,7 @@ function Hero() {
           {/* Hero Description */}
           <motion.p
             variants={itemVariants}
-            className="text-xl font-raleway text-gray-300 leading-relaxed font-light mb-16 max-w-3xl mx-auto"
+            className="text-xl font-raleway text-muted-foreground leading-relaxed font-light mb-16 max-w-3xl mx-auto"
           >
             Every transformative partnership begins with a conversation. Whether
             you&apos;re seeking exclusive South African gifts, premium brand
@@ -125,14 +125,14 @@ function Hero() {
                   y: -5,
                   transition: { type: "spring", stiffness: 300 },
                 }}
-                className="text-center p-5 border border-gray-700 bg-coal-grey/50 backdrop-blur-sm rounded-lg transition-all duration-300 hover:border-teal-400 group"
+                className="text-center p-5 border border-border bg-coal-grey/50 backdrop-blur-sm rounded-lg transition-all duration-300 hover:border-teal-400 group"
               >
                 <div
                   className={`w-12 h-12 ${feature.color} rounded-full flex items-center justify-center mx-auto mb-4 text-lg text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}
                 >
                   {feature.icon}
                 </div>
-                <div className="text-base font-raleway text-gray-400 uppercase tracking-wider font-light">
+                <div className="text-base font-raleway text-muted-foreground uppercase tracking-wider font-light">
                   {feature.text}
                 </div>
               </motion.div>

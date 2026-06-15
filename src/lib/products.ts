@@ -1,4 +1,5 @@
 import { pool } from "@/lib/db";
+import { calcPrice, getPricingConfig } from "@/lib/pricing";
 
 export type ProductListItem = {
   simpleCode: string;
@@ -82,16 +83,160 @@ export async function getProducts({
   );
 
   const hasMore = rows.length > limit;
+  const cfg = await getPricingConfig();
   const items: ProductListItem[] = rows.slice(0, limit).map((row) => ({
     simpleCode: row.simple_code,
     productName: row.product_name ?? "",
     brandCode: row.brand_code,
     brandName: row.brand_name,
     image: pickImage(row.images),
-    price: row.price ? Number(row.price) : null,
+    price: row.price ? calcPrice(Number(row.price), cfg).priceNgn : null,
   }));
 
   return { items, hasMore };
+}
+
+export type ProductImage = {
+  name: string;
+  type: string;
+  urls: { url: string; width: number; height: number }[];
+  hasLogo: boolean;
+  isDefault: boolean;
+};
+
+export type ProductVariant = {
+  fullCode: string;
+  codeColour: string | null;
+  codeColourName: string | null;
+  codeSize: string | null;
+  codeSizeName: string | null;
+};
+
+export type ProductBrandingMethod = {
+  brandingCode: string;
+  brandingName: string;
+  numberOfColours?: string;
+};
+
+export type ProductBranding = {
+  positionCode: string;
+  positionName: string;
+  method: ProductBrandingMethod[];
+};
+
+export type ProductCategory = { id: string; name: string };
+
+export type ProductDetail = {
+  simpleCode: string;
+  productName: string;
+  description: string;
+  brandCode: string | null;
+  brandName: string | null;
+  images: ProductImage[];
+  variants: ProductVariant[];
+  brandings: ProductBranding[];
+  prices: Record<string, number>;
+  inStock: boolean;
+  categories: ProductCategory[];
+};
+
+type ProductDetailRow = {
+  simple_code: string;
+  product_name: string | null;
+  brand_code: string | null;
+  brand_name: string | null;
+  data: {
+    description?: string;
+    images?: ProductImage[];
+    variants?: ProductVariant[];
+    brandings?: ProductBranding[];
+    categories?: ProductCategory[];
+  };
+};
+
+export async function getProductDetail(simpleCode: string): Promise<ProductDetail | null> {
+  const { rows } = await pool.query<ProductDetailRow>(
+    `
+    select p.simple_code, p.product_name, p.brand_code, b.name as brand_name, p.data
+    from products p
+    left join brands b on b.code = p.brand_code
+    where p.simple_code = $1 and p.is_active = true
+    `,
+    [simpleCode]
+  );
+
+  if (!rows.length) return null;
+  const row = rows[0];
+
+  const [{ rows: priceRows }, { rows: stockRows }] = await Promise.all([
+    pool.query<{ full_code: string; price: string }>(
+      `select full_code, data->>'price' as price from product_prices where simple_code = $1`,
+      [simpleCode]
+    ),
+    pool.query<{ in_stock: boolean }>(
+      `select coalesce(bool_or((data->>'stock')::numeric > 0), false) as in_stock from product_stock where simple_code = $1`,
+      [simpleCode]
+    ),
+  ]);
+
+  const cfg = await getPricingConfig();
+  const prices: Record<string, number> = {};
+  for (const r of priceRows) prices[r.full_code] = calcPrice(Number(r.price), cfg).priceNgn;
+
+  return {
+    simpleCode: row.simple_code,
+    productName: row.product_name ?? "",
+    description: row.data.description ?? "",
+    brandCode: row.brand_code,
+    brandName: row.brand_name,
+    images: row.data.images ?? [],
+    variants: row.data.variants ?? [],
+    brandings: row.data.brandings ?? [],
+    prices,
+    inStock: stockRows[0]?.in_stock ?? false,
+    categories: row.data.categories ?? [],
+  };
+}
+
+export async function getRelatedProducts(
+  simpleCode: string,
+  categoryIds: string[],
+  limit = 8
+): Promise<ProductListItem[]> {
+  if (!categoryIds.length) return [];
+
+  const { rows } = await pool.query<ProductRow>(
+    `
+    select
+      p.simple_code,
+      p.product_name,
+      p.brand_code,
+      b.name as brand_name,
+      p.data -> 'images' as images,
+      (select min((pp.data->>'price')::numeric) from product_prices pp where pp.simple_code = p.simple_code) as price
+    from products p
+    left join brands b on b.code = p.brand_code
+    where p.is_active = true
+      and p.simple_code <> $1
+      and exists (
+        select 1 from jsonb_array_elements(p.data -> 'categories') as pc
+        where (pc ->> 'id') = any($2::text[])
+      )
+    order by p.product_name asc
+    limit $3
+    `,
+    [simpleCode, categoryIds, limit]
+  );
+
+  const cfg = await getPricingConfig();
+  return rows.map((row) => ({
+    simpleCode: row.simple_code,
+    productName: row.product_name ?? "",
+    brandCode: row.brand_code,
+    brandName: row.brand_name,
+    image: pickImage(row.images),
+    price: row.price ? calcPrice(Number(row.price), cfg).priceNgn : null,
+  }));
 }
 
 export async function getBrandOptions(): Promise<BrandOption[]> {

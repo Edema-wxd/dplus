@@ -136,15 +136,15 @@ function Contact() {
   ];
 
   return (
-    <section id="contact-form" className="py-30 bg-black">
+    <section id="contact-form" className="py-30 bg-background">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-25 items-start">
           {/* Contact Information */}
           <div className="lg:col-span-1">
-            <h2 className="font-sarlotte text-white text-4xl lg:text-5xl font-normal mb-8 tracking-tight">
+            <h2 className="font-sarlotte text-foreground text-4xl lg:text-5xl font-normal mb-8 tracking-tight">
               Share Your Vision
             </h2>
-            <p className="text-gray-400 font-raleway leading-relaxed font-light mb-10">
+            <p className="text-muted-foreground font-raleway leading-relaxed font-light mb-10">
               Tell us about your objectives, timeline, and the impact you want
               to create. Our team will review your requirements and respond
               within 24 hours with a tailored approach and initial
@@ -155,7 +155,7 @@ function Contact() {
               {contactItems.map((item, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-5 py-5 border-b border-gray-700"
+                  className="flex items-center gap-5 py-5 border-b border-border"
                 >
                   <div
                     className={cn(
@@ -166,10 +166,10 @@ function Contact() {
                     {item.icon}
                   </div>
                   <div className="flex-1">
-                    <div className="text-gray-400 font-raleway text-xs uppercase tracking-wider mb-1 font-light">
+                    <div className="text-muted-foreground font-raleway text-xs uppercase tracking-wider mb-1 font-light">
                       {item.label}
                     </div>
-                    <div className="text-white text-base font-normal">
+                    <div className="text-foreground text-base font-normal">
                       {item.value}
                     </div>
                   </div>
@@ -182,13 +182,13 @@ function Contact() {
           <div className="lg:col-span-2">
             <form
               onSubmit={handleSubmit}
-              className="bg-gray-900 p-15 border border-gray-700"
+              className="bg-card p-15 border border-border"
             >
               <div className="text-center mb-12">
-                <h3 className="font-sarlotte text-3xl text-white font-normal mb-4 tracking-tight">
+                <h3 className="font-sarlotte text-3xl text-foreground font-normal mb-4 tracking-tight">
                   Project Inquiry Form
                 </h3>
-                <p className="text-gray-400 font-raleway text-sm font-light">
+                <p className="text-muted-foreground font-raleway text-sm font-light">
                   All information provided is strictly confidential
                 </p>
               </div>
@@ -198,7 +198,7 @@ function Contact() {
                 <div>
                   <label
                     htmlFor="firstName"
-                    className="block mb-3 text-gray-400 font-raleway font-light text-sm uppercase tracking-wider"
+                    className="block mb-3 text-muted-foreground font-raleway font-light text-sm uppercase tracking-wider"
                   >
                     First Name *
                   </label>
@@ -209,13 +209,13 @@ function Contact() {
                     value={formData.firstName}
                     onChange={handleInputChange}
                     required
-                    className="w-full font-raleway py-5 bg-transparent border-b border-gray-700 text-white font-light text-base focus:outline-none focus:border-cyan-400 transition-colors"
+                    className="w-full font-raleway py-5 bg-transparent border-b border-border text-foreground font-light text-base focus:outline-none focus:border-cyan-400 transition-colors"
                   />
                 </div>
                 <div>
                   <label
                     htmlFor="lastName"
-                    className="block mb-3 text-gray-400 font-light text-sm uppercase tracking-wider"
+                    className="block mb-3 text-muted-foreground font-light text-sm uppercase tracking-wider"
                   >
                     Last Name *
                   </label>
@@ -226,7 +226,7 @@ function Contact() {
                     value={formData.lastName}
                     onChange={handleInputChange}
                     required
-                    className="w-full font-raleway py-5 bg-transparent border-b border-gray-700 text-white font-light text-base focus:outline-none focus:border-cyan-400 transition-colors"
+                    className="w-full font-raleway py-5 bg-transparent border-b border-border text-foreground font-light text-base focus:outline-none focus:border-cyan-400 transition-colors"
                   />
                 </div>
               </div>
@@ -236,7 +236,7 @@ function Contact() {
                 <div>
                   <label
                     htmlFor="company"
-                    className="block mb-3 text-gray-400 font-light text-sm uppercase tracking-wider"
+                    className="block mb-3 text-muted-foreground font-light text-sm uppercase tracking-wider"
                   >
                     Company *
                   </label>
@@ -247,13 +247,13 @@ function Contact() {
                     value={formData.company}
                     onChange={handleInputChange}
                     required
-                    className="w-full font-raleway py-5 bg-transparent border-b border-gray-700 text-white font-light text-base focus:outline-none focus:border-cyan-400 transition-colors"
+                    className="w-full font-raleway py-5 bg-transparent border-b border-border text-foreground font-light text-base focus:outline-none focus:border-cyan-400 transition-colors"
                   />
                 </div>
                 <div>
                   <label
                     htmlFor="position"
-                    className="block mb-3 text-gray-400 font-light text-sm uppercase tracking-wider"
+                    className="block mb-3 text-muted-foreground font-light text-sm uppercase tracking-wider"
                   >
                     Your Position *
                   </label>
@@ -264,7 +264,7 @@ function Contact() {
                     value={formData.position}
                     onChange={handleInputChange}
                     required
-                    className="w-full font-raleway py-5 bg-transparent border-b border-gray-700 text-white font-light text-base focus:outline-none focus:border-cyan-400 transition-colors"
+                    className="w-full font-raleway py-5 bg-transparent border-b border-border text-foreground font-light text-base focus:outline-none focus:border-cyan-400 transition-colors"
                   />
                 </div>
               </div>
@@ -274,7 +274,7 @@ function Contact() {
                 <div>
                   <label
                     htmlFor="email"
-                    className="block mb-3 text-gray-400 font-light text-sm uppercase tracking-wider"
+                    className="block mb-3 text-muted-foreground font-light text-sm uppercase tracking-wider"
                   >
                     Email Address *
                   </label>
@@ -285,13 +285,13 @@ function Contact() {
                     value={formData.email}
                     onChange={handleInputChange}
                     required
-                    className="w-full font-raleway py-5 bg-transparent border-b border-gray-700 text-white font-light text-base focus:outline-none focus:border-cyan-400 transition-colors"
+                    className="w-full font-raleway py-5 bg-transparent border-b border-border text-foreground font-light text-base focus:outline-none focus:border-cyan-400 transition-colors"
                   />
                 </div>
                 <div>
                   <label
                     htmlFor="phone"
-                    className="block mb-3 text-gray-400 font-light text-sm uppercase tracking-wider"
+                    className="block mb-3 text-muted-foreground font-light text-sm uppercase tracking-wider"
                   >
                     Phone Number
                   </label>
@@ -301,7 +301,7 @@ function Contact() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="w-full font-raleway py-5 bg-transparent border-b border-gray-700 text-white font-light text-base focus:outline-none focus:border-cyan-400 transition-colors"
+                    className="w-full font-raleway py-5 bg-transparent border-b border-border text-foreground font-light text-base focus:outline-none focus:border-cyan-400 transition-colors"
                   />
                 </div>
               </div>
@@ -310,7 +310,7 @@ function Contact() {
               <div className="mb-8">
                 <label
                   htmlFor="service"
-                  className="block mb-3 text-gray-400 font-light text-sm uppercase tracking-wider"
+                  className="block mb-3 text-muted-foreground font-light text-sm uppercase tracking-wider"
                 >
                   Service Interest *
                 </label>
@@ -320,7 +320,7 @@ function Contact() {
                   value={formData.service}
                   onChange={handleInputChange}
                   required
-                  className="w-full font-raleway py-5 bg-transparent border-b border-gray-700 text-white font-light text-base focus:outline-none focus:border-cyan-400 transition-colors cursor-pointer"
+                  className="w-full font-raleway py-5 bg-transparent border-b border-border text-foreground font-light text-base focus:outline-none focus:border-cyan-400 transition-colors cursor-pointer"
                 >
                   <option className="text-black" value="">
                     Select a service...
@@ -348,7 +348,7 @@ function Contact() {
 
               {/* Budget Range */}
               <div className="mb-8">
-                <label className="block mb-3 text-gray-400 font-light text-sm uppercase tracking-wider">
+                <label className="block mb-3 text-muted-foreground font-light text-sm uppercase tracking-wider">
                   Project Budget Range (₦) *
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
@@ -367,7 +367,7 @@ function Contact() {
                       <label
                         htmlFor={option.id}
                         className={cn(
-                          "block rounded-xl  py-4 px-3 font-raleway bg-transparent border border-gray-700 text-center text-xs uppercase tracking-wider cursor-pointer transition-all text-white",
+                          "block rounded-xl  py-4 px-3 font-raleway bg-transparent border border-border text-center text-xs uppercase tracking-wider cursor-pointer transition-all text-foreground",
                           formData.budget === option.value &&
                             "border-cyan-400 bg-cyan-200 text-black"
                         )}
@@ -384,7 +384,7 @@ function Contact() {
                 <div>
                   <label
                     htmlFor="timeline"
-                    className="block font-raleway mb-3 text-gray-400 font-light text-sm uppercase tracking-wider"
+                    className="block font-raleway mb-3 text-muted-foreground font-light text-sm uppercase tracking-wider"
                   >
                     Desired Timeline *
                   </label>
@@ -394,7 +394,7 @@ function Contact() {
                     value={formData.timeline}
                     onChange={handleInputChange}
                     required
-                    className="w-full font-raleway py-5 bg-transparent border-b border-gray-700 text-white font-light text-base focus:outline-none focus:border-cyan-400 transition-colors cursor-pointer"
+                    className="w-full font-raleway py-5 bg-transparent border-b border-border text-foreground font-light text-base focus:outline-none focus:border-cyan-400 transition-colors cursor-pointer"
                   >
                     <option className="text-black" value="">
                       Select timeline...
@@ -416,7 +416,7 @@ function Contact() {
                 <div>
                   <label
                     htmlFor="location"
-                    className="block mb-3 font-raleway text-gray-400 font-light text-sm uppercase tracking-wider"
+                    className="block mb-3 font-raleway text-muted-foreground font-light text-sm uppercase tracking-wider"
                   >
                     Project Location
                   </label>
@@ -427,7 +427,7 @@ function Contact() {
                     value={formData.location}
                     onChange={handleInputChange}
                     placeholder="e.g. Lagos, Abuja, International"
-                    className="w-full font-raleway py-5 bg-transparent border-b border-gray-700 text-white font-light text-base focus:outline-none focus:border-cyan-400 transition-colors"
+                    className="w-full font-raleway py-5 bg-transparent border-b border-border text-foreground font-light text-base focus:outline-none focus:border-cyan-400 transition-colors"
                   />
                 </div>
               </div>
@@ -436,7 +436,7 @@ function Contact() {
               <div className="mb-8">
                 <label
                   htmlFor="objectives"
-                  className="block mb-3 font-raleway text-gray-400 font-light text-sm uppercase tracking-wider"
+                  className="block mb-3 font-raleway text-muted-foreground font-light text-sm uppercase tracking-wider"
                 >
                   Project Objectives & Vision *
                 </label>
@@ -448,7 +448,7 @@ function Contact() {
                   placeholder="Please describe your project goals, target audience, cultural considerations, and any specific requirements..."
                   required
                   rows={4}
-                  className="w-full py-5 font-raleway pt-5 bg-transparent border-b border-gray-700 text-white font-light text-base focus:outline-none focus:border-cyan-400 transition-colors resize-none"
+                  className="w-full py-5 font-raleway pt-5 bg-transparent border-b border-border text-foreground font-light text-base focus:outline-none focus:border-cyan-400 transition-colors resize-none"
                 />
               </div>
 
@@ -456,7 +456,7 @@ function Contact() {
               <div className="mb-8">
                 <label
                   htmlFor="inspiration"
-                  className="block mb-3 font-raleway text-gray-400 font-light text-sm uppercase tracking-wider"
+                  className="block mb-3 font-raleway text-muted-foreground font-light text-sm uppercase tracking-wider"
                 >
                   Inspiration & References
                 </label>
@@ -467,7 +467,7 @@ function Contact() {
                   onChange={handleInputChange}
                   placeholder="Share any inspiration, previous work you admire, or specific cultural elements you'd like incorporated..."
                   rows={4}
-                  className="w-full py-5 font-raleway pt-5 bg-transparent border-b border-gray-700 text-white font-light text-base focus:outline-none focus:border-cyan-400 transition-colors resize-none"
+                  className="w-full py-5 font-raleway pt-5 bg-transparent border-b border-border text-foreground font-light text-base focus:outline-none focus:border-cyan-400 transition-colors resize-none"
                 />
               </div>
 
@@ -504,7 +504,7 @@ function Contact() {
                 )}
               </Button>
 
-              <p className="text-gray-500 text-xs text-center mt-5 leading-relaxed">
+              <p className="text-muted-foreground text-xs text-center mt-5 leading-relaxed">
                 By submitting this form, you agree to our confidentiality terms.
                 We treat all client information with absolute discretion and
                 will never share your details without explicit consent.

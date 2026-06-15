@@ -1,9 +1,13 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { ProductListItem } from "@/lib/products";
 
 export default function ProductCard({ product }: { product: ProductListItem }) {
   return (
-    <div className="group flex flex-col overflow-hidden rounded-lg border bg-card transition-shadow hover:shadow-md">
+    <Link
+      href={`/products/${product.simpleCode}`}
+      className="group flex flex-col overflow-hidden rounded-lg border bg-card transition-shadow hover:shadow-md"
+    >
       <div className="relative aspect-square w-full bg-muted">
         {product.image ? (
           <Image
@@ -30,13 +34,13 @@ export default function ProductCard({ product }: { product: ProductListItem }) {
         </h3>
         <div className="mt-auto pt-2 text-sm font-semibold">
           {product.price != null
-            ? new Intl.NumberFormat("en-ZA", {
+            ? new Intl.NumberFormat("en-NG", {
                 style: "currency",
-                currency: "ZAR",
+                currency: "NGN",
               }).format(product.price)
             : "Price on request"}
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

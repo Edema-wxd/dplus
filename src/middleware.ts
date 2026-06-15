@@ -7,10 +7,8 @@ const { auth } = NextAuth(authConfig);
 export default auth((req) => {
   const { pathname } = req.nextUrl;
 
-  if (pathname === "/admin/login") return NextResponse.next();
-
   if (pathname.startsWith("/admin") && !req.auth) {
-    const url = new URL("/admin/login", req.nextUrl.origin);
+    const url = new URL("/portal", req.nextUrl.origin);
     return NextResponse.redirect(url);
   }
 });

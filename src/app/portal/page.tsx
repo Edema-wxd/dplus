@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export default async function AdminLoginPage({
+export default async function PortalLoginPage({
   searchParams,
 }: {
   searchParams: Promise<{ error?: string }>;
@@ -22,7 +22,7 @@ export default async function AdminLoginPage({
       });
     } catch (error) {
       if (error instanceof AuthError) {
-        redirect("/admin/login?error=1");
+        redirect("/portal?error=1");
       }
       throw error;
     }
@@ -34,7 +34,7 @@ export default async function AdminLoginPage({
         action={login}
         className="w-full max-w-sm space-y-4 rounded-lg border p-6 shadow-sm"
       >
-        <h1 className="text-xl font-semibold">Admin Login</h1>
+        <h1 className="text-xl font-semibold">Sign In</h1>
 
         {error && (
           <p className="text-sm text-destructive">

@@ -108,10 +108,10 @@ function SubHero({
         style={{ y, opacity }}
         className="absolute inset-0 pointer-events-none"
       >
-        <div className="absolute top-20 left-10 w-32 h-32 bg-white/5 rounded-full blur-xl"></div>
-        <div className="absolute top-40 right-20 w-24 h-24 bg-white/3 rounded-full blur-lg"></div>
-        <div className="absolute bottom-40 left-1/4 w-40 h-40 bg-white/2 rounded-full blur-2xl"></div>
-        <div className="absolute top-1/2 right-1/4 w-20 h-20 bg-yellow-400/10 rounded-full blur-lg"></div>
+        <div className="absolute top-20 left-10 w-32 h-32 bg-foreground/5 rounded-full blur-xl"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 bg-foreground/3 rounded-full blur-lg"></div>
+        <div className="absolute bottom-40 left-1/4 w-40 h-40 bg-foreground/2 rounded-full blur-2xl"></div>
+        <div className="absolute top-1/2 right-1/4 w-20 h-20 bg-dsp-yellow/10 rounded-full blur-lg"></div>
       </motion.div>
 
       {/* Main content container */}
@@ -132,7 +132,7 @@ function SubHero({
               {/* Subtitle */}
               <motion.div
                 variants={itemVariants}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-400/10 backdrop-blur-sm border border-yellow-400/20 rounded-full text-sm font-raleway text-yellow-400 uppercase tracking-wider"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-dsp-yellow/10 backdrop-blur-sm border border-dsp-yellow/20 rounded-full text-sm font-raleway text-dsp-yellow uppercase tracking-wider"
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 400 }}
               >
@@ -143,7 +143,7 @@ function SubHero({
               {/* Main Title */}
               <motion.h1
                 variants={itemVariants}
-                className="text-4xl leading-tight sm:text-5xl lg:text-6xl xl:text-7xl font-sarlotte font-normal text-white tracking-tight"
+                className="text-4xl leading-tight sm:text-5xl lg:text-6xl xl:text-7xl font-sarlotte font-normal text-foreground tracking-tight"
               >
                 {title}
               </motion.h1>
@@ -151,7 +151,7 @@ function SubHero({
               {/* Description */}
               <motion.p
                 variants={itemVariants}
-                className="text-lg sm:text-xl text-gray-300 font-raleway leading-relaxed max-w-3xl"
+                className="text-lg sm:text-xl text-muted-foreground font-raleway leading-relaxed max-w-3xl"
               >
                 {description}
               </motion.p>
@@ -166,8 +166,8 @@ function SubHero({
                     key={index}
                     className={`px-4 py-2 text-xs font-raleway uppercase tracking-wider border rounded-full transition-all duration-300 ${
                       index === 0
-                        ? "border-yellow-400 text-yellow-400 bg-yellow-400/10"
-                        : "border-gray-600 text-gray-400 hover:border-gray-500 hover:text-gray-300"
+                        ? "border-dsp-yellow text-dsp-yellow bg-dsp-yellow/10"
+                        : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
                     }`}
                     whileHover={{ scale: 1.05, y: -2 }}
                     transition={{ type: "spring", stiffness: 400 }}
@@ -184,25 +184,25 @@ function SubHero({
                 <motion.div
                   key={index}
                   variants={itemVariants}
-                  className="pt-6 border-t border-gray-800 first:border-t-0 first:pt-0"
+                  className="pt-6 border-t border-border first:border-t-0 first:pt-0"
                   whileHover={{ x: 5 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
                   <div className="flex items-center gap-3 mb-2">
                     <item.icon
                       className={`w-4 h-4 ${
-                        item.highlight ? "text-yellow-400" : "text-gray-500"
+                        item.highlight ? "text-dsp-yellow" : "text-muted-foreground"
                       }`}
                     />
-                    <span className="text-xs font-raleway text-gray-500 uppercase tracking-wider">
+                    <span className="text-xs font-raleway text-muted-foreground uppercase tracking-wider">
                       {item.label}
                     </span>
                   </div>
                   <div
                     className={`text-base font-raleway leading-relaxed ${
                       item.highlight
-                        ? "text-yellow-400 font-sarlotte text-2xl"
-                        : "text-white"
+                        ? "text-dsp-yellow font-sarlotte text-2xl"
+                        : "text-foreground"
                     }`}
                   >
                     {item.value}
@@ -219,7 +219,7 @@ function SubHero({
           >
             {/* Main Image */}
             <motion.div
-              className="lg:col-span-2 h-96 lg:h-[500px] relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800"
+              className="lg:col-span-2 h-96 lg:h-[500px] relative overflow-hidden rounded-2xl bg-gradient-to-br from-muted to-card"
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
@@ -239,7 +239,7 @@ function SubHero({
             {/* Secondary Images */}
             <motion.div className="space-y-6 lg:space-y-8">
               <motion.div
-                className="h-48 lg:h-[240px] relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800"
+                className="h-48 lg:h-[240px] relative overflow-hidden rounded-2xl bg-gradient-to-br from-muted to-card"
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
@@ -248,7 +248,7 @@ function SubHero({
               </motion.div>
 
               <motion.div
-                className="h-48 lg:h-[240px] relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800"
+                className="h-48 lg:h-[240px] relative overflow-hidden rounded-2xl bg-gradient-to-br from-muted to-card"
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >

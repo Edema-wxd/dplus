@@ -69,9 +69,9 @@ function Hero() {
         style={{ y, opacity }}
         className="absolute inset-0 pointer-events-none"
       >
-        <div className="absolute top-20 left-10 w-32 h-32 bg-white/5 rounded-full blur-xl"></div>
-        <div className="absolute top-40 right-20 w-24 h-24 bg-white/3 rounded-full blur-lg"></div>
-        <div className="absolute bottom-40 left-1/4 w-40 h-40 bg-white/2 rounded-full blur-2xl"></div>
+        <div className="absolute top-20 left-10 w-32 h-32 bg-foreground/5 rounded-full blur-xl"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 bg-foreground/3 rounded-full blur-lg"></div>
+        <div className="absolute bottom-40 left-1/4 w-40 h-40 bg-foreground/2 rounded-full blur-2xl"></div>
       </motion.div>
 
       {/* Main content container */}
@@ -90,7 +90,7 @@ function Hero() {
             {/* Badge */}
             <motion.div
               variants={itemVariants}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-sm font-raleway text-gray-300"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-foreground/5 backdrop-blur-sm border border-foreground/10 rounded-full text-sm font-raleway text-muted-foreground"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 400 }}
             >
@@ -101,10 +101,10 @@ function Hero() {
             {/* Main heading */}
             <motion.h1
               variants={itemVariants}
-              className="text-4xl leading-tight sm:text-5xl lg:text-6xl xl:text-7xl font-sarlotte font-bold text-white "
+              className="text-4xl leading-tight sm:text-5xl lg:text-6xl xl:text-7xl font-sarlotte font-bold text-foreground "
             >
               Transforming{" "}
-              <span className="bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-foreground via-foreground/70 to-foreground bg-clip-text text-transparent">
                 Experiences
               </span>{" "}
               through{" "}
@@ -116,7 +116,7 @@ function Hero() {
             {/* Description */}
             <motion.p
               variants={itemVariants}
-              className="text-lg sm:text-xl text-gray-300 font-raleway leading-relaxed max-w-2xl"
+              className="text-lg sm:text-xl text-muted-foreground font-raleway leading-relaxed max-w-2xl"
             >
               As Nigeria&apos;s fastest rising luxury curation house, we source
               extraordinary craftsmanship across the globe to create gifts and
@@ -130,7 +130,7 @@ function Hero() {
               className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
             >
               <Button
-                className="group bg-white text-black hover:bg-gray-100 font-sarlotte font-semibold px-8 py-4 text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+                className="group bg-foreground text-background hover:bg-foreground/90 font-sarlotte font-semibold px-8 py-4 text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl"
                 size="lg"
                 onClick={() => {
                   window.location.href = "/contact-us";
@@ -142,7 +142,7 @@ function Hero() {
 
               <Button
                 variant="outline"
-                className="border-white/30 text-white hover:bg-white hover:text-black font-sarlotte px-8 py-4 text-lg backdrop-blur-sm"
+                className="border-foreground/20 text-foreground hover:bg-foreground hover:text-background font-sarlotte px-8 py-4 text-lg backdrop-blur-sm"
                 size="lg"
                 onClick={() => {
                   window.location.href = "/portfolio";
@@ -155,7 +155,7 @@ function Hero() {
             {/* Trust indicators */}
             <motion.div
               variants={itemVariants}
-              className="flex items-center gap-6 pt-4 text-sm text-gray-400"
+              className="flex items-center gap-6 pt-4 text-sm text-muted-foreground"
             >
               <div className="flex items-center gap-2">
                 <Globe className="w-4 h-4" />

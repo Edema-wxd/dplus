@@ -112,10 +112,10 @@ function Services() {
           y: -10,
           transition: { duration: 0.3, ease: "easeOut" },
         }}
-        className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-500"
+        className="group relative bg-foreground/5 backdrop-blur-sm border border-foreground/10 rounded-2xl p-8 hover:bg-foreground/10 hover:border-foreground/20 transition-all duration-500"
       >
         {/* Animated border effect */}
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-foreground/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
         {/* Icon */}
         <motion.div
@@ -145,7 +145,7 @@ function Services() {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ delay: 0.4, duration: 0.5 }}
-            className="text-2xl font-sarlotte font-bold text-white group-hover:text-yellow-400 transition-colors duration-300"
+            className="text-2xl font-sarlotte font-bold text-foreground group-hover:text-dsp-yellow transition-colors duration-300"
           >
             {service.title}
           </motion.h3>
@@ -154,7 +154,7 @@ function Services() {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ delay: 0.5, duration: 0.5 }}
-            className="text-gray-300 font-raleway leading-relaxed"
+            className="text-muted-foreground font-raleway leading-relaxed"
           >
             {service.description}
           </motion.p>
@@ -167,7 +167,7 @@ function Services() {
           >
             <Button
               variant="ghost"
-              className="group/btn text-yellow-400 hover:text-white hover:bg-yellow-400/20 font-sarlotte font-semibold p-0 h-auto"
+              className="group/btn text-dsp-yellow hover:text-foreground hover:bg-dsp-yellow/20 font-sarlotte font-semibold p-0 h-auto"
               onClick={() => {
                 window.location.href = "/contact-us";
               }}
@@ -188,9 +188,9 @@ function Services() {
         style={{ y, opacity }}
         className="absolute inset-0 pointer-events-none"
       >
-        <div className="absolute top-20 left-10 w-64 h-64 bg-yellow-400/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-orange-400/3 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-white/2 rounded-full blur-2xl"></div>
+        <div className="absolute top-20 left-10 w-64 h-64 bg-dsp-yellow/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-orange-400/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-foreground/2 rounded-full blur-2xl"></div>
       </motion.div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -208,12 +208,12 @@ function Services() {
             <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-black font-sarlotte font-bold text-lg">
               01
             </div>
-            <div className="h-px w-16 bg-gradient-to-r from-transparent to-white/30"></div>
+            <div className="h-px w-16 bg-gradient-to-r from-transparent to-foreground/20"></div>
           </motion.div>
 
           <motion.h2
             variants={itemVariants as Variants}
-            className="text-4xl lg:text-5xl xl:text-6xl font-sarlotte font-bold text-white mb-6"
+            className="text-4xl lg:text-5xl xl:text-6xl font-sarlotte font-bold text-foreground mb-6"
           >
             Exclusive Offerings for{" "}
             <span className="bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
@@ -223,7 +223,7 @@ function Services() {
 
           <motion.p
             variants={itemVariants as Variants}
-            className="text-lg lg:text-xl text-gray-300 font-raleway leading-relaxed max-w-4xl mx-auto"
+            className="text-lg lg:text-xl text-muted-foreground font-raleway leading-relaxed max-w-4xl mx-auto"
           >
             Each element in our collection represents the pinnacle of South
             African craftsmanship, thoughtfully curated and delivered with

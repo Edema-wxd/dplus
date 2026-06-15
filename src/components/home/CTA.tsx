@@ -37,9 +37,9 @@ function CTA() {
       
       {/* Animated background elements */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-10 left-1/4 w-32 h-32 bg-white/5 rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-1/4 w-24 h-24 bg-white/3 rounded-full blur-lg animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-10 w-16 h-16 bg-white/2 rounded-full blur-md animate-pulse delay-500"></div>
+        <div className="absolute top-10 left-1/4 w-32 h-32 bg-foreground/5 rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-1/4 w-24 h-24 bg-foreground/3 rounded-full blur-lg animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-10 w-16 h-16 bg-foreground/2 rounded-full blur-md animate-pulse delay-500"></div>
       </div>
 
       {/* Main content */}
@@ -54,7 +54,7 @@ function CTA() {
           {/* Badge */}
           <motion.div
             variants={itemVariants as Variants}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-sm font-raleway text-gray-300 mb-8"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-foreground/5 backdrop-blur-sm border border-foreground/10 rounded-full text-sm font-raleway text-muted-foreground mb-8"
           >
             <Sparkles className="w-4 h-4 text-yellow-400" />
             Ready to Transform Your Experience?
@@ -63,7 +63,7 @@ function CTA() {
           {/* Main heading */}
           <motion.h2
             variants={itemVariants as Variants}
-            className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-sarlotte font-bold text-white leading-tight mb-6"
+            className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-sarlotte font-bold text-foreground leading-tight mb-6"
           >
             Let&apos;s Create Something{" "}
             <span className="bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
@@ -75,7 +75,7 @@ function CTA() {
           {/* Description */}
           <motion.p
             variants={itemVariants as Variants}
-            className="text-lg text-left sm:text-xl text-gray-300 font-raleway leading-relaxed max-w-3xl   mb-10"
+            className="text-lg text-left sm:text-xl text-muted-foreground font-raleway leading-relaxed max-w-3xl   mb-10"
           >
             Ready to elevate your brand with our exclusive curation? Whether you&apos;re looking 
             for the perfect corporate gift, luxury brand experience, or bespoke partnership, 
@@ -88,7 +88,7 @@ function CTA() {
             className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
           >
             <Button
-              className="group bg-white text-black hover:bg-gray-100 font-sarlotte font-semibold px-8 py-4 text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+              className="group bg-foreground text-background hover:bg-foreground/90 font-sarlotte font-semibold px-8 py-4 text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl"
               size="lg"
               onClick={() => {
                 window.location.href = "/contact-us";
@@ -100,7 +100,7 @@ function CTA() {
 
             <Button
               variant="outline"
-              className="border-white/30 text-white hover:bg-white hover:text-black font-sarlotte px-8 py-4 text-lg backdrop-blur-sm"
+              className="border-foreground/20 text-foreground hover:bg-foreground hover:text-background font-sarlotte px-8 py-4 text-lg backdrop-blur-sm"
               size="lg"
               onClick={() => {
                 window.location.href = "/services";
@@ -113,7 +113,7 @@ function CTA() {
           {/* Trust indicators */}
           <motion.div
             variants={itemVariants as Variants  }
-            className="flex flex-col sm:flex-row items-center justify-center gap-8 text-sm text-gray-400"
+            className="flex flex-col sm:flex-row items-center justify-center gap-8 text-sm text-muted-foreground"
           >
             <div className="flex items-center gap-2">
               <Star className="w-4 h-4 text-yellow-400" />

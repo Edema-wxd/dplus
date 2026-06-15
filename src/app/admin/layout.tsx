@@ -1,6 +1,7 @@
 import { auth, signOut } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/sonner";
 import Link from "next/link";
 
 export default async function AdminLayout({
@@ -11,7 +12,7 @@ export default async function AdminLayout({
   const session = await auth();
 
   if (!session) {
-    redirect("/admin/login");
+    redirect("/portal");
   }
 
   return (
@@ -22,6 +23,7 @@ export default async function AdminLayout({
           <Link href="/admin/orders">Orders</Link>
           <Link href="/admin/content">Content</Link>
           <Link href="/admin/amrod">Amrod Sync</Link>
+          <Link href="/admin/pricing">Pricing</Link>
         </nav>
 
         <div className="flex items-center gap-4 text-sm">
@@ -29,7 +31,7 @@ export default async function AdminLayout({
           <form
             action={async () => {
               "use server";
-              await signOut({ redirectTo: "/admin/login" });
+              await signOut({ redirectTo: "/portal" });
             }}
           >
             <Button variant="outline" size="sm" type="submit">
@@ -40,6 +42,7 @@ export default async function AdminLayout({
       </header>
 
       <main className="p-6">{children}</main>
+      <Toaster richColors />
     </div>
   );
 }

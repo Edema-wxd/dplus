@@ -4,12 +4,22 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { useTheme } from "next-themes";
+import { useCart } from "@/context/cart-context";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const { count } = useCart();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Handle scroll effect for navbar background
   useEffect(() => {
@@ -78,7 +88,9 @@ function Navbar() {
         animate="visible"
         variants={containerVariants}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? "bg-black/95 backdrop-blur-md shadow-lg" : "bg-black"
+          scrolled
+            ? "bg-background/95 backdrop-blur-md shadow-lg"
+            : "bg-background"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -88,7 +100,7 @@ function Navbar() {
               <Link href="/" className="flex items-center space-x-2">
                 <div className="relative w-24  h-12 lg:w-32 lg:h-16">
                   <Image
-                    src="/logo-w.svg"
+                    src={mounted && resolvedTheme === "light" ? "/logo-b.svg" : "/logo-w.svg"}
                     alt="De-Sign Plus"
                     fill
                     className="object-contain"
@@ -113,11 +125,11 @@ function Navbar() {
                   <Link
                     href={item.href}
                     id={index.toString()}
-                    className="font-sarlotte text-white/90 hover:text-white text-lg font-medium transition-colors duration-200 relative group"
+                    className="font-sarlotte text-foreground/80 hover:text-foreground text-lg font-medium transition-colors duration-200 relative group"
                   >
                     {item.label}
                     <motion.div
-                      className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"
+                      className="absolute -bottom-1 left-0 w-0 h-0.5 bg-foreground group-hover:w-full transition-all duration-300"
                       initial={{ width: 0 }}
                       whileHover={{ width: "100%" }}
                     />
@@ -126,11 +138,27 @@ function Navbar() {
               ))}
             </motion.div>
 
-            {/* CTA Button */}
-            <motion.div variants={itemVariants} className="hidden lg:block">
+            {/* CTA Button + Theme Toggle */}
+            <motion.div
+              variants={itemVariants}
+              className="hidden lg:flex items-center gap-4"
+            >
+              <Link
+                href="/basket"
+                className="relative p-2 text-foreground/80 hover:text-foreground transition-colors"
+                aria-label="Basket"
+              >
+                <ShoppingCart size={22} />
+                {count > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background text-xs font-medium">
+                    {count}
+                  </span>
+                )}
+              </Link>
+              <ThemeToggle />
               <Button
                 asChild
-                className="font-sarlotte bg-white text-black hover:bg-gray-100 transition-all duration-200 hover:scale-105"
+                className="font-sarlotte bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 hover:scale-105"
                 size="lg"
               >
                 <Link href="/contact-us">Get Started</Link>
@@ -138,10 +166,26 @@ function Navbar() {
             </motion.div>
 
             {/* Mobile Menu Button */}
-            <motion.div variants={itemVariants} className="lg:hidden">
+            <motion.div
+              variants={itemVariants}
+              className="lg:hidden flex items-center gap-2"
+            >
+              <Link
+                href="/basket"
+                className="relative p-2 text-foreground/80 hover:text-foreground transition-colors"
+                aria-label="Basket"
+              >
+                <ShoppingCart size={22} />
+                {count > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background text-xs font-medium">
+                    {count}
+                  </span>
+                )}
+              </Link>
+              <ThemeToggle />
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="text-white p-2 hover:bg-white/10 rounded-lg transition-colors duration-200"
+                className="text-foreground p-2 hover:bg-foreground/10 rounded-lg transition-colors duration-200"
                 aria-label="Toggle menu"
               >
                 <AnimatePresence mode="wait">
@@ -180,7 +224,7 @@ function Navbar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+            className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40 lg:hidden"
             onClick={() => setIsOpen(false)}
           />
         )}
@@ -194,17 +238,17 @@ function Navbar() {
             animate="open"
             exit="closed"
             variants={mobileMenuVariants}
-            className="fixed top-0 right-0 h-full w-80 bg-black z-50 lg:hidden"
+            className="fixed top-0 right-0 h-full w-80 bg-background border-l border-border z-50 lg:hidden"
           >
             <div className="flex flex-col h-full">
               {/* Mobile Menu Header */}
-              <div className="flex justify-between items-center p-6 border-b border-white/10">
-                <span className="font-sarlotte text-white text-xl font-bold">
+              <div className="flex justify-between items-center p-6 border-b border-border">
+                <span className="font-sarlotte text-foreground text-xl font-bold">
                   Menu
                 </span>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="text-white/70 hover:text-white transition-colors duration-200"
+                  className="text-foreground/70 hover:text-foreground transition-colors duration-200"
                 >
                   <X size={24} />
                 </button>
@@ -224,7 +268,7 @@ function Navbar() {
                         href={item.href}
                         id={index.toString()}
                         onClick={() => setIsOpen(false)}
-                        className="font-sarlotte text-white/90 hover:text-white text-2xl font-medium transition-colors duration-200 block py-2"
+                        className="font-sarlotte text-foreground/80 hover:text-foreground text-2xl font-medium transition-colors duration-200 block py-2"
                       >
                         {item.label}
                       </Link>
@@ -234,11 +278,11 @@ function Navbar() {
 
                 <motion.div
                   variants={itemVariants}
-                  className="mt-8 pt-6 border-t border-white/10"
+                  className="mt-8 pt-6 border-t border-border"
                 >
                   <Button
                     asChild
-                    className="font-sarlotte bg-white text-black hover:bg-gray-100 w-full transition-all duration-200"
+                    className="font-sarlotte bg-foreground text-background hover:bg-foreground/90 w-full transition-all duration-200"
                     size="lg"
                   >
                     <Link href="/contact-us" onClick={() => setIsOpen(false)}>

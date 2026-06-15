@@ -16,9 +16,15 @@ import {
 import { MdDesignServices } from "react-icons/md";
 import { FaRegCopy, FaRegImages, FaScroll } from "react-icons/fa6";
 import { toast } from "sonner";
+import { useTheme } from "next-themes";
+import { useState, useEffect } from "react";
 
 function Footer() {
   const currentYear = new Date().getFullYear();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   // Enhanced container variants with smoother easing
   const containerVariants = {
@@ -157,10 +163,10 @@ function Footer() {
   };
 
   return (
-    <footer className="bg-black text-white relative overflow-hidden">
+    <footer className="bg-background text-foreground border-t border-border relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-foreground/10 to-transparent"></div>
       </div>
 
       <motion.div
@@ -181,14 +187,14 @@ function Footer() {
               <div className="flex items-center space-x-3 mb-6">
                 <div className="relative w-24 h-12 lg:w-40 lg:h-16">
                   <Image
-                    src="/logo-w.svg"
+                    src={mounted && resolvedTheme === "light" ? "/logo-b.svg" : "/logo-w.svg"}
                     alt="De-Sign Plus"
                     fill
                     className="object-contain"
                   />
                 </div>
               </div>
-              <p className="text-gray-300 font-raleway text-sm leading-relaxed mb-6">
+              <p className="text-muted-foreground font-raleway text-sm leading-relaxed mb-6">
                 We create exceptional experiences that inspire, engage, and
                 drive results. Your vision, our expertise.
               </p>
@@ -202,10 +208,10 @@ function Footer() {
                     variants={socialLinkVariants as Variants}
                     whileHover="hover"
                     whileTap="tap"
-                    className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300 ease-out group"
+                    className="w-10 h-10 bg-foreground/10 hover:bg-foreground/20 rounded-full flex items-center justify-center transition-all duration-300 ease-out group"
                     aria-label={social.label}
                   >
-                    <social.icon className="w-4 h-4 text-white group-hover:text-white transition-all duration-300 ease-out" />
+                    <social.icon className="w-4 h-4 text-foreground transition-all duration-300 ease-out" />
                   </motion.a>
                 ))}
               </div>
@@ -226,9 +232,9 @@ function Footer() {
                   >
                     <Link
                       href={link.href}
-                      className="flex items-center gap-2 font-raleway group text-gray-300 hover:text-white transition-all duration-300 ease-out text-sm font-medium"
+                      className="flex items-center gap-2 font-raleway group text-muted-foreground hover:text-foreground transition-all duration-300 ease-out text-sm font-medium"
                     >
-                      <link.icon className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all duration-300 ease-out" />
+                      <link.icon className="w-4 h-4 text-foreground opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all duration-300 ease-out" />
                       {link.label}
                     </Link>
                   </motion.li>
@@ -247,9 +253,9 @@ function Footer() {
                   whileHover="hover"
                   className="flex items-center space-x-3 group cursor-pointer"
                 >
-                  <FaPhone className="w-4 h-4 text-gray-400 flex-shrink-0 group-hover:text-white transition-all duration-300 ease-out" />
+                  <FaPhone className="w-4 h-4 text-muted-foreground flex-shrink-0 group-hover:text-foreground transition-all duration-300 ease-out" />
                   <span
-                    className="text-gray-300 text-sm group-hover:text-white transition-all duration-300 ease-out cursor-pointer"
+                    className="text-muted-foreground text-sm group-hover:text-foreground transition-all duration-300 ease-out cursor-pointer"
                     title="Click to copy"
                     onClick={async () => {
                       try {
@@ -265,7 +271,7 @@ function Footer() {
                   >
                     +1 (555) 123-4567
                   </span>
-                  <FaRegCopy className="w-4 h-4 text-gray-400 flex-shrink-0 group-hover:text-white transition-all duration-300 ease-out" />
+                  <FaRegCopy className="w-4 h-4 text-muted-foreground flex-shrink-0 group-hover:text-foreground transition-all duration-300 ease-out" />
                 </motion.div>
 
                 <motion.div
@@ -273,12 +279,12 @@ function Footer() {
                   whileHover="hover"
                   className="flex items-center space-x-3 group cursor-pointer"
                 >
-                  <FaEnvelope className="w-4 h-4 text-gray-400 flex-shrink-0 group-hover:text-white transition-all duration-300 ease-out" />
+                  <FaEnvelope className="w-4 h-4 text-muted-foreground flex-shrink-0 group-hover:text-foreground transition-all duration-300 ease-out" />
                   <span
                     onClick={() => {
                       window.location.href = "mailto:support@de-signplus.com";
                     }}
-                    className="text-gray-300 text-sm group-hover:text-white transition-all duration-300 ease-out"
+                    className="text-muted-foreground text-sm group-hover:text-foreground transition-all duration-300 ease-out"
                   >
                     support@de-signplus.com
                   </span>
@@ -291,7 +297,7 @@ function Footer() {
         {/* Newsletter Section */}
         <motion.div
           variants={itemVariants as Variants}
-          className="border-t border-white/10"
+          className="border-t border-border"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex flex-col lg:flex-row items-center justify-between space-y-4 lg:space-y-0">
@@ -299,7 +305,7 @@ function Footer() {
                 <h3 className="font-sarlotte text-xl font-bold mb-2">
                   Stay Updated
                 </h3>
-                <p className="font-raleway text-gray-300 text-sm">
+                <p className="font-raleway text-muted-foreground text-sm">
                   Subscribe to our newsletter for the latest design insights and
                   updates.
                 </p>
@@ -309,13 +315,13 @@ function Footer() {
                 <input
                   type="email"
                   placeholder="Enter your email"
-                  className="flex-1 lg:w-64 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-white/40 transition-all duration-300 ease-out"
+                  className="flex-1 lg:w-64 px-4 py-3 bg-foreground/5 border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-foreground/40 transition-all duration-300 ease-out"
                 />
                 <motion.button
                   variants={buttonVariants as Variants}
                   whileHover="hover"
                   whileTap="tap"
-                  className="px-6 py-3 bg-white text-black font-medium rounded-lg hover:bg-gray-100 transition-all duration-300 ease-out"
+                  className="px-6 py-3 bg-foreground text-background font-medium rounded-lg hover:bg-foreground/90 transition-all duration-300 ease-out"
                 >
                   Subscribe
                 </motion.button>
@@ -327,24 +333,24 @@ function Footer() {
         {/* Bottom Bar */}
         <motion.div
           variants={itemVariants as Variants}
-          className="border-t border-white/10"
+          className="border-t border-border"
         >
           <div className="max-w-7xl font-raleway mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-              <div className="text-gray-400 text-sm">
+              <div className="text-muted-foreground text-sm">
                 © {currentYear} De-Sign Plus. All rights reserved.
               </div>
 
               <div className="flex items-center space-x-6 text-sm">
                 <Link
                   href="/privacy"
-                  className="text-gray-400 hover:text-white transition-all duration-300 ease-out"
+                  className="text-muted-foreground hover:text-foreground transition-all duration-300 ease-out"
                 >
                   Privacy Policy
                 </Link>
                 <Link
                   href="/terms"
-                  className="text-gray-400 hover:text-white transition-all duration-300 ease-out"
+                  className="text-muted-foreground hover:text-foreground transition-all duration-300 ease-out"
                 >
                   Terms of Service
                 </Link>
@@ -360,7 +366,7 @@ function Footer() {
         variants={scrollToTopVariants as Variants}
         whileHover="hover"
         whileTap="tap"
-        className="fixed bottom-6 right-6 w-12 h-12 bg-white text-black rounded-full shadow-lg flex items-center justify-center z-40 hover:bg-gray-100 transition-all duration-300 ease-out"
+        className="fixed bottom-6 right-6 w-12 h-12 bg-foreground text-background rounded-full shadow-lg flex items-center justify-center z-40 hover:bg-foreground/90 transition-all duration-300 ease-out"
         aria-label="Scroll to top"
       >
         <FaArrowUp className="w-4 h-4" />

@@ -110,7 +110,7 @@ function CTA() {
           {/* Main heading */}
           <motion.h2
             variants={itemVariants}
-            className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-sarlotte font-bold text-white leading-tight mb-4 sm:mb-6"
+            className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-sarlotte font-bold text-foreground leading-tight mb-4 sm:mb-6"
           >
             Ready to Create Your Own Success Story?
           </motion.h2>
@@ -118,7 +118,7 @@ function CTA() {
           {/* Description */}
           <motion.p
             variants={itemVariants}
-            className="text-base sm:text-lg lg:text-xl text-gray-300 font-raleway leading-relaxed max-w-3xl mx-auto mb-8 sm:mb-10"
+            className="text-base sm:text-lg lg:text-xl text-muted-foreground font-raleway leading-relaxed max-w-3xl mx-auto mb-8 sm:mb-10"
           >
             Let&apos;s discuss how our exclusive curation services can transform
             your next business opportunity into a remarkable success story.
@@ -132,7 +132,7 @@ function CTA() {
             <motion.div variants={buttonVariants} whileHover="hover">
               <Link href="/contact-us">
                 <Button
-                  className="group bg-white text-black hover:bg-gray-100 font-sarlotte font-semibold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg transition-all duration-300 hover:shadow-2xl w-full sm:w-auto"
+                  className="group bg-foreground text-background hover:bg-foreground/90 font-sarlotte font-semibold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg transition-all duration-300 hover:shadow-2xl w-full sm:w-auto"
                   size="lg"
                 >
                   Start Your Project
@@ -145,7 +145,7 @@ function CTA() {
               <Link href="/portfolio">
                 <Button
                   variant="outline"
-                  className="border-white/30 text-white hover:bg-white hover:text-black font-sarlotte px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg backdrop-blur-sm w-full sm:w-auto"
+                  className="border-foreground/20 text-foreground hover:bg-foreground hover:text-background font-sarlotte px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg backdrop-blur-sm w-full sm:w-auto"
                   size="lg"
                 >
                   View All Projects

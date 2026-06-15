@@ -131,10 +131,10 @@ function Challenge({ challenge }: { challenge: Challenge }) {
         style={{ y, opacity }}
         className="absolute inset-0 pointer-events-none"
       >
-        <div className="absolute top-20 left-10 w-32 h-32 bg-white/3 rounded-full blur-xl"></div>
-        <div className="absolute top-40 right-20 w-24 h-24 bg-yellow-400/5 rounded-full blur-lg"></div>
-        <div className="absolute bottom-40 left-1/4 w-40 h-40 bg-white/2 rounded-full blur-2xl"></div>
-        <div className="absolute top-1/2 right-1/4 w-20 h-20 bg-yellow-400/8 rounded-full blur-lg"></div>
+        <div className="absolute top-20 left-10 w-32 h-32 bg-foreground/3 rounded-full blur-xl"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 bg-dsp-yellow/10 rounded-full blur-lg"></div>
+        <div className="absolute bottom-40 left-1/4 w-40 h-40 bg-foreground/2 rounded-full blur-2xl"></div>
+        <div className="absolute top-1/2 right-1/4 w-20 h-20 bg-dsp-yellow/10 rounded-full blur-lg"></div>
       </motion.div>
 
       {/* Main content container */}
@@ -155,11 +155,11 @@ function Challenge({ challenge }: { challenge: Challenge }) {
               variants={numberVariants}
               className="relative inline-block mb-6"
             >
-              <span className="font-sarlotte text-8xl lg:text-9xl xl:text-[120px] text-gray-800 font-normal leading-none">
+              <span className="font-sarlotte text-8xl lg:text-9xl xl:text-[120px] text-muted-foreground/30 font-normal leading-none">
                 01
               </span>
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-orange-400/20 rounded-full blur-3xl"
+                className="absolute inset-0 bg-gradient-to-r from-dsp-yellow/20 to-orange-400/20 rounded-full blur-3xl"
                 animate={pulseAnimation}
               />
             </motion.div>
@@ -167,7 +167,7 @@ function Challenge({ challenge }: { challenge: Challenge }) {
             {/* Section Title */}
             <motion.h2
               variants={itemVariants}
-              className="font-sarlotte text-3xl sm:text-4xl lg:text-5xl xl:text-[42px] font-normal text-white mb-6 tracking-tight"
+              className="font-sarlotte text-3xl sm:text-4xl lg:text-5xl xl:text-[42px] font-normal text-foreground mb-6 tracking-tight"
             >
               The Challenge
             </motion.h2>
@@ -175,7 +175,7 @@ function Challenge({ challenge }: { challenge: Challenge }) {
             {/* Section Description */}
             <motion.p
               variants={itemVariants}
-              className="text-lg text-gray-300 font-raleway leading-relaxed max-w-2xl mx-auto"
+              className="text-lg text-muted-foreground font-raleway leading-relaxed max-w-2xl mx-auto"
             >
               Creating meaningful cultural bridges while maintaining the highest
               standards of luxury and exclusivity.
@@ -188,7 +188,7 @@ function Challenge({ challenge }: { challenge: Challenge }) {
             <motion.div variants={itemVariants} className="space-y-6">
               <motion.p
                 variants={itemVariants}
-                className="text-base text-gray-300 font-raleway leading-relaxed"
+                className="text-base text-muted-foreground font-raleway leading-relaxed"
               >
                 <span
                   dangerouslySetInnerHTML={{ __html: challenge.description }}
@@ -201,29 +201,29 @@ function Challenge({ challenge }: { challenge: Challenge }) {
               {/* Quote */}
               <motion.div
                 variants={quoteVariants}
-                className="relative bg-gradient-to-br from-gray-900/50 to-gray-800/50 backdrop-blur-sm p-8 lg:p-10 border-l-4 border-yellow-400 rounded-r-2xl"
+                className="relative bg-gradient-to-br from-muted/50 to-card/50 backdrop-blur-sm p-8 lg:p-10 border-l-4 border-dsp-yellow rounded-r-2xl"
               >
-                <div className="absolute top-4 right-4 text-yellow-400/20">
+                <div className="absolute top-4 right-4 text-dsp-yellow/30">
                   <Quote className="w-8 h-8" />
                 </div>
 
                 <motion.p
                   variants={itemVariants}
-                  className="font-raleway text-lg lg:text-xl text-white italic leading-relaxed mb-4"
+                  className="font-raleway text-lg lg:text-xl text-foreground italic leading-relaxed mb-4"
                 >
                   &quot;{challenge.quote.quote}&quot;
                 </motion.p>
 
                 <motion.div
                   variants={itemVariants}
-                  className="text-yellow-400 text-sm font-raleway uppercase mb-4 tracking-wider"
+                  className="text-dsp-yellow text-sm font-raleway uppercase mb-4 tracking-wider"
                 >
                   ~ {challenge.quote.role}
                 </motion.div>
 
                 {/* Decorative elements */}
                 <motion.div
-                  className="absolute -bottom-2 -right-2 w-16 h-16 bg-yellow-400/10 rounded-full blur-xl"
+                  className="absolute -bottom-2 -right-2 w-16 h-16 bg-dsp-yellow/10 rounded-full blur-xl"
                   animate={floatingAnimation}
                 />
                 <motion.div
@@ -232,13 +232,13 @@ function Challenge({ challenge }: { challenge: Challenge }) {
                 >
                   <motion.div
                     variants={statVariants}
-                    className="text-center p-6 lg:p-8 bg-gradient-to-br from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl"
+                    className="text-center p-6 lg:p-8 bg-gradient-to-br from-muted/50 to-card/50 backdrop-blur-sm border border-border rounded-2xl"
                   >
                     <motion.div className="flex justify-center mb-3">
-                      <TrendingUp className="w-6 h-6 text-yellow-400" />
+                      <TrendingUp className="w-6 h-6 text-dsp-yellow" />
                     </motion.div>
                     <motion.span
-                      className="font-sarlotte text-2xl lg:text-3xl text-yellow-400 block mb-2"
+                      className="font-sarlotte text-2xl lg:text-3xl text-dsp-yellow block mb-2"
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{
@@ -249,21 +249,21 @@ function Challenge({ challenge }: { challenge: Challenge }) {
                     >
                       ₦1.2B
                     </motion.span>
-                    <span className="text-xs text-gray-400 font-raleway uppercase tracking-wider">
+                    <span className="text-xs text-muted-foreground font-raleway uppercase tracking-wider">
                       Deal at Stake
                     </span>
                   </motion.div>
 
                   <motion.div
                     variants={statVariants}
-                    className="text-center p-6 lg:p-8 bg-gradient-to-br from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl"
+                    className="text-center p-6 lg:p-8 bg-gradient-to-br from-muted/50 to-card/50 backdrop-blur-sm border border-border rounded-2xl"
               
                   >
                     <motion.div className="flex justify-center mb-3">
-                      <Clock className="w-6 h-6 text-yellow-400" />
+                      <Clock className="w-6 h-6 text-dsp-yellow" />
                     </motion.div>
                     <motion.span
-                      className="font-sarlotte text-2xl lg:text-3xl text-yellow-400 block mb-2"
+                      className="font-sarlotte text-2xl lg:text-3xl text-dsp-yellow block mb-2"
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{
@@ -274,7 +274,7 @@ function Challenge({ challenge }: { challenge: Challenge }) {
                     >
                       8
                     </motion.span>
-                    <span className="text-xs text-gray-400 font-raleway uppercase tracking-wider">
+                    <span className="text-xs text-muted-foreground font-raleway uppercase tracking-wider">
                       Weeks Timeline
                     </span>
                   </motion.div>
