@@ -1,8 +1,8 @@
 import { signIn } from "@/lib/auth";
 import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SubmitButton } from "@/components/portal/SubmitButton";
 
 export default async function PortalLoginPage({
   searchParams,
@@ -56,9 +56,7 @@ export default async function PortalLoginPage({
           <Input id="password" name="password" type="password" required />
         </div>
 
-        <Button type="submit" className="w-full">
-          Sign in
-        </Button>
+        <SubmitButton />
       </form>
     </div>
   );

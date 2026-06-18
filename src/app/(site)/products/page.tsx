@@ -8,7 +8,7 @@ export const metadata = {
 export const revalidate = 0;
 
 export default async function ProductsPage() {
-  const [{ items, hasMore }, brands, categories] = await Promise.all([
+  const [{ items, hasMore, total }, brands, categories] = await Promise.all([
     getProducts({ offset: 0, limit: PAGE_SIZE }),
     getBrandOptions(),
     getTopCategoryOptions(),
@@ -25,6 +25,7 @@ export default async function ProductsPage() {
       <ProductsClient
         initialItems={items}
         initialHasMore={hasMore}
+        initialTotal={total}
         brands={brands}
         categories={categories}
       />

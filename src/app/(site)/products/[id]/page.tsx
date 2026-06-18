@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getProductDetail, getRelatedProducts } from "@/lib/products";
 import ProductDetailClient from "@/components/products/ProductDetailClient";
 import ProductCard from "@/components/products/ProductCard";
+import BackButton from "@/components/products/BackButton";
 
 export default async function ProductDetailPage({
   params,
@@ -18,6 +19,7 @@ export default async function ProductDetailPage({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
+      <BackButton />
       <ProductDetailClient product={product} />
 
       {related.length > 0 && (

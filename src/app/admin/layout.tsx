@@ -1,8 +1,8 @@
 import { auth, signOut } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
-import Link from "next/link";
+import { SidebarNav } from "@/components/admin/SidebarNav";
+import { getNewOrderCount } from "@/lib/orders";
 
 export default async function AdminLayout({
   children,
@@ -15,33 +15,26 @@ export default async function AdminLayout({
     redirect("/portal");
   }
 
+  const newOrderCount = await getNewOrderCount();
+
+  const signOutAction = async () => {
+    "use server";
+    await signOut({ redirectTo: "/portal" });
+  };
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="flex items-center justify-between border-b px-6 py-4">
-        <nav className="flex items-center gap-4 text-sm font-medium">
-          <Link href="/admin">Dashboard</Link>
-          <Link href="/admin/orders">Orders</Link>
-          <Link href="/admin/content">Content</Link>
-          <Link href="/admin/amrod">Amrod Sync</Link>
-          <Link href="/admin/pricing">Pricing</Link>
-        </nav>
+    <div className="flex min-h-screen bg-background">
+      <SidebarNav
+        userEmail={session.user?.email}
+        newOrderCount={newOrderCount}
+        signOutAction={signOutAction}
+      />
 
-        <div className="flex items-center gap-4 text-sm">
-          <span className="text-muted-foreground">{session.user?.email}</span>
-          <form
-            action={async () => {
-              "use server";
-              await signOut({ redirectTo: "/portal" });
-            }}
-          >
-            <Button variant="outline" size="sm" type="submit">
-              Sign out
-            </Button>
-          </form>
-        </div>
-      </header>
+      {/* Main content — adds bottom padding on mobile so the tab bar doesn't overlap */}
+      <main className="flex-1 overflow-y-auto p-6 pb-24 lg:pb-6">
+        {children}
+      </main>
 
-      <main className="p-6">{children}</main>
       <Toaster richColors />
     </div>
   );

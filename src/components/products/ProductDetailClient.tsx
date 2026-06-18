@@ -1,16 +1,49 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/cart-context";
-import type { ProductDetail } from "@/lib/products";
+import type { ProductDetail, ProductImage } from "@/lib/products";
 
 const currency = new Intl.NumberFormat("en-NG", {
   style: "currency",
   currency: "NGN",
 });
+
+function pickGallery(
+  images: ProductImage[],
+  selectedColour: string | null,
+  hasBranding: boolean
+): ProductImage[] {
+  if (!images.length) return [];
+
+  // Find images matching this colour (name contains "-COLOUR-" pattern)
+  const colourImages = selectedColour
+    ? images.filter((img) =>
+        img.name.toUpperCase().includes(`-${selectedColour.toUpperCase()}-`)
+      )
+    : [];
+
+  const pool = colourImages.length ? colourImages : images;
+
+  // Sort so the most relevant image for current state is first
+  return [...pool].sort((a, b) => {
+    if (hasBranding) {
+      // show logo versions first when branding is selected
+      if (a.hasLogo && !b.hasLogo) return -1;
+      if (!a.hasLogo && b.hasLogo) return 1;
+    } else {
+      // default/no-logo first when no branding
+      if (a.isDefault && !b.isDefault) return -1;
+      if (!a.isDefault && b.isDefault) return 1;
+      if (!a.hasLogo && b.hasLogo) return -1;
+      if (a.hasLogo && !b.hasLogo) return 1;
+    }
+    return 0;
+  });
+}
 
 export default function ProductDetailClient({ product }: { product: ProductDetail }) {
   const { addItem } = useCart();
@@ -39,16 +72,32 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
   );
   const [selectedBranding, setSelectedBranding] = useState<string>("none");
   const [quantity, setQuantity] = useState(1);
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
 
-  const selectedVariant = useMemo(() => {
-    return (
+  const hasBranding = selectedBranding !== "none";
+
+  const gallery = useMemo(
+    () => pickGallery(product.images, selectedColour, hasBranding),
+    [product.images, selectedColour, hasBranding]
+  );
+
+  // Reset to first image whenever the gallery changes (colour / branding switch)
+  useEffect(() => {
+    setActiveImageIdx(0);
+  }, [gallery]);
+
+  const activeImage = gallery[activeImageIdx] ?? gallery[0] ?? null;
+  const mainImageUrl = activeImage?.urls?.[0]?.url ?? null;
+
+  const selectedVariant = useMemo(
+    () =>
       product.variants.find(
         (v) =>
           (!selectedColour || v.codeColour === selectedColour) &&
           (!selectedSize || v.codeSize === selectedSize)
-      ) ?? product.variants[0]
-    );
-  }, [product.variants, selectedColour, selectedSize]);
+      ) ?? product.variants[0],
+    [product.variants, selectedColour, selectedSize]
+  );
 
   const fullCode = selectedVariant?.fullCode ?? product.simpleCode;
 
@@ -57,22 +106,6 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
     const values = Object.values(product.prices);
     return values.length ? Math.min(...values) : null;
   }, [product.prices, fullCode]);
-
-  const image = useMemo(() => {
-    if (!product.images.length) return null;
-    if (selectedColour) {
-      const match = product.images.find(
-        (img) => img.hasLogo && img.name.includes(`-${selectedColour}-`)
-      );
-      if (match?.urls?.[0]?.url) return match.urls[0].url;
-      const matchNoLogo = product.images.find((img) =>
-        img.name.includes(`-${selectedColour}-`)
-      );
-      if (matchNoLogo?.urls?.[0]?.url) return matchNoLogo.urls[0].url;
-    }
-    const def = product.images.find((img) => img.isDefault) ?? product.images[0];
-    return def?.urls?.[0]?.url ?? null;
-  }, [product.images, selectedColour]);
 
   const brandingOptions = useMemo(() => {
     const opts: { value: string; label: string }[] = [];
@@ -88,9 +121,10 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
   }, [product.brandings]);
 
   const handleAddToBasket = () => {
-    const variantLabel = [selectedVariant?.codeColourName, selectedVariant?.codeSizeName]
-      .filter(Boolean)
-      .join(" / ") || null;
+    const variantLabel =
+      [selectedVariant?.codeColourName, selectedVariant?.codeSizeName]
+        .filter(Boolean)
+        .join(" / ") || null;
 
     const brandingOption = brandingOptions.find((o) => o.value === selectedBranding);
 
@@ -98,7 +132,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
       simpleCode: product.simpleCode,
       fullCode,
       productName: product.productName,
-      image,
+      image: mainImageUrl,
       variantLabel,
       brandingLabel: brandingOption?.label ?? null,
       quantity,
@@ -110,22 +144,60 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
 
   return (
     <div className="grid gap-8 md:grid-cols-2">
-      <div className="relative aspect-square w-full rounded-lg border bg-muted">
-        {image ? (
-          <Image
-            src={image}
-            alt={product.productName}
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-contain p-6"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
-            No image
+      {/* ── Image panel ── */}
+      <div className="flex flex-col gap-3">
+        {/* Main image */}
+        <div className="relative aspect-square w-full overflow-hidden rounded-lg border bg-muted">
+          {mainImageUrl ? (
+            <Image
+              key={mainImageUrl}
+              src={mainImageUrl}
+              alt={product.productName}
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-contain p-6 transition-opacity duration-200"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
+              No image
+            </div>
+          )}
+        </div>
+
+        {/* Thumbnails */}
+        {gallery.length > 1 && (
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {gallery.map((img, idx) => {
+              const thumbUrl = img.urls?.[0]?.url;
+              if (!thumbUrl) return null;
+              return (
+                <button
+                  key={img.name + idx}
+                  onClick={() => setActiveImageIdx(idx)}
+                  className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 bg-muted transition-colors ${
+                    idx === activeImageIdx
+                      ? "border-foreground"
+                      : "border-transparent hover:border-foreground/40"
+                  }`}
+                  aria-label={`View image ${idx + 1}`}
+                >
+                  <Image
+                    src={thumbUrl}
+                    alt=""
+                    fill
+                    loading={idx === 0 ? "eager" : "lazy"}
+                    sizes="64px"
+                    className="object-contain p-1"
+                  />
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
 
+      {/* ── Details panel ── */}
       <div className="flex flex-col gap-4">
         {product.brandName && (
           <span className="text-xs uppercase tracking-wide text-muted-foreground">

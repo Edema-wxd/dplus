@@ -75,9 +75,91 @@ export async function createOrder(input: {
   return mapRow(rows[0]);
 }
 
-export async function getOrders(): Promise<Order[]> {
+export async function getOrders(opts?: {
+  status?: string;
+  search?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<{ orders: Order[]; total: number }> {
+  const conditions: string[] = [];
+  const params: unknown[] = [];
+
+  if (opts?.status) {
+    params.push(opts.status);
+    conditions.push(`status = $${params.length}`);
+  }
+
+  if (opts?.search) {
+    params.push(`%${opts.search}%`);
+    conditions.push(
+      `(customer_name ILIKE $${params.length} OR customer_email ILIKE $${params.length})`
+    );
+  }
+
+  const where = conditions.length ? `where ${conditions.join(" and ")}` : "";
+
+  const countResult = await pool.query<{ count: string }>(
+    `select count(*) from orders ${where}`,
+    params
+  );
+  const total = Number(countResult.rows[0].count);
+
+  const limit = opts?.limit ?? 20;
+  const offset = opts?.offset ?? 0;
+  params.push(limit, offset);
+
   const { rows } = await pool.query<OrderRow>(
-    `select * from orders order by created_at desc`
+    `select * from orders ${where} order by created_at desc limit $${params.length - 1} offset $${params.length}`,
+    params
+  );
+
+  return { orders: rows.map(mapRow), total };
+}
+
+export const VALID_STATUSES = ["new", "reviewing", "confirmed", "cancelled"] as const;
+export type OrderStatus = (typeof VALID_STATUSES)[number];
+
+export async function updateOrderStatus(
+  id: number,
+  status: OrderStatus
+): Promise<Order> {
+  const { rows } = await pool.query<OrderRow>(
+    `update orders set status = $1 where id = $2 returning *`,
+    [status, id]
+  );
+  if (!rows[0]) throw new Error(`Order ${id} not found`);
+  return mapRow(rows[0]);
+}
+
+export async function getNewOrderCount(): Promise<number> {
+  const { rows } = await pool.query<{ count: string }>(
+    `select count(*) from orders where status = 'new'`
+  );
+  return Number(rows[0].count);
+}
+
+export type OrderStats = {
+  total: number;
+  byStatus: Record<string, number>;
+};
+
+export async function getOrderStats(): Promise<OrderStats> {
+  const { rows } = await pool.query<{ status: string; count: string }>(
+    `select status, count(*) from orders group by status`
+  );
+  const byStatus: Record<string, number> = {};
+  let total = 0;
+  for (const row of rows) {
+    byStatus[row.status] = Number(row.count);
+    total += Number(row.count);
+  }
+  return { total, byStatus };
+}
+
+export async function getRecentOrders(limit = 5): Promise<Order[]> {
+  const { rows } = await pool.query<OrderRow>(
+    `select * from orders order by created_at desc limit $1`,
+    [limit]
   );
   return rows.map(mapRow);
 }

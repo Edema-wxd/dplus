@@ -1,5 +1,52 @@
 import { pool } from "@/lib/db";
 
+export interface SyncResourceStatus {
+  resource: string;
+  sync_type: string;
+  status: string;
+  record_count: number | null;
+  error: string | null;
+  started_at: Date;
+  finished_at: Date | null;
+}
+
+export interface SyncLogEntry {
+  id: number;
+  resource: string;
+  sync_type: string;
+  status: string;
+  record_count: number | null;
+  error: string | null;
+  started_at: Date;
+  finished_at: Date | null;
+}
+
+export async function getSyncStatus(): Promise<SyncResourceStatus[]> {
+  const { rows } = await pool.query<SyncResourceStatus>(
+    `SELECT DISTINCT ON (resource) resource, sync_type, status, record_count,
+            error, started_at, finished_at
+     FROM amrod_sync_log
+     WHERE finished_at IS NOT NULL
+     ORDER BY resource, started_at DESC`
+  );
+  return rows;
+}
+
+export async function getRecentSyncLog(limit = 20): Promise<SyncLogEntry[]> {
+  const { rows } = await pool.query<SyncLogEntry>(
+    `SELECT * FROM amrod_sync_log ORDER BY started_at DESC LIMIT $1`,
+    [limit]
+  );
+  return rows;
+}
+
+export async function getLastSyncTime(): Promise<Date | null> {
+  const { rows } = await pool.query<{ finished_at: Date }>(
+    `select finished_at from amrod_sync_log where status = 'success' order by finished_at desc limit 1`
+  );
+  return rows[0]?.finished_at ?? null;
+}
+
 export async function withSyncLog(
   resource: string,
   syncType: "full" | "updated",
