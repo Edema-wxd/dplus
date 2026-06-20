@@ -7,6 +7,59 @@ import { Input } from "@/components/ui/input";
 import type { PricingConfig, PricingPreview } from "@/lib/pricing";
 
 const ngn = new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN" });
+const zar = new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR" });
+
+function BreakdownRow({
+  step,
+  label,
+  sublabel,
+  value,
+  delta,
+  currency,
+  isFirst,
+  isLast,
+}: {
+  step: number;
+  label: string;
+  sublabel: string;
+  value: string;
+  delta?: number;
+  currency?: string;
+  isFirst?: boolean;
+  isLast?: boolean;
+}) {
+  return (
+    <div className={`flex items-stretch gap-3 ${!isLast ? "pb-0" : ""}`}>
+      {/* Connector line + step number */}
+      <div className="flex flex-col items-center w-6 shrink-0">
+        <div className={`w-6 h-6 rounded-full border-2 border-border bg-background flex items-center justify-center text-[10px] font-bold text-muted-foreground shrink-0 z-10 ${isLast ? "border-foreground text-foreground" : ""}`}>
+          {step}
+        </div>
+        {!isLast && <div className="w-px flex-1 bg-border mt-0.5" />}
+      </div>
+
+      {/* Content */}
+      <div className={`flex items-start justify-between flex-1 gap-2 ${!isLast ? "pb-3" : ""}`}>
+        <div>
+          <p className="text-sm font-medium text-foreground leading-tight">{label}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{sublabel}</p>
+        </div>
+        <div className="text-right shrink-0">
+          <p className={`text-sm font-semibold ${isLast ? "text-foreground" : "text-muted-foreground"}`}>
+            {value}
+          </p>
+          {delta !== undefined && (
+            <p className="text-xs text-muted-foreground mt-0.5">
+              +{currency === "ZAR"
+                ? new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR" }).format(delta)
+                : delta.toFixed(2)}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function PricingForm({
   config,
@@ -113,17 +166,22 @@ export default function PricingForm({
             </div>
           </div>
 
-          <div className="grid grid-cols-[1fr_auto] items-center gap-3">
-            <label className="text-sm font-medium">Exchange Rate</label>
-            <div className="flex items-center gap-2">
+          <div className="grid grid-cols-[1fr_auto] items-start gap-3">
+            <div>
+              <label className="text-sm font-medium">Exchange Rate</label>
+              <p className="mt-0.5 text-xs text-muted-foreground">How many NGN one South African Rand buys</p>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground font-medium">1 ZAR =</span>
               <Input
                 type="number"
                 step="0.0001"
+                min="0"
                 value={exchangeRate}
                 onChange={(e) => setExchangeRate(e.target.value)}
                 className="w-28"
               />
-              <span className="text-sm text-muted-foreground">ZAR &rarr; NGN</span>
+              <span className="text-muted-foreground font-medium">NGN</span>
             </div>
           </div>
 
@@ -154,38 +212,93 @@ export default function PricingForm({
       </div>
 
       {preview && (
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-lg border bg-card p-4 space-y-5">
           <h2 className="font-medium">Preview (before saving)</h2>
 
-          <div className="mt-3 grid gap-1 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Total variants affected</span>
-              <span>{preview.impact.totalVariants.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Price range</span>
-              <span>
-                {ngn.format(preview.impact.minPriceNgn)} &ndash; {ngn.format(preview.impact.maxPriceNgn)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Average price</span>
-              <span>{ngn.format(preview.impact.avgPriceNgn)}</span>
+          {/* ── Step-by-step breakdown ── */}
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-3">
+              How the average product price is built
+            </p>
+
+            <div className="space-y-0">
+              {/* Base price */}
+              <BreakdownRow
+                step={1}
+                label="Base price (ex-VAT)"
+                sublabel="Raw supplier price in ZAR"
+                value={zar.format(preview.breakdown.avgRawZar)}
+                isFirst
+              />
+
+              {/* VAT */}
+              <BreakdownRow
+                step={2}
+                label={`VAT +${(preview.inputs.vatRate * 100).toFixed(2)}%`}
+                sublabel={`× ${(1 + preview.inputs.vatRate).toFixed(4)}`}
+                value={zar.format(preview.breakdown.afterVat)}
+                delta={preview.breakdown.afterVat - preview.breakdown.avgRawZar}
+                currency="ZAR"
+              />
+
+              {/* Markup */}
+              <BreakdownRow
+                step={3}
+                label={`Markup +${preview.inputs.markupPercent.toFixed(2)}%`}
+                sublabel={`× ${(1 + preview.inputs.markupPercent / 100).toFixed(4)}`}
+                value={zar.format(preview.breakdown.afterMarkup)}
+                delta={preview.breakdown.afterMarkup - preview.breakdown.afterVat}
+                currency="ZAR"
+              />
+
+              {/* Exchange */}
+              <BreakdownRow
+                step={4}
+                label={`Exchange rate × ${preview.inputs.exchangeRate}`}
+                sublabel="1 ZAR → NGN"
+                value={ngn.format(preview.breakdown.finalNgn)}
+                isLast
+              />
             </div>
           </div>
 
+          {/* ── Catalogue impact ── */}
+          <div className="border-t border-border pt-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-3">
+              Catalogue impact ({preview.impact.totalVariants.toLocaleString()} variants)
+            </p>
+            <div className="grid grid-cols-3 gap-3 text-sm">
+              <div className="rounded-md bg-muted/50 px-3 py-2">
+                <p className="text-xs text-muted-foreground">Min</p>
+                <p className="font-medium mt-0.5">{ngn.format(preview.impact.minPriceNgn)}</p>
+              </div>
+              <div className="rounded-md bg-muted/50 px-3 py-2">
+                <p className="text-xs text-muted-foreground">Average</p>
+                <p className="font-medium mt-0.5">{ngn.format(preview.impact.avgPriceNgn)}</p>
+              </div>
+              <div className="rounded-md bg-muted/50 px-3 py-2">
+                <p className="text-xs text-muted-foreground">Max</p>
+                <p className="font-medium mt-0.5">{ngn.format(preview.impact.maxPriceNgn)}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Sample products ── */}
           {preview.impact.sampleProducts.length > 0 && (
-            <div className="mt-4">
-              <h3 className="text-sm font-medium text-muted-foreground">Sample changes</h3>
-              <div className="mt-2 flex flex-col gap-1">
+            <div className="border-t border-border pt-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-3">
+                Sample product changes
+              </p>
+              <div className="space-y-1.5">
                 {preview.impact.sampleProducts.map((sample) => (
-                  <div key={sample.fullCode} className="flex justify-between text-sm">
-                    <span>{sample.fullCode}</span>
-                    <span>
-                      {ngn.format(sample.currentNgn)} &rarr; {ngn.format(sample.newNgn)}{" "}
-                      <span className={sample.changePct >= 0 ? "text-green-600" : "text-red-600"}>
-                        ({sample.changePct >= 0 ? "+" : ""}
-                        {sample.changePct.toFixed(2)}%)
+                  <div key={sample.fullCode} className="flex items-baseline justify-between text-sm gap-4">
+                    <span className="text-muted-foreground truncate font-mono text-xs">{sample.fullCode}</span>
+                    <span className="shrink-0 flex items-baseline gap-2">
+                      <span className="text-muted-foreground">{ngn.format(sample.currentNgn)}</span>
+                      <span className="text-muted-foreground">→</span>
+                      <span className="font-medium">{ngn.format(sample.newNgn)}</span>
+                      <span className={`text-xs font-medium ${sample.changePct >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                        {sample.changePct >= 0 ? "+" : ""}{sample.changePct.toFixed(2)}%
                       </span>
                     </span>
                   </div>

@@ -128,6 +128,12 @@ export function calcPrice(
 
 export type PricingPreview = {
   inputs: { vatRate: number; markupPercent: number; exchangeRate: number };
+  breakdown: {
+    avgRawZar: number;
+    afterVat: number;
+    afterMarkup: number;
+    finalNgn: number;
+  };
   impact: {
     totalVariants: number;
     minPriceNgn: number;
@@ -154,19 +160,26 @@ export async function getPricingPreview(overrides: {
     min_ngn: string | null;
     max_ngn: string | null;
     avg_ngn: string | null;
+    avg_raw_zar: string | null;
   }>(
     `
     with calc as (
       select
+        (pp.data->>'price')::numeric as raw_zar,
         round(
-          round(round((pp.data->>'price')::numeric, 2) * (1 + $1), 2)
-          * (1 + $2 / 100)
-          * $3,
+          round(round((pp.data->>'price')::numeric, 2) * (1 + $1::numeric), 2)
+          * (1 + $2::numeric / 100)
+          * $3::numeric,
         2) as new_ngn
       from product_prices pp
       where (pp.data->>'price') is not null
     )
-    select count(*) as total, min(new_ngn) as min_ngn, max(new_ngn) as max_ngn, avg(new_ngn) as avg_ngn
+    select
+      count(*) as total,
+      min(new_ngn) as min_ngn,
+      max(new_ngn) as max_ngn,
+      avg(new_ngn) as avg_ngn,
+      avg(raw_zar) as avg_raw_zar
     from calc
     `,
     [inputs.vatRate, inputs.markupPercent, inputs.exchangeRate]
@@ -194,9 +207,17 @@ export async function getPricingPreview(overrides: {
   });
 
   const stats = statsRows[0];
+  const avgRawZar = stats.avg_raw_zar ? Math.round(Number(stats.avg_raw_zar) * 100) / 100 : 0;
+  const avgBreakdown = calcPrice(avgRawZar, inputs);
 
   return {
     inputs,
+    breakdown: {
+      avgRawZar,
+      afterVat: avgBreakdown.zarIncVat,
+      afterMarkup: avgBreakdown.zarFinal,
+      finalNgn: avgBreakdown.priceNgn,
+    },
     impact: {
       totalVariants: Number(stats.total),
       minPriceNgn: stats.min_ngn ? Number(stats.min_ngn) : 0,

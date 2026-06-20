@@ -1,4 +1,5 @@
 import Link from "next/link";
+import OrderRow from "./_components/OrderRow";
 import { pool } from "@/lib/db";
 import { getOrderStats, getRecentOrders } from "@/lib/orders";
 import { getLastSyncTime } from "@/lib/amrod/sync/log";
@@ -132,32 +133,7 @@ export default async function AdminDashboardPage() {
               </thead>
               <tbody className="divide-y divide-border">
                 {recentOrders.map((order) => (
-                  <Link key={order.id} href="/admin/orders" legacyBehavior>
-                    <tr className="cursor-pointer hover:bg-muted/50 transition-colors">
-                      <td className="px-5 py-3.5 font-medium text-foreground whitespace-nowrap">
-                        {order.customerName}
-                      </td>
-                      <td className="px-5 py-3.5 text-muted-foreground hidden sm:table-cell truncate max-w-[180px]">
-                        {order.customerEmail}
-                      </td>
-                      <td className="px-5 py-3.5 text-right tabular-nums text-muted-foreground">
-                        {order.items.reduce((s, i) => s + i.quantity, 0)}
-                      </td>
-                      <td className="px-5 py-3.5 text-right tabular-nums font-medium text-foreground whitespace-nowrap">
-                        {formatNGN(order.total)}
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <StatusBadge status={order.status} />
-                      </td>
-                      <td className="px-5 py-3.5 text-muted-foreground whitespace-nowrap hidden md:table-cell">
-                        {new Date(order.createdAt).toLocaleDateString("en-ZA", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </td>
-                    </tr>
-                  </Link>
+                  <OrderRow key={order.id} order={order} />
                 ))}
               </tbody>
             </table>

@@ -26,7 +26,6 @@ export async function getSyncStatus(): Promise<SyncResourceStatus[]> {
     `SELECT DISTINCT ON (resource) resource, sync_type, status, record_count,
             error, started_at, finished_at
      FROM amrod_sync_log
-     WHERE finished_at IS NOT NULL
      ORDER BY resource, started_at DESC`
   );
   return rows;
@@ -53,7 +52,7 @@ export async function withSyncLog(
   fn: () => Promise<number>
 ): Promise<number> {
   const { rows } = await pool.query(
-    `insert into amrod_sync_log (resource, sync_type) values ($1, $2) returning id`,
+    `insert into amrod_sync_log (resource, sync_type, status) values ($1, $2, 'running') returning id`,
     [resource, syncType]
   );
   const logId = rows[0].id;

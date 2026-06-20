@@ -17,7 +17,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "CRON_SECRET not configured" }, { status: 500 });
   }
 
-  const baseUrl = process.env.NEXTAUTH_URL ?? `https://${req.headers.get("host")}`;
+  const host = req.headers.get("host") ?? "localhost:3000";
+  const protocol = host.startsWith("localhost") || host.startsWith("127.") ? "http" : "https";
+  const baseUrl = process.env.NEXTAUTH_URL ?? `${protocol}://${host}`;
   const endpoint = `${baseUrl}/api/cron/amrod-${body.job}`;
 
   const cronRes = await fetch(endpoint, {
