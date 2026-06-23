@@ -51,10 +51,8 @@ export default function Footer() {
   return (
     <footer className="bg-background border-t border-border overflow-hidden">
       <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
-
         {/* ── Main grid ──────────────────────────────────────── */}
         <div className="py-12 lg:py-16 grid grid-cols-1 lg:grid-cols-4 gap-10 lg:gap-12">
-
           {/* Brand */}
           <div className="flex flex-col items-center lg:items-start lg:col-span-1">
             <div className="relative w-28 h-14 lg:w-36 lg:h-16 mb-4">
