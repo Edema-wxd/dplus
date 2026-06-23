@@ -1,378 +1,210 @@
 "use client";
 
-import React from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, Variants } from "framer-motion";
-import {
-  FaFacebookF,
-  FaInstagram,
-  FaLinkedinIn,
-  FaPhone,
-  FaEnvelope,
-  FaArrowUp,
-  FaHome,
-} from "react-icons/fa";
-import { MdDesignServices } from "react-icons/md";
-import { FaRegCopy, FaRegImages, FaScroll } from "react-icons/fa6";
-import { toast } from "sonner";
+import { motion } from "framer-motion";
+import { FaFacebookF, FaInstagram, FaLinkedinIn } from "react-icons/fa";
+import { ArrowUp } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useState, useEffect } from "react";
 
-function Footer() {
-  const currentYear = new Date().getFullYear();
+const navLinks = [
+  { href: "/", label: "Home" },
+  { href: "/services", label: "Services" },
+  { href: "/products", label: "Products" },
+  { href: "/portfolio", label: "Portfolio" },
+  { href: "/contact-us", label: "Contact" },
+];
+
+const socialLinks = [
+  {
+    icon: FaInstagram,
+    href: "https://www.instagram.com/de.sign_plus",
+    label: "Instagram",
+  },
+  {
+    icon: FaFacebookF,
+    href: "https://www.facebook.com/De.SignPlusNig/",
+    label: "Facebook",
+  },
+  {
+    icon: FaLinkedinIn,
+    href: "https://www.linkedin.com/company/de-sign-plus/",
+    label: "LinkedIn",
+  },
+];
+
+export default function Footer() {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [email, setEmail] = useState("");
+  const currentYear = new Date().getFullYear();
 
-  useEffect(() => setMounted(true), []);
-
-  // Enhanced container variants with smoother easing
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        duration: 1.2,
-        ease: "easeOut",
-        staggerChildren: 0.15,
-      },
-    },
-  };
-
-  // Enhanced item variants with better motion
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut",
-      },
-    },
-  };
-
-  // Enhanced hover animations for social links
-  const socialLinkVariants = {
-    hover: {
-      y: -4,
-      scale: 1.1,
-      transition: {
-        duration: 0.3,
-        ease: "easeOut",
-      },
-    },
-    tap: {
-      scale: 0.95,
-      transition: {
-        duration: 0.1,
-      },
-    },
-  };
-
-  // Enhanced hover animations for quick links
-  const quickLinkVariants = {
-    hover: {
-      x: 8,
-      transition: {
-        duration: 0.3,
-        ease: "easeOut",
-      },
-    },
-    tap: {
-      scale: 0.98,
-      transition: {
-        duration: 0.1,
-      },
-    },
-  };
-
-  // Enhanced contact item hover
-  const contactItemVariants = {
-    hover: {
-      x: 8,
-      transition: {
-        duration: 0.3,
-        ease: "easeOut",
-      },
-    },
-  };
-
-  // Enhanced button hover
-  const buttonVariants = {
-    hover: {
-      scale: 1.05,
-      transition: {
-        duration: 0.3,
-        ease: "easeOut",
-      },
-    },
-    tap: {
-      scale: 0.95,
-      transition: {
-        duration: 0.1,
-      },
-    },
-  };
-
-  // Enhanced scroll to top button
-  const scrollToTopVariants = {
-    hover: {
-      scale: 1.1,
-      y: -2,
-      transition: {
-        duration: 0.3,
-        ease: "easeOut",
-      },
-    },
-    tap: {
-      scale: 0.9,
-      transition: {
-        duration: 0.1,
-      },
-    },
-  };
-
-  const socialLinks = [
-    {
-      icon: FaInstagram,
-      href: "https://www.instagram.com/de.sign_plus",
-      label: "Instagram",
-    },
-    {
-      icon: FaFacebookF,
-      href: "https://www.facebook.com/De.SignPlusNig/",
-      label: "Facebook",
-    },
-    {
-      icon: FaLinkedinIn,
-      href: "https://www.linkedin.com/company/de-sign-plus/",
-      label: "LinkedIn",
-    },
-  ];
-
-  const quickLinks = [
-    { href: "/", label: "Home", icon: FaHome },
-    { href: "/services", label: "Services", icon: MdDesignServices },
-    { href: "/portfolio", label: "Portfolio", icon: FaRegImages },
-    { href: "/contact-us", label: "Contact", icon: FaScroll },
-  ];
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  useEffect(() => {
+    setMounted(true);
+    const onScroll = () => setShowScrollTop(window.scrollY > 400);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <footer className="bg-background text-foreground border-t border-border relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0 bg-gradient-to-br from-foreground/10 to-transparent"></div>
-      </div>
+    <footer className="bg-background border-t border-border overflow-hidden">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
 
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-100px" }}
-        variants={containerVariants as Variants}
-        className="relative z-10"
-      >
-        {/* Main Footer Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-            {/* Company Info */}
-            <motion.div
-              variants={itemVariants as Variants}
-              className="lg:col-span-1"
+        {/* ── Main grid ──────────────────────────────────────── */}
+        <div className="py-12 lg:py-16 grid grid-cols-1 lg:grid-cols-4 gap-10 lg:gap-12">
+
+          {/* Brand */}
+          <div className="flex flex-col items-center lg:items-start lg:col-span-1">
+            <div className="relative w-28 h-14 lg:w-36 lg:h-16 mb-4">
+              <Image
+                src={
+                  mounted && resolvedTheme === "light"
+                    ? "/logo-b.svg"
+                    : "/logo-w.svg"
+                }
+                alt="De-Sign Plus"
+                fill
+                className="object-contain"
+              />
+            </div>
+
+            <p className="font-raleway text-sm text-muted-foreground leading-relaxed text-center lg:text-left max-w-[28ch] mb-6">
+              Nigeria&apos;s luxury curation house — crafting experiences that
+              close deals and forge lasting partnerships.
+            </p>
+
+            <div className="flex items-center gap-3">
+              {socialLinks.map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.label}
+                  className="group w-9 h-9 rounded-full bg-foreground/10 hover:bg-dsp-yellow/15 border border-foreground/10 hover:border-dsp-yellow/30 flex items-center justify-center transition-colors duration-200"
+                >
+                  <s.icon className="w-3.5 h-3.5 text-muted-foreground group-hover:text-dsp-yellow transition-colors duration-200" />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Navigation — improved for mobile: single column on very small, 2 cols on small screens, touch-friendly links */}
+          <div>
+            <h3 className="font-sarlotte font-bold text-base text-foreground mb-5 text-left">
+              Quick Links
+            </h3>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-x-4 gap-y-2">
+              {navLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="font-raleway text-sm text-muted-foreground hover:text-foreground active:text-foreground transition-colors duration-200 block py-2 px-2 min-h-[44px] rounded-md text-left"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Contact — tappable links on mobile */}
+          <div>
+            <h3 className="font-sarlotte font-bold text-base text-foreground mb-5 text-center lg:text-left">
+              Contact
+            </h3>
+            <div className="space-y-3 font-raleway text-sm text-center lg:text-left">
+              <a
+                href="tel:+15551234567"
+                className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground active:text-foreground transition-colors duration-200 justify-center lg:justify-start"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-dsp-yellow flex-shrink-0" />
+                +1 (555) 123-4567
+              </a>
+              <br />
+              <a
+                href="mailto:support@de-signplus.com"
+                className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground active:text-foreground transition-colors duration-200 justify-center lg:justify-start"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-dsp-yellow flex-shrink-0" />
+                support@de-signplus.com
+              </a>
+            </div>
+          </div>
+
+          {/* Newsletter */}
+          <div>
+            <h3 className="font-sarlotte font-bold text-base text-foreground mb-2 text-center lg:text-left">
+              Stay Updated
+            </h3>
+            <p className="font-raleway text-xs text-muted-foreground mb-4 text-center lg:text-left">
+              Design insights and exclusive updates.
+            </p>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setEmail("");
+              }}
+              className="flex flex-col gap-2 max-w-xs mx-auto lg:mx-0"
             >
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="relative w-24 h-12 lg:w-40 lg:h-16">
-                  <Image
-                    src={mounted && resolvedTheme === "light" ? "/logo-b.svg" : "/logo-w.svg"}
-                    alt="De-Sign Plus"
-                    fill
-                    className="object-contain"
-                  />
-                </div>
-              </div>
-              <p className="text-muted-foreground font-raleway text-sm leading-relaxed mb-6">
-                We create exceptional experiences that inspire, engage, and
-                drive results. Your vision, our expertise.
-              </p>
-
-              {/* Social Links */}
-              <div className="flex space-x-4">
-                {socialLinks.map((social, index) => (
-                  <motion.a
-                    key={social.label}
-                    href={social.href}
-                    variants={socialLinkVariants as Variants}
-                    whileHover="hover"
-                    whileTap="tap"
-                    className="w-10 h-10 bg-foreground/10 hover:bg-foreground/20 rounded-full flex items-center justify-center transition-all duration-300 ease-out group"
-                    aria-label={social.label}
-                  >
-                    <social.icon className="w-4 h-4 text-foreground transition-all duration-300 ease-out" />
-                  </motion.a>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Quick Links */}
-            <motion.div variants={itemVariants as Variants}>
-              <h3 className="font-sarlotte text-xl font-bold mb-6">
-                Quick Links
-              </h3>
-              <ul className="space-y-3">
-                {quickLinks.map((link, index) => (
-                  <motion.li
-                    key={link.label}
-                    variants={quickLinkVariants as Variants}
-                    whileHover="hover"
-                    whileTap="tap"
-                  >
-                    <Link
-                      href={link.href}
-                      className="flex items-center gap-2 font-raleway group text-muted-foreground hover:text-foreground transition-all duration-300 ease-out text-sm font-medium"
-                    >
-                      <link.icon className="w-4 h-4 text-foreground opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all duration-300 ease-out" />
-                      {link.label}
-                    </Link>
-                  </motion.li>
-                ))}
-              </ul>
-            </motion.div>
-
-            {/* Contact Info */}
-            <motion.div variants={itemVariants as Variants}>
-              <h3 className="font-sarlotte text-xl font-bold mb-6">
-                Contact Us
-              </h3>
-              <div className="space-y-4 font-raleway">
-                <motion.div
-                  variants={contactItemVariants as Variants}
-                  whileHover="hover"
-                  className="flex items-center space-x-3 group cursor-pointer"
-                >
-                  <FaPhone className="w-4 h-4 text-muted-foreground flex-shrink-0 group-hover:text-foreground transition-all duration-300 ease-out" />
-                  <span
-                    className="text-muted-foreground text-sm group-hover:text-foreground transition-all duration-300 ease-out cursor-pointer"
-                    title="Click to copy"
-                    onClick={async () => {
-                      try {
-                        await navigator.clipboard.writeText(
-                          "+1 (555) 123-4567"
-                        );
-                        toast.success("Phone number copied to clipboard");
-                      } catch (err) {
-                        console.error("Failed to copy phone number:", err);
-                        toast.error("Failed to copy phone number");
-                      }
-                    }}
-                  >
-                    +1 (555) 123-4567
-                  </span>
-                  <FaRegCopy className="w-4 h-4 text-muted-foreground flex-shrink-0 group-hover:text-foreground transition-all duration-300 ease-out" />
-                </motion.div>
-
-                <motion.div
-                  variants={contactItemVariants as Variants}
-                  whileHover="hover"
-                  className="flex items-center space-x-3 group cursor-pointer"
-                >
-                  <FaEnvelope className="w-4 h-4 text-muted-foreground flex-shrink-0 group-hover:text-foreground transition-all duration-300 ease-out" />
-                  <span
-                    onClick={() => {
-                      window.location.href = "mailto:support@de-signplus.com";
-                    }}
-                    className="text-muted-foreground text-sm group-hover:text-foreground transition-all duration-300 ease-out"
-                  >
-                    support@de-signplus.com
-                  </span>
-                </motion.div>
-              </div>
-            </motion.div>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Your email address"
+                required
+                className="w-full px-4 py-3 bg-foreground/5 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-foreground/30 transition-colors duration-200"
+              />
+              <button
+                type="submit"
+                className="w-full px-4 py-3 bg-foreground text-background font-sarlotte text-sm font-semibold rounded-lg hover:bg-foreground/90 active:scale-[0.98] transition-all duration-200"
+              >
+                Subscribe
+              </button>
+            </form>
           </div>
         </div>
 
-        {/* Newsletter Section */}
-        <motion.div
-          variants={itemVariants as Variants}
-          className="border-t border-border"
-        >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex flex-col lg:flex-row items-center justify-between space-y-4 lg:space-y-0">
-              <div>
-                <h3 className="font-sarlotte text-xl font-bold mb-2">
-                  Stay Updated
-                </h3>
-                <p className="font-raleway text-muted-foreground text-sm">
-                  Subscribe to our newsletter for the latest design insights and
-                  updates.
-                </p>
-              </div>
-
-              <div className="flex w-full flex-wrap gap-2 font-raleway lg:w-auto space-x-2">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="flex-1 lg:w-64 px-4 py-3 bg-foreground/5 border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-foreground/40 transition-all duration-300 ease-out"
-                />
-                <motion.button
-                  variants={buttonVariants as Variants}
-                  whileHover="hover"
-                  whileTap="tap"
-                  className="px-6 py-3 bg-foreground text-background font-medium rounded-lg hover:bg-foreground/90 transition-all duration-300 ease-out"
-                >
-                  Subscribe
-                </motion.button>
-              </div>
+        {/* ── Bottom bar ──────────────────────────────────────── */}
+        <div className="border-t border-border py-5">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 font-raleway text-xs text-muted-foreground">
+            <span>© {currentYear} De-Sign Plus. All rights reserved.</span>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/privacy"
+                className="hover:text-foreground transition-colors duration-200"
+              >
+                Privacy Policy
+              </Link>
+              <span className="w-px h-3 bg-border" />
+              <Link
+                href="/terms"
+                className="hover:text-foreground transition-colors duration-200"
+              >
+                Terms of Service
+              </Link>
             </div>
           </div>
-        </motion.div>
+        </div>
+      </div>
 
-        {/* Bottom Bar */}
-        <motion.div
-          variants={itemVariants as Variants}
-          className="border-t border-border"
-        >
-          <div className="max-w-7xl font-raleway mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-              <div className="text-muted-foreground text-sm">
-                © {currentYear} De-Sign Plus. All rights reserved.
-              </div>
-
-              <div className="flex items-center space-x-6 text-sm">
-                <Link
-                  href="/privacy"
-                  className="text-muted-foreground hover:text-foreground transition-all duration-300 ease-out"
-                >
-                  Privacy Policy
-                </Link>
-                <Link
-                  href="/terms"
-                  className="text-muted-foreground hover:text-foreground transition-all duration-300 ease-out"
-                >
-                  Terms of Service
-                </Link>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </motion.div>
-
-      {/* Scroll to Top Button */}
+      {/* Scroll-to-top — appears only after scrolling 400px */}
       <motion.button
-        onClick={scrollToTop}
-        variants={scrollToTopVariants as Variants}
-        whileHover="hover"
-        whileTap="tap"
-        className="fixed bottom-6 right-6 w-12 h-12 bg-foreground text-background rounded-full shadow-lg flex items-center justify-center z-40 hover:bg-foreground/90 transition-all duration-300 ease-out"
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        initial={false}
+        animate={{
+          opacity: showScrollTop ? 1 : 0,
+          y: showScrollTop ? 0 : 10,
+          pointerEvents: showScrollTop ? "auto" : "none",
+        }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 w-10 h-10 bg-foreground text-background rounded-full shadow-lg flex items-center justify-center z-40 hover:bg-foreground/90 active:scale-95 transition-colors duration-200"
         aria-label="Scroll to top"
       >
-        <FaArrowUp className="w-4 h-4" />
+        <ArrowUp className="w-4 h-4" />
       </motion.button>
     </footer>
   );
 }
-
-export default Footer;

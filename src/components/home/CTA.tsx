@@ -1,137 +1,88 @@
 "use client";
 
-import { motion, Variants } from "framer-motion";
-import { ArrowRight, Sparkles, Star } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import { Button } from "../ui/button";
+import Link from "next/link";
 
-function CTA() {
-  const containerVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        staggerChildren: 0.2,
-        ease: "easeOut",
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut",
-      },
-    },
-  };
-
+export default function CTA() {
   return (
-    <section className="relative py-20 lg:py-32 overflow-hidden">
-      {/* Background gradient and effects */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-coal-grey to-background"></div>
-      
-      {/* Animated background elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-10 left-1/4 w-32 h-32 bg-foreground/5 rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-1/4 w-24 h-24 bg-foreground/3 rounded-full blur-lg animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-10 w-16 h-16 bg-foreground/2 rounded-full blur-md animate-pulse delay-500"></div>
+    <section className="relative py-16 lg:py-28 overflow-hidden">
+      {/* Subtle gradient backdrop */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-coal-grey/60 to-background" />
+
+      {/* Ambient orbs — desktop only, no pulse */}
+      <div className="absolute inset-0 pointer-events-none hidden lg:block">
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-dsp-yellow/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-56 h-56 bg-dsp-red/5 rounded-full blur-3xl" />
       </div>
 
-      {/* Main content */}
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative max-w-5xl mx-auto px-5 sm:px-6 lg:px-8">
         <motion.div
-          variants={containerVariants as Variants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="text-left"
+          initial={{ opacity: 0, y: 22 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.52, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col items-center text-center lg:items-start lg:text-left"
         >
-          {/* Badge */}
-          <motion.div
-            variants={itemVariants as Variants}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-foreground/5 backdrop-blur-sm border border-foreground/10 rounded-full text-sm font-raleway text-muted-foreground mb-8"
-          >
-            <Sparkles className="w-4 h-4 text-yellow-400" />
-            Ready to Transform Your Experience?
-          </motion.div>
+          {/* Eyebrow — flanked rules, centered on mobile */}
+          <div className="flex items-center gap-3 mb-6">
+            <span className="w-8 h-px bg-dsp-yellow/40" />
+            <p className="font-raleway text-[10px] tracking-[0.22em] uppercase text-dsp-yellow">
+              Ready to Begin
+            </p>
+            <span className="w-8 h-px bg-dsp-yellow/40" />
+          </div>
 
-          {/* Main heading */}
-          <motion.h2
-            variants={itemVariants as Variants}
-            className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-sarlotte font-bold text-foreground leading-tight mb-6"
+          {/* Heading */}
+          <h2
+            className="font-sarlotte font-bold text-foreground leading-[1.07] mb-5 lg:mb-6"
+            style={{ fontSize: "clamp(2.1rem, 8vw, 3.75rem)" }}
           >
             Let&apos;s Create Something{" "}
-            <span className="bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
-              Extraordinary
-            </span>{" "}
+            <span className="text-dsp-yellow italic">Extraordinary</span>{" "}
             Together
-          </motion.h2>
+          </h2>
 
-          {/* Description */}
-          <motion.p
-            variants={itemVariants as Variants}
-            className="text-lg text-left sm:text-xl text-muted-foreground font-raleway leading-relaxed max-w-3xl   mb-10"
-          >
-            Ready to elevate your brand with our exclusive curation? Whether you&apos;re looking 
-            for the perfect corporate gift, luxury brand experience, or bespoke partnership, 
-            we&apos;re here to make it happen.
-          </motion.p>
+          {/* Body — shorter on mobile */}
+          <p className="font-raleway text-sm sm:text-base lg:text-lg text-muted-foreground leading-[1.7] max-w-[30ch] sm:max-w-sm lg:max-w-2xl mb-8 lg:mb-10">
+            Whether you need the perfect corporate gift, a luxury brand
+            experience, or a bespoke partnership strategy — we make it happen.
+          </p>
 
-          {/* CTA Buttons */}
-          <motion.div
-            variants={itemVariants as Variants}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
-          >
+          {/* CTAs — full-width stacked on mobile, inline on sm+ */}
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <Button
-              className="group bg-foreground text-background hover:bg-foreground/90 font-sarlotte font-semibold px-8 py-4 text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+              asChild
               size="lg"
-              onClick={() => {
-                window.location.href = "/contact-us";
-              }}
+              className="group w-full sm:w-auto bg-foreground text-background hover:bg-foreground/90 font-sarlotte font-semibold text-base h-[52px] px-8 rounded-xl hover:scale-105 transition-all duration-300"
             >
-              Start Your Project
-              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <Link href="/contact-us">
+                Start Your Project
+                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
             </Button>
 
             <Button
+              asChild
               variant="outline"
-              className="border-foreground/20 text-foreground hover:bg-foreground hover:text-background font-sarlotte px-8 py-4 text-lg backdrop-blur-sm"
               size="lg"
-              onClick={() => {
-                window.location.href = "/services";
-              }}
+              className="w-full sm:w-auto border-foreground/15 text-foreground hover:bg-foreground hover:text-background font-sarlotte text-base h-[52px] px-8 rounded-xl"
             >
-              Explore Services
+              <Link href="/services">Explore Services</Link>
             </Button>
-          </motion.div>
+          </div>
 
-          {/* Trust indicators */}
-          <motion.div
-            variants={itemVariants as Variants  }
-            className="flex flex-col sm:flex-row items-center justify-center gap-8 text-sm text-muted-foreground"
-          >
-            <div className="flex items-center gap-2">
-              <Star className="w-4 h-4 text-yellow-400" />
-              <span className="font-raleway">Premium Quality Guaranteed</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Star className="w-4 h-4 text-yellow-400" />
-              <span className="font-raleway">Global Sourcing Network</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Star className="w-4 h-4 text-yellow-400" />
-              <span className="font-raleway">Bespoke Solutions</span>
-            </div>
-          </motion.div>
+          {/* Trust — single compact line, no vertical stacking */}
+          <div className="flex items-center justify-center lg:justify-start gap-2.5 mt-8 font-raleway text-[11px] tracking-wide text-muted-foreground/50">
+            <span>Premium Quality</span>
+            <span className="w-[3px] h-[3px] rounded-full bg-dsp-yellow/50 flex-shrink-0" />
+            <span>Global Sourcing</span>
+            <span className="w-[3px] h-[3px] rounded-full bg-dsp-yellow/50 flex-shrink-0" />
+            <span>Bespoke Solutions</span>
+          </div>
         </motion.div>
       </div>
     </section>
   );
 }
-
-export default CTA;
