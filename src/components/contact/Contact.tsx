@@ -28,78 +28,118 @@ interface ContactFormData {
   inspiration: string;
 }
 
-function Contact() {
-  const [formData, setFormData] = useState<ContactFormData>({
-    firstName: "",
-    lastName: "",
-    company: "",
-    position: "",
-    email: "",
-    phone: "",
-    service: "",
-    budget: "",
-    timeline: "",
-    location: "",
-    objectives: "",
-    inspiration: "",
-  });
+interface FieldErrors {
+  name?: string;
+  email?: string;
+  message?: string;
+}
 
+const EMPTY_FORM: ContactFormData = {
+  firstName: "",
+  lastName: "",
+  company: "",
+  position: "",
+  email: "",
+  phone: "",
+  service: "",
+  budget: "",
+  timeline: "",
+  location: "",
+  objectives: "",
+  inspiration: "",
+};
+
+function Contact() {
+  const [formData, setFormData] = useState<ContactFormData>(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [submitted, setSubmitted] = useState(false);
+
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear the relevant server error when the user starts typing
+    if (name === "firstName" || name === "lastName") {
+      setFieldErrors((prev) => ({ ...prev, name: undefined }));
+    } else if (name === "email") {
+      setFieldErrors((prev) => ({ ...prev, email: undefined }));
+    } else if (name === "objectives") {
+      setFieldErrors((prev) => ({ ...prev, message: undefined }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setFieldErrors({});
 
     try {
-      console.log("Form data:", formData);
-
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Reset form
-      setFormData({
-        firstName: "",
-        lastName: "",
-        company: "",
-        position: "",
-        email: "",
-        phone: "",
-        service: "",
-        budget: "",
-        timeline: "",
-        location: "",
-        objectives: "",
-        inspiration: "",
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: `${formData.firstName.trim()} ${formData.lastName.trim()}`.trim(),
+          email: formData.email,
+          phone: formData.phone || undefined,
+          company: formData.company || undefined,
+          message: formData.objectives,
+          position: formData.position || undefined,
+          service: formData.service || undefined,
+          budget: formData.budget || undefined,
+          timeline: formData.timeline || undefined,
+          location: formData.location || undefined,
+          inspiration: formData.inspiration || undefined,
+        }),
       });
 
-      // Success toast
-      toast.message("Inquiry Submitted Successfully!", {
-        description:
-          "Thank you for your inquiry. We will respond within 24 hours.",
-        duration: 5000,
-      });
-    } catch (error) {
-      console.error("Form submission error:", error);
-      // Error toast
+      if (res.ok) {
+        setSubmitted(true);
+        return;
+      }
+
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 400 && data.errors) {
+        setFieldErrors(data.errors as FieldErrors);
+        toast.message("Please fix the highlighted fields", { duration: 4000 });
+      } else {
+        toast.message("Submission Failed", {
+          description: "There was an error submitting your form. Please try again.",
+          duration: 5000,
+        });
+      }
+    } catch {
       toast.message("Submission Failed", {
-        description:
-          "There was an error submitting your form. Please try again.",
+        description: "There was an error submitting your form. Please try again.",
         duration: 5000,
       });
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (submitted) {
+    return (
+      <section id="contact-form" className="py-30 bg-background">
+        <div className="container mx-auto px-4 flex flex-col items-center justify-center min-h-[40vh] text-center gap-6">
+          <div className="w-16 h-16 rounded-full bg-cyan-200 flex items-center justify-center text-3xl">
+            <GiPaperPlane className="text-black" />
+          </div>
+          <h2 className="font-sarlotte text-4xl text-foreground font-normal tracking-tight">
+            Thank you — we&apos;ll be in touch
+          </h2>
+          <p className="text-muted-foreground font-raleway font-light max-w-md leading-relaxed">
+            Your inquiry has been received. Our team will review your requirements
+            and respond within 24 hours.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   const contactItems = [
     {
@@ -209,8 +249,11 @@ function Contact() {
                     value={formData.firstName}
                     onChange={handleInputChange}
                     required
-                    className="w-full font-raleway py-5 bg-transparent border-b border-border text-foreground font-light text-base focus:outline-none focus:border-cyan-400 transition-colors"
+                    className={`w-full font-raleway py-5 bg-transparent border-b text-foreground font-light text-base focus:outline-none transition-colors ${fieldErrors.name ? "border-red-400 focus:border-red-400" : "border-border focus:border-cyan-400"}`}
                   />
+                  {fieldErrors.name && (
+                    <p className="mt-1.5 text-xs text-red-400 font-raleway">{fieldErrors.name}</p>
+                  )}
                 </div>
                 <div>
                   <label
@@ -226,7 +269,7 @@ function Contact() {
                     value={formData.lastName}
                     onChange={handleInputChange}
                     required
-                    className="w-full font-raleway py-5 bg-transparent border-b border-border text-foreground font-light text-base focus:outline-none focus:border-cyan-400 transition-colors"
+                    className={`w-full font-raleway py-5 bg-transparent border-b text-foreground font-light text-base focus:outline-none transition-colors ${fieldErrors.name ? "border-red-400 focus:border-red-400" : "border-border focus:border-cyan-400"}`}
                   />
                 </div>
               </div>
@@ -285,8 +328,11 @@ function Contact() {
                     value={formData.email}
                     onChange={handleInputChange}
                     required
-                    className="w-full font-raleway py-5 bg-transparent border-b border-border text-foreground font-light text-base focus:outline-none focus:border-cyan-400 transition-colors"
+                    className={`w-full font-raleway py-5 bg-transparent border-b text-foreground font-light text-base focus:outline-none transition-colors ${fieldErrors.email ? "border-red-400 focus:border-red-400" : "border-border focus:border-cyan-400"}`}
                   />
+                  {fieldErrors.email && (
+                    <p className="mt-1.5 text-xs text-red-400 font-raleway">{fieldErrors.email}</p>
+                  )}
                 </div>
                 <div>
                   <label
@@ -448,8 +494,11 @@ function Contact() {
                   placeholder="Please describe your project goals, target audience, cultural considerations, and any specific requirements..."
                   required
                   rows={4}
-                  className="w-full py-5 font-raleway pt-5 bg-transparent border-b border-border text-foreground font-light text-base focus:outline-none focus:border-cyan-400 transition-colors resize-none"
+                  className={`w-full py-5 font-raleway pt-5 bg-transparent border-b text-foreground font-light text-base focus:outline-none transition-colors resize-none ${fieldErrors.message ? "border-red-400 focus:border-red-400" : "border-border focus:border-cyan-400"}`}
                 />
+                {fieldErrors.message && (
+                  <p className="mt-1.5 text-xs text-red-400 font-raleway">{fieldErrors.message}</p>
+                )}
               </div>
 
               {/* Inspiration */}

@@ -10,7 +10,7 @@ jest.mock("@/lib/orders", () => ({ getOrders: jest.fn() }));
 import { auth } from "@/lib/auth";
 import { getOrders } from "@/lib/orders";
 
-const mockAuth = auth as jest.MockedFunction<() => Promise<unknown>>;
+const mockAuth = auth as unknown as jest.Mock;
 const mockGetOrders = getOrders as jest.MockedFunction<typeof getOrders>;
 
 function makeReq(search = "") {

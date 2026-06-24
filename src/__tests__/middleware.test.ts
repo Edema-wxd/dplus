@@ -16,7 +16,8 @@ jest.mock("next-auth", () => ({
   }),
 }));
 
-import middleware, { config } from "../../src/middleware";
+import middlewareExport, { config } from "../../src/middleware";
+const middleware = middlewareExport as unknown as (req: unknown) => unknown;
 import { NextResponse } from "next/server";
 
 // ── helpers ───────────────────────────────────────────────
@@ -58,7 +59,7 @@ describe("middleware config", () => {
 
 describe("unauthenticated requests", () => {
   it("redirects /admin to <origin>/portal", () => {
-    middleware(fakeReq("/admin") as never);
+    middleware(fakeReq("/admin"));
 
     expect(redirectSpy).toHaveBeenCalledTimes(1);
     const url: URL = redirectSpy.mock.calls[0][0];
@@ -66,7 +67,7 @@ describe("unauthenticated requests", () => {
   });
 
   it("redirects /admin/orders to <origin>/portal (covers :path*)", () => {
-    middleware(fakeReq("/admin/orders") as never);
+    middleware(fakeReq("/admin/orders"));
 
     expect(redirectSpy).toHaveBeenCalledTimes(1);
     const url: URL = redirectSpy.mock.calls[0][0];
@@ -76,13 +77,13 @@ describe("unauthenticated requests", () => {
 
 describe("authenticated requests", () => {
   it("does NOT redirect /admin", () => {
-    middleware(fakeReq("/admin", { user: { email: "admin@test.com" } }) as never);
+    middleware(fakeReq("/admin", { user: { email: "admin@test.com" } }));
 
     expect(redirectSpy).not.toHaveBeenCalled();
   });
 
   it("does NOT redirect /admin/pricing", () => {
-    middleware(fakeReq("/admin/pricing", { user: {} }) as never);
+    middleware(fakeReq("/admin/pricing", { user: {} }));
 
     expect(redirectSpy).not.toHaveBeenCalled();
   });
@@ -94,7 +95,7 @@ describe("non-admin paths", () => {
     // running for /portal entirely. Even when called directly, the
     // pathname.startsWith("/admin") guard inside the callback means no redirect
     // is issued — both layers exclude non-admin paths.
-    middleware(fakeReq("/portal") as never);
+    middleware(fakeReq("/portal"));
 
     expect(redirectSpy).not.toHaveBeenCalled();
   });
@@ -103,7 +104,7 @@ describe("non-admin paths", () => {
 describe("redirect URL", () => {
   it("uses req.nextUrl.origin as the base — not a hardcoded host", () => {
     const origin = "https://example.com";
-    middleware(fakeReq("/admin", null, origin) as never);
+    middleware(fakeReq("/admin", null, origin));
 
     const url: URL = redirectSpy.mock.calls[0][0];
     expect(url.toString()).toBe(`${origin}/portal`);

@@ -13,7 +13,7 @@ jest.mock("@/lib/orders", () => ({
 import { auth } from "@/lib/auth";
 import { updateOrderStatus, VALID_STATUSES } from "@/lib/orders";
 
-const mockAuth = auth as jest.MockedFunction<() => Promise<unknown>>;
+const mockAuth = auth as unknown as jest.Mock;
 const mockUpdateOrderStatus = updateOrderStatus as jest.MockedFunction<typeof updateOrderStatus>;
 
 function makeReq(id: string, body: unknown, invalidJson = false) {

@@ -131,3 +131,19 @@ export async function togglePublished(
 ): Promise<PortfolioItem> {
   return updatePortfolioItem(id, { isPublished: published });
 }
+
+export async function getPublishedPortfolioItems(): Promise<PortfolioItem[]> {
+  return getPortfolioItems({ includeUnpublished: false });
+}
+
+export async function getPortfolioItemById(
+  id: number
+): Promise<PortfolioItem | null> {
+  const { rows } = await pool.query<PortfolioRow>(
+    `select id, title, client, description, tags, images, is_published, created_at, updated_at
+     from portfolio_items
+     where id = $1 and is_published = true`,
+    [id]
+  );
+  return rows.length ? rowToItem(rows[0]) : null;
+}

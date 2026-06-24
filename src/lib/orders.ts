@@ -116,6 +116,14 @@ export async function getOrders(opts?: {
   return { orders: rows.map(mapRow), total };
 }
 
+export async function getOrderById(id: number): Promise<Order | null> {
+  const { rows } = await pool.query<OrderRow>(
+    `select * from orders where id = $1`,
+    [id]
+  );
+  return rows[0] ? mapRow(rows[0]) : null;
+}
+
 export const VALID_STATUSES = ["new", "reviewing", "confirmed", "cancelled"] as const;
 export type OrderStatus = (typeof VALID_STATUSES)[number];
 

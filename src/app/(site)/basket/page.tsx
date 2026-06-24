@@ -167,7 +167,7 @@ function EmptyState() {
 
 // ─── Success state ────────────────────────────────────────────────────────────
 
-function SuccessState() {
+function SuccessState({ orderId }: { orderId: number | null }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center px-4">
       <motion.div
@@ -204,6 +204,11 @@ function SuccessState() {
         >
           Request received
         </h1>
+        {orderId && (
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">
+            Reference <span className="text-foreground">#{orderId}</span>
+          </p>
+        )}
         <p className="text-muted-foreground text-sm max-w-sm">
           Our team will review your selection and be in touch within 24 hours to confirm details and pricing.
         </p>
@@ -252,6 +257,7 @@ export default function BasketPage() {
   const { items, removeItem, updateQuantity, clear, total } = useCart();
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [orderId, setOrderId] = useState<number | null>(null);
   const [form, setForm] = useState({
     customerName: "",
     customerEmail: "",
@@ -270,7 +276,9 @@ export default function BasketPage() {
         body: JSON.stringify({ ...form, items, total }),
       });
       if (!res.ok) throw new Error();
+      const data = await res.json();
       clear();
+      setOrderId(data?.order?.id ?? null);
       setSubmitted(true);
     } catch {
       toast.error("Something went wrong. Please try again.");
@@ -279,7 +287,7 @@ export default function BasketPage() {
     }
   };
 
-  if (submitted) return <SuccessState />;
+  if (submitted) return <SuccessState orderId={orderId} />;
   if (!items.length) return <EmptyState />;
 
   return (

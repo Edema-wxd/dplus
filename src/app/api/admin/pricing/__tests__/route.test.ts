@@ -21,7 +21,7 @@ jest.mock("@/lib/pricing", () => ({
 
 jest.mock("@/lib/db", () => ({ pool: { query: jest.fn() } }));
 
-const mockAuth = jest.mocked(auth);
+const mockAuth = auth as unknown as jest.Mock;
 const mockGetConfig = jest.mocked(getPricingConfig);
 const mockUpdateConfig = jest.mocked(updatePricingConfig);
 const mockGetPreview = jest.mocked(getPricingPreview);

@@ -31,7 +31,7 @@ export default function OrderRow({ order }: { order: Order }) {
   return (
     <tr
       className="cursor-pointer hover:bg-muted/50 transition-colors"
-      onClick={() => router.push("/admin/orders")}
+      onClick={() => router.push(`/admin/orders/${order.id}`)}
     >
       <td className="px-5 py-3.5 font-medium text-foreground whitespace-nowrap">
         {order.customerName}

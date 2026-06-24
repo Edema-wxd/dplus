@@ -39,6 +39,8 @@ export default function Footer() {
   const [mounted, setMounted] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [email, setEmail] = useState("");
+  const [subState, setSubState] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [subError, setSubError] = useState("");
   const currentYear = new Date().getFullYear();
 
   useEffect(() => {
@@ -140,28 +142,59 @@ export default function Footer() {
             <p className="font-raleway text-xs text-muted-foreground mb-4 text-center lg:text-left">
               Design insights and exclusive updates.
             </p>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setEmail("");
-              }}
-              className="flex flex-col gap-2 max-w-xs mx-auto lg:mx-0"
-            >
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Your email address"
-                required
-                className="w-full px-4 py-3 bg-foreground/5 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-foreground/30 transition-colors duration-200"
-              />
-              <button
-                type="submit"
-                className="w-full px-4 py-3 bg-foreground text-background font-sarlotte text-sm font-semibold rounded-lg hover:bg-foreground/90 active:scale-[0.98] transition-all duration-200"
+            {subState === "done" ? (
+              <p className="font-raleway text-sm text-foreground text-center lg:text-left">
+                You&apos;re subscribed!
+              </p>
+            ) : (
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setSubState("loading");
+                  setSubError("");
+                  try {
+                    const res = await fetch("/api/newsletter", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ email }),
+                    });
+                    if (res.ok) {
+                      setSubState("done");
+                    } else {
+                      const data = await res.json().catch(() => ({}));
+                      setSubError(data.error ?? "Something went wrong. Please try again.");
+                      setSubState("error");
+                    }
+                  } catch {
+                    setSubError("Something went wrong. Please try again.");
+                    setSubState("error");
+                  }
+                }}
+                className="flex flex-col gap-2 max-w-xs mx-auto lg:mx-0"
               >
-                Subscribe
-              </button>
-            </form>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (subState === "error") { setSubState("idle"); setSubError(""); }
+                  }}
+                  placeholder="Your email address"
+                  required
+                  className={`w-full px-4 py-3 bg-foreground/5 border rounded-lg text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-colors duration-200 ${subState === "error" ? "border-red-400 focus:border-red-400" : "border-border focus:border-foreground/30"}`}
+                />
+                {subError && (
+                  <p className="text-xs text-red-400 font-raleway">{subError}</p>
+                )}
+                <button
+                  type="submit"
+                  disabled={subState === "loading"}
+                  className="w-full px-4 py-3 bg-foreground text-background font-sarlotte text-sm font-semibold rounded-lg hover:bg-foreground/90 active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {subState === "loading" ? "Subscribing…" : "Subscribe"}
+                </button>
+              </form>
+            )}
           </div>
         </div>
 

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Loader2, UploadCloud, Link2 } from "lucide-react";
 
 // ── types ─────────────────────────────────────────────────
 
@@ -31,6 +32,8 @@ type FormState = {
   images: PortfolioImage[];
   isPublished: boolean;
 };
+
+type UploadStatus = { id: string; name: string; progress: "uploading" | "done" | "error"; error?: string };
 
 const EMPTY_FORM: FormState = {
   title: "",
@@ -69,6 +72,9 @@ export default function AdminContentPage() {
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<PortfolioItem | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [uploads, setUploads] = useState<UploadStatus[]>([]);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
   // ── load ──────────────────────────────────────────────
@@ -150,6 +156,53 @@ export default function AdminContentPage() {
       imageUrlInput: "",
     }));
   }
+
+  const handleFileUpload = useCallback(async (files: FileList) => {
+    const fileArray = Array.from(files);
+    const newUploads: UploadStatus[] = fileArray.map((f) => ({
+      id: Math.random().toString(36).slice(2),
+      name: f.name,
+      progress: "uploading",
+    }));
+    setUploads((prev) => [...prev, ...newUploads]);
+
+    await Promise.all(
+      fileArray.map(async (file, i) => {
+        const uploadId = newUploads[i].id;
+        try {
+          const fd = new FormData();
+          fd.append("file", file);
+          const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error ?? "Upload failed");
+
+          setForm((prev) => {
+            const isMain = prev.images.length === 0;
+            return {
+              ...prev,
+              images: [...prev.images, { url: data.url, alt: "", isMain }],
+            };
+          });
+          setUploads((prev) =>
+            prev.map((u) => (u.id === uploadId ? { ...u, progress: "done" } : u))
+          );
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "Upload failed";
+          setUploads((prev) =>
+            prev.map((u) => (u.id === uploadId ? { ...u, progress: "error", error: msg } : u))
+          );
+          toast.error(`Failed to upload ${file.name}: ${msg}`);
+        }
+      })
+    );
+
+    // clear completed uploads after a short delay
+    setTimeout(() => {
+      setUploads((prev) => prev.filter((u) => u.progress !== "done"));
+    }, 2000);
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, []);
 
   function removeImage(idx: number) {
     setForm((prev) => {
@@ -496,25 +549,94 @@ export default function AdminContentPage() {
               </Field>
 
               {/* images */}
-              <Field label="Images (URLs)">
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <Input
-                      value={form.imageUrlInput}
-                      onChange={(e) => setField("imageUrlInput", e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          addImageUrl();
-                        }
-                      }}
-                      placeholder="https://…"
-                      type="url"
-                    />
-                    <Button type="button" variant="outline" size="sm" onClick={addImageUrl}>
-                      Add
-                    </Button>
+              <Field label="Images">
+                <div className="space-y-3">
+
+                  {/* Drop zone / file picker */}
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      if (e.dataTransfer.files.length) handleFileUpload(e.dataTransfer.files);
+                    }}
+                    className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border hover:border-foreground/30 bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors py-6 px-4 text-center"
+                  >
+                    <UploadCloud className="w-6 h-6 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      <span className="font-medium text-foreground">Click to upload</span> or drag and drop
+                    </p>
+                    <p className="text-xs text-muted-foreground">PNG, JPG, WebP, GIF — max 10 MB each</p>
                   </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files?.length) handleFileUpload(e.target.files);
+                    }}
+                  />
+
+                  {/* In-flight uploads */}
+                  {uploads.length > 0 && (
+                    <ul className="space-y-1.5">
+                      {uploads.map((u) => (
+                        <li
+                          key={u.id}
+                          className="flex items-center gap-2 rounded-md border border-border px-3 py-2 text-xs"
+                        >
+                          {u.progress === "uploading" && (
+                            <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin text-muted-foreground" />
+                          )}
+                          {u.progress === "done" && (
+                            <span className="w-3.5 h-3.5 shrink-0 rounded-full bg-green-500 flex items-center justify-center text-white text-[8px]">✓</span>
+                          )}
+                          {u.progress === "error" && (
+                            <span className="w-3.5 h-3.5 shrink-0 rounded-full bg-destructive flex items-center justify-center text-white text-[8px]">✕</span>
+                          )}
+                          <span className={`flex-1 truncate ${u.progress === "error" ? "text-destructive" : "text-muted-foreground"}`}>
+                            {u.progress === "uploading" ? `Uploading ${u.name}…` : u.progress === "error" ? (u.error ?? "Failed") : u.name}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {/* Paste URL fallback */}
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => setShowUrlInput((v) => !v)}
+                      className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Link2 className="w-3.5 h-3.5" />
+                      {showUrlInput ? "Hide URL input" : "Paste URL instead"}
+                    </button>
+
+                    {showUrlInput && (
+                      <div className="flex gap-2 mt-2">
+                        <Input
+                          value={form.imageUrlInput}
+                          onChange={(e) => setField("imageUrlInput", e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              addImageUrl();
+                            }
+                          }}
+                          placeholder="https://…"
+                          type="url"
+                        />
+                        <Button type="button" variant="outline" size="sm" onClick={addImageUrl}>
+                          Add
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Saved images list */}
                   {form.images.length > 0 && (
                     <ul className="space-y-1.5">
                       {form.images.map((img, idx) => (
