@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { VALID_STATUSES, type Order, type OrderStatus } from "@/lib/orders";
+import { VALID_STATUSES, type OrderStatus } from "@/lib/order-constants";
+import type { Order } from "@/lib/orders";
 
 const STATUS_LABEL: Record<string, string> = {
   new: "New",

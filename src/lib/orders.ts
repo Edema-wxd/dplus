@@ -124,8 +124,8 @@ export async function getOrderById(id: number): Promise<Order | null> {
   return rows[0] ? mapRow(rows[0]) : null;
 }
 
-export const VALID_STATUSES = ["new", "reviewing", "confirmed", "cancelled"] as const;
-export type OrderStatus = (typeof VALID_STATUSES)[number];
+export { VALID_STATUSES, type OrderStatus } from "@/lib/order-constants";
+import { VALID_STATUSES, type OrderStatus } from "@/lib/order-constants";
 
 export async function updateOrderStatus(
   id: number,
