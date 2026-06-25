@@ -260,23 +260,3 @@ function StatCard({
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
-  return (
-    <span
-      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-        STATUS_CLASSES[status] ?? "bg-muted text-muted-foreground"
-      }`}
-    >
-      {STATUS_LABELS[status] ?? status}
-    </span>
-  );
-}
-
-function formatNGN(amount: number): string {
-  return new Intl.NumberFormat("en-NG", {
-    style: "currency",
-    currency: "NGN",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}

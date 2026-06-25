@@ -130,11 +130,10 @@ describe("calcPrice", () => {
 
 describe("getPricingConfig — memCache path", () => {
   let getPricingConfig: () => Promise<PricingConfig>;
-  let invalidatePricingCache: () => Promise<void>;
   let mockQuery: jest.Mock;
 
   beforeEach(() => {
-    ({ mod: { getPricingConfig, invalidatePricingCache }, mockQuery } = freshPricingMods(null));
+    ({ mod: { getPricingConfig }, mockQuery } = freshPricingMods(null));
   });
 
   test("calls pool.query and returns mapped config on first call", async () => {

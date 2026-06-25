@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { motion, useScroll, useTransform, Variants } from "framer-motion";
-import { Quote, TrendingUp, Clock, Target, AlertTriangle } from "lucide-react";
+import { Quote, TrendingUp, Clock } from "lucide-react";
 
 type Challenge = {
   description: string;

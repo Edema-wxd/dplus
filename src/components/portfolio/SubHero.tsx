@@ -79,14 +79,6 @@ function SubHero({
     },
   };
 
-  const floatingAnimation = {
-    y: [0, -8, 0],
-    transition: {
-      duration: 4,
-      repeat: Infinity,
-      ease: "easeInOut",
-    },
-  };
 
   const detailItems = [
     {

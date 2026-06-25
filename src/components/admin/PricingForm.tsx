@@ -16,7 +16,6 @@ function BreakdownRow({
   value,
   delta,
   currency,
-  isFirst,
   isLast,
 }: {
   step: number;
@@ -25,7 +24,6 @@ function BreakdownRow({
   value: string;
   delta?: number;
   currency?: string;
-  isFirst?: boolean;
   isLast?: boolean;
 }) {
   return (
@@ -228,7 +226,6 @@ export default function PricingForm({
                 label="Base price (ex-VAT)"
                 sublabel="Raw supplier price in ZAR"
                 value={zar.format(preview.breakdown.avgRawZar)}
-                isFirst
               />
 
               {/* VAT */}

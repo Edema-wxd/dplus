@@ -125,7 +125,7 @@ export async function getOrderById(id: number): Promise<Order | null> {
 }
 
 export { VALID_STATUSES, type OrderStatus } from "@/lib/order-constants";
-import { VALID_STATUSES, type OrderStatus } from "@/lib/order-constants";
+import { type OrderStatus } from "@/lib/order-constants";
 
 export async function updateOrderStatus(
   id: number,
