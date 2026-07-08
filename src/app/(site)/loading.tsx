@@ -1,14 +1,22 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import { useTheme } from "next-themes";
 
 export default function Loading() {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="relative">
         {/* Logo with pulse animation */}
         <div className="animate-pulse">
           <Image
-            src="/logo-w.svg"
+            src={mounted && resolvedTheme === "light" ? "/logo-b.svg" : "/logo-w.svg"}
             alt="DSP Logo"
             width={200}
             height={106}
