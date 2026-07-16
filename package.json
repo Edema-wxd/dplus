@@ -6,6 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "start:server": "NODE_ENV=production node server.js",
     "lint": "next lint",
     "seed:admin": "tsx scripts/seed-admin.ts",
     "seed:amrod": "tsx scripts/amrod-seed.ts",

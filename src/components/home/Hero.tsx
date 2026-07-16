@@ -214,12 +214,12 @@ function Hero() {
           {/* Right — image */}
           <motion.div variants={fadeUp(0)} className="flex items-center justify-center">
             <Image
-              src="/letters.svg"
+              src="/image.png"
               alt="De-Sign Plus"
               width={1000}
-              height={1000}
+              height={750}
               priority
-              className="w-full h-auto"
+              className="w-full h-auto rounded-2xl object-cover"
             />
           </motion.div>
         </motion.div>
