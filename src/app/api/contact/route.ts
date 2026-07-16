@@ -67,7 +67,7 @@ async function sendNotification(data: ContactPayload): Promise<void> {
   const resendKey = process.env.RESEND_API_KEY;
 
   const html = `
-    <h2>New Project Inquiry — De-Sign Plus</h2>
+    <h2>New Project Inquiry - De-Sign Plus</h2>
     <table cellpadding="6" style="border-collapse:collapse;font-family:sans-serif;font-size:14px">
       <tr><td><strong>Name</strong></td><td>${esc(data.name)}</td></tr>
       <tr><td><strong>Email</strong></td><td>${esc(data.email)}</td></tr>
@@ -103,7 +103,7 @@ async function sendNotification(data: ContactPayload): Promise<void> {
       from: "notifications@de-signplus.com",
       to: "hello@de-signplus.com",
       reply_to: data.email,
-      subject: `New Inquiry from ${data.name}${data.company ? ` — ${data.company}` : ""}`,
+      subject: `New Inquiry from ${data.name}${data.company ? ` - ${data.company}` : ""}`,
       html,
     }),
   });

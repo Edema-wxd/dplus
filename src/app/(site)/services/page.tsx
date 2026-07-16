@@ -6,7 +6,7 @@ const services = [
     icon: Gift,
     title: "Corporate Gifting",
     description:
-      "Premium, bespoke gifts curated for executive-level recipients. Handpicked items that leave lasting impressions at client meetings, year-end functions, and milestone events — sourced globally, delivered with Nigerian precision.",
+      "Premium, bespoke gifts curated for executive-level recipients. Handpicked items that leave lasting impressions at client meetings, year-end functions, and milestone events, sourced globally, delivered with Nigerian precision.",
   },
   {
     icon: Package,
@@ -18,7 +18,7 @@ const services = [
     icon: HardHat,
     title: "Workwear & PPE",
     description:
-      "Professional workwear and personal protective equipment branded with your company identity. Compliant, durable, and tailored to your sector — from construction and manufacturing to hospitality and healthcare.",
+      "Professional workwear and personal protective equipment branded with your company identity. Compliant, durable, and tailored to your sector, from construction and manufacturing to hospitality and healthcare.",
   },
   {
     icon: Palette,
@@ -85,7 +85,7 @@ export default function ServicesPage() {
                 Ready to start a project?
               </h2>
               <p className="font-raleway text-muted-foreground text-sm sm:text-base">
-                Tell us what you need — we&apos;ll handle the rest.
+                Tell us what you need, we&apos;ll handle the rest.
               </p>
             </div>
             <Link

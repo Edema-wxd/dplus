@@ -47,7 +47,7 @@ export default function CTA() {
           {/* Body — shorter on mobile */}
           <p className="font-raleway text-sm sm:text-base lg:text-lg text-muted-foreground leading-[1.7] max-w-[30ch] sm:max-w-sm lg:max-w-2xl mb-8 lg:mb-10">
             Whether you need the perfect corporate gift, a luxury brand
-            experience, or a bespoke partnership strategy — we make it happen.
+            experience, or a bespoke partnership strategy, we make it happen.
           </p>
 
           {/* CTAs — full-width stacked on mobile, inline on sm+ */}

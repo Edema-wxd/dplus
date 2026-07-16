@@ -130,7 +130,7 @@ function Contact() {
             <GiPaperPlane className="text-black" />
           </div>
           <h2 className="font-sarlotte text-4xl text-foreground font-normal tracking-tight">
-            Thank you — we&apos;ll be in touch
+            Thank you, we&apos;ll be in touch
           </h2>
           <p className="text-muted-foreground font-raleway font-light max-w-md leading-relaxed">
             Your inquiry has been received. Our team will review your requirements
@@ -145,13 +145,13 @@ function Contact() {
     {
       icon: <GiMailbox className=" text-2xl text-dsp-green" />,
       label: "Email",
-      value: "hello@de-signplus.com",
+      value: "support@de-signplus.com",
       bgColor: "bg-blue-400",
     },
     {
       icon: <FaWhatsapp className=" text-2xl text-black" />,
       label: "WhatsApp",
-      value: "+234 812 345 6789",
+      value: "+2349125120020",
       bgColor: "bg-green-400",
     },
     {

@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Terms of Service — De-Sign Plus",
+  title: "Terms of Service - De-Sign Plus",
 };
 
 export default function TermsPage() {

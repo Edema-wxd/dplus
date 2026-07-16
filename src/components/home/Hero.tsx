@@ -83,7 +83,7 @@ function Hero() {
             animate={isLoaded ? "visible" : "hidden"}
             className="font-raleway text-sm leading-[1.75] text-muted-foreground max-w-[30ch] pl-4"
           >
-            Nigeria&apos;s luxury curation house — sourcing global craftsmanship to build brand experiences that close deals and forge lasting partnerships.
+            Nigeria&apos;s luxury curation house, sourcing global craftsmanship to build brand experiences that close deals and forge lasting partnerships.
           </motion.p>
         </div>
 

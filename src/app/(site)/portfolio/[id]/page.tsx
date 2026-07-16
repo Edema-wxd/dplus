@@ -94,7 +94,7 @@ export default async function PortfolioDetailPage({
               <img
                 key={i}
                 src={img.url}
-                alt={img.alt || `${item.title} — image ${i + 2}`}
+                alt={img.alt || `${item.title} - image ${i + 2}`}
                 className="w-full rounded-xl object-cover aspect-[4/3] bg-muted"
               />
             ))}

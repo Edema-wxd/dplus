@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Privacy Policy — De-Sign Plus",
+  title: "Privacy Policy - De-Sign Plus",
 };
 
 export default function PrivacyPage() {
@@ -42,20 +42,20 @@ export default function PrivacyPage() {
           <p>We collect information only to the extent necessary to deliver our services:</p>
           <ul>
             <li>
-              <strong>Business contact details</strong> — name, job title,
+              <strong>Business contact details:</strong> name, job title,
               business email, phone number, and company name of the individual
               we engage with at a client or supplier organisation.
             </li>
             <li>
-              <strong>Delivery information</strong> — physical address and
+              <strong>Delivery information:</strong> physical address and
               recipient details required to fulfil orders.
             </li>
             <li>
-              <strong>Communication records</strong> — emails, enquiry forms,
+              <strong>Communication records:</strong> emails, enquiry forms,
               and notes from client engagements.
             </li>
             <li>
-              <strong>Technical data</strong> — IP address, browser type, and
+              <strong>Technical data:</strong> IP address, browser type, and
               pages visited, collected automatically when you use our website.
             </li>
           </ul>
@@ -76,18 +76,18 @@ export default function PrivacyPage() {
 
           <H2>4. Legal Basis for Processing</H2>
           <ul>
-            <li><strong>Contract performance</strong> — processing necessary to fulfil an order or service agreement.</li>
-            <li><strong>Legitimate interests</strong> — client communications, relationship management, and fraud prevention.</li>
-            <li><strong>Legal obligation</strong> — where required by applicable law (e.g., tax records).</li>
-            <li><strong>Consent</strong> — for marketing communications where no pre-existing relationship exists.</li>
+            <li><strong>Contract performance:</strong> processing necessary to fulfil an order or service agreement.</li>
+            <li><strong>Legitimate interests:</strong> client communications, relationship management, and fraud prevention.</li>
+            <li><strong>Legal obligation:</strong> where required by applicable law (e.g., tax records).</li>
+            <li><strong>Consent:</strong> for marketing communications where no pre-existing relationship exists.</li>
           </ul>
 
           <H2>5. Sharing Your Information</H2>
           <p>We do not sell, rent, or trade personal information. We share it only with:</p>
           <ul>
-            <li><strong>Service providers</strong> — logistics partners, payment processors, and cloud providers engaged to deliver our services, bound by appropriate data-processing agreements.</li>
-            <li><strong>Suppliers</strong> — where necessary to produce or deliver a custom order.</li>
-            <li><strong>Regulatory authorities</strong> — where required by law or valid legal process.</li>
+            <li><strong>Service providers:</strong> logistics partners, payment processors, and cloud providers engaged to deliver our services, bound by appropriate data-processing agreements.</li>
+            <li><strong>Suppliers:</strong> where necessary to produce or deliver a custom order.</li>
+            <li><strong>Regulatory authorities:</strong> where required by law or valid legal process.</li>
           </ul>
 
           <H2>6. Cross-Border Transfers</H2>

@@ -4,6 +4,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { SidebarNav } from "@/components/admin/SidebarNav";
 import { getNewOrderCount } from "@/lib/orders";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminLayout({
   children,
 }: {

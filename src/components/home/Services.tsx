@@ -18,7 +18,7 @@ const services = [
   {
     numeral: "II",
     title: "Premium Brand Development",
-    desc: "Complete luxury brand identity that resonates with affluent markets — crafting visual narratives that position your company as the pinnacle of excellence.",
+    desc: "Complete luxury brand identity that resonates with affluent markets, crafting visual narratives that position your company as the pinnacle of excellence.",
     icon: Palette,
     textColor: "text-dsp-red",
     bgColor: "bg-dsp-red/10",

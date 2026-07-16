@@ -71,7 +71,7 @@ export default function Footer() {
             </div>
 
             <p className="font-raleway text-sm text-muted-foreground leading-relaxed text-center lg:text-left max-w-[28ch] mb-6">
-              Nigeria&apos;s luxury curation house — crafting experiences that
+              Nigeria&apos;s luxury curation house, crafting experiences that
               close deals and forge lasting partnerships.
             </p>
 
@@ -117,11 +117,11 @@ export default function Footer() {
             </h3>
             <div className="space-y-3 font-raleway text-sm text-center lg:text-left">
               <a
-                href="tel:+15551234567"
+                href="tel:+2349125120020"
                 className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground active:text-foreground transition-colors duration-200 justify-center lg:justify-start"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-dsp-yellow flex-shrink-0" />
-                +1 (555) 123-4567
+                +234 912 512 0020
               </a>
               <br />
               <a
@@ -162,7 +162,9 @@ export default function Footer() {
                       setSubState("done");
                     } else {
                       const data = await res.json().catch(() => ({}));
-                      setSubError(data.error ?? "Something went wrong. Please try again.");
+                      setSubError(
+                        data.error ?? "Something went wrong. Please try again.",
+                      );
                       setSubState("error");
                     }
                   } catch {
@@ -177,14 +179,19 @@ export default function Footer() {
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
-                    if (subState === "error") { setSubState("idle"); setSubError(""); }
+                    if (subState === "error") {
+                      setSubState("idle");
+                      setSubError("");
+                    }
                   }}
                   placeholder="Your email address"
                   required
                   className={`w-full px-4 py-3 bg-foreground/5 border rounded-lg text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-colors duration-200 ${subState === "error" ? "border-red-400 focus:border-red-400" : "border-border focus:border-foreground/30"}`}
                 />
                 {subError && (
-                  <p className="text-xs text-red-400 font-raleway">{subError}</p>
+                  <p className="text-xs text-red-400 font-raleway">
+                    {subError}
+                  </p>
                 )}
                 <button
                   type="submit"
