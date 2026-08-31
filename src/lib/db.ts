@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import { Pool } from "@neondatabase/serverless";
 
 declare global {
   var _pgPool: Pool | undefined;

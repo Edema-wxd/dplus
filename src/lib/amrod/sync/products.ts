@@ -22,13 +22,31 @@ function brandCode(brand: AmrodProduct["brand"]): string | null {
   return brand.code ?? null;
 }
 
-async function upsertBatch(client: import("pg").PoolClient, products: AmrodProduct[]) {
+async function upsertBatch(
+  client: import("@neondatabase/serverless").PoolClient,
+  products: AmrodProduct[],
+) {
   await batchUpsert(
     client,
     "products",
-    ["simple_code", "type", "product_name", "brand_code", "data", "is_active", "last_synced_at"],
+    [
+      "simple_code",
+      "type",
+      "product_name",
+      "brand_code",
+      "data",
+      "is_active",
+      "last_synced_at",
+    ],
     ["simple_code"],
-    ["type", "product_name", "brand_code", "data", "is_active", "last_synced_at"],
+    [
+      "type",
+      "product_name",
+      "brand_code",
+      "data",
+      "is_active",
+      "last_synced_at",
+    ],
     products.map((p) => [
       p.simpleCode,
       p.type,
@@ -39,7 +57,7 @@ async function upsertBatch(client: import("pg").PoolClient, products: AmrodProdu
       new Date(),
     ]),
     BATCH_SIZE,
-    false
+    false,
   );
 }
 
