@@ -2,10 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import { motion, useScroll, useTransform, Variants } from "framer-motion";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "../ui/button";
 import Image from "next/image";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 
 const fadeUp = (delay = 0): Variants => ({
   hidden: { opacity: 0, y: 18 },
@@ -18,6 +19,7 @@ const fadeUp = (delay = 0): Variants => ({
 
 function Hero() {
   const [isLoaded, setIsLoaded] = useState(false);
+  const { resolvedTheme } = useTheme();
   const { scrollY } = useScroll();
   const bgY = useTransform(scrollY, [0, 600], [0, 110]);
 
@@ -28,71 +30,54 @@ function Hero() {
   return (
     <section className="relative w-full overflow-hidden bg-background">
       {/* ── MOBILE ──────────────────────────────────────────────────────── */}
-      <div className="lg:hidden relative min-h-[calc(100svh-4rem)] flex flex-col px-5 pt-7 pb-8">
+      <div className="lg:hidden relative min-h-[calc(100svh-4rem)] flex flex-col pt-8 pb-10">
 
-        {/* letters.svg as right-edge watermark — depth without layout cost */}
-        <div className="absolute inset-0 flex items-center justify-end pointer-events-none select-none">
-          <Image
-            src="/letters.svg"
-            alt=""
-            aria-hidden
-            width={300}
-            height={300}
-            className="w-[52vw] max-w-[200px] opacity-[0.045]"
-          />
-        </div>
-
-        {/* Zone 1 — Badge */}
+        {/* Editorial left-rule — the signature device, and the only accent needed */}
         <motion.div
           variants={fadeUp(0)}
           initial="hidden"
           animate={isLoaded ? "visible" : "hidden"}
-          className="inline-flex items-center gap-2 self-start"
+          className="mx-5 pl-5 border-l-[3px] border-dsp-yellow"
         >
-          <span className="w-[5px] h-[5px] rounded-full bg-dsp-yellow flex-shrink-0" />
-          <span className="font-raleway text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
-            Nigerian Excellence · Global Impact
-          </span>
+          <h1
+            className="font-sarlotte font-bold text-foreground leading-[1.0]"
+            style={{ fontSize: "clamp(2.5rem, 12vw, 3.6rem)" }}
+          >
+            Transforming<br />
+            Experiences
+          </h1>
+
+          <p className="font-raleway text-[0.9375rem] leading-[1.7] text-muted-foreground max-w-[28ch] mt-4">
+            Exclusive curation for Nigeria&apos;s boardrooms. Sourced globally,
+            delivered with precision.
+          </p>
         </motion.div>
 
-        {/* Zone 2 — Headline + body, vertically centered */}
-        <div className="flex-1 flex flex-col justify-center gap-5 py-6">
-
-          {/* Editorial left-rule — the signature device */}
-          <motion.div
-            variants={fadeUp(0.1)}
-            initial="hidden"
-            animate={isLoaded ? "visible" : "hidden"}
-            className="pl-4 border-l-[3px] border-dsp-yellow"
-          >
-            <h1
-              className="font-sarlotte font-bold text-foreground leading-[1.05]"
-              style={{ fontSize: "clamp(2.7rem, 10.5vw, 3.8rem)" }}
-            >
-              Transform&shy;ing<br />
-              <span className="text-dsp-yellow italic">Experiences</span><br />
-              through<br />
-              Exclusive<br />
-              Curation
-            </h1>
-          </motion.div>
-
-          <motion.p
-            variants={fadeUp(0.2)}
-            initial="hidden"
-            animate={isLoaded ? "visible" : "hidden"}
-            className="font-raleway text-sm leading-[1.75] text-muted-foreground max-w-[30ch] pl-4"
-          >
-            Nigeria&apos;s luxury curation house, sourcing global craftsmanship to build brand experiences that close deals and forge lasting partnerships.
-          </motion.p>
-        </div>
-
-        {/* Zone 3 — CTAs, thumb-zone friendly */}
+        {/* Full-bleed work image — takes the leftover height on any phone.
+            The photo ships in two colourways; the dark one melts into the
+            page ground so the objects read as if they sit on the page. */}
         <motion.div
-          variants={fadeUp(0.3)}
+          variants={fadeUp(0.18)}
           initial="hidden"
           animate={isLoaded ? "visible" : "hidden"}
-          className="flex flex-col gap-3"
+          className="relative flex-1 min-h-[190px] my-7"
+        >
+          <Image
+            src={isLoaded && resolvedTheme === "light" ? "/hero-light.jpg" : "/hero-dark.jpg"}
+            alt="De-Sign Plus stationery and brand collateral"
+            fill
+            priority
+            sizes="(min-width: 1024px) 1px, 100vw"
+            className="object-cover object-center"
+          />
+        </motion.div>
+
+        {/* CTAs, thumb-zone friendly */}
+        <motion.div
+          variants={fadeUp(0.26)}
+          initial="hidden"
+          animate={isLoaded ? "visible" : "hidden"}
+          className="flex flex-col gap-3 px-5"
         >
           <Button
             asChild
@@ -113,15 +98,6 @@ function Hero() {
           >
             <Link href="/portfolio">View Portfolio</Link>
           </Button>
-
-          <div className="flex justify-center pt-3">
-            <motion.div
-              animate={{ y: [0, 5, 0] }}
-              transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <ChevronDown className="w-4 h-4 text-muted-foreground/30" />
-            </motion.div>
-          </div>
         </motion.div>
       </div>
 
@@ -219,6 +195,7 @@ function Hero() {
               width={1000}
               height={750}
               priority
+              sizes="(max-width: 1023px) 1px, 50vw"
               className="w-full h-auto rounded-2xl object-cover"
             />
           </motion.div>

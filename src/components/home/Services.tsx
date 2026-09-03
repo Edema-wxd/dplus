@@ -9,6 +9,7 @@ const services = [
   {
     numeral: "I",
     title: "Bespoke Gift Curation",
+    short: "Handcrafted pieces from African artisans.",
     desc: "Handcrafted corporate gifts sourced from South African artisans. Each piece carries cultural significance and rarity, designed to leave lasting impressions on C-suite executives.",
     icon: Gift,
     textColor: "text-dsp-yellow",
@@ -18,6 +19,7 @@ const services = [
   {
     numeral: "II",
     title: "Premium Brand Development",
+    short: "Brand identity built for affluent markets.",
     desc: "Complete luxury brand identity that resonates with affluent markets, crafting visual narratives that position your company as the pinnacle of excellence.",
     icon: Palette,
     textColor: "text-dsp-red",
@@ -27,6 +29,7 @@ const services = [
   {
     numeral: "III",
     title: "Executive Merchandise",
+    short: "Limited runs in authentic materials.",
     desc: "Limited-edition corporate merchandise featuring authentic materials, perfect for strengthening relationships with high-net-worth individuals and corporate leaders.",
     icon: Package,
     textColor: "text-dsp-blue",
@@ -36,6 +39,7 @@ const services = [
   {
     numeral: "IV",
     title: "Strategic Partnership Gifts",
+    short: "Timed to land when the deal does.",
     desc: "Precisely timed gift experiences aligned with your business objectives. Our discretion and cultural insight help secure partnerships worth millions.",
     icon: Handshake,
     textColor: "text-dsp-green",
@@ -57,12 +61,15 @@ export default function Services() {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-10 lg:mb-16 lg:text-center"
+          className="mb-8 lg:mb-16 lg:text-center"
         >
-          <p className="font-raleway text-[10px] tracking-[0.2em] uppercase text-dsp-yellow mb-3 lg:mb-4">
+          <p className="hidden lg:block font-raleway text-[10px] tracking-[0.2em] uppercase text-dsp-yellow mb-4">
             What We Do
           </p>
-          <h2 className="font-sarlotte font-bold text-foreground text-[1.85rem] sm:text-4xl lg:text-5xl xl:text-6xl leading-[1.1] max-w-xl lg:mx-auto">
+          <h2 className="lg:hidden font-sarlotte font-bold text-foreground text-[2.1rem] leading-[1.05] pl-5 border-l-[3px] border-dsp-yellow">
+            What we do
+          </h2>
+          <h2 className="hidden lg:block font-sarlotte font-bold text-foreground text-5xl xl:text-6xl leading-[1.1] max-w-xl lg:mx-auto">
             Exclusive Offerings for{" "}
             <span className="text-dsp-yellow">Discerning Leaders</span>
           </h2>
@@ -91,7 +98,7 @@ export default function Services() {
                 >
                   <Link
                     href="/services"
-                    className={`group flex items-start gap-4 py-5 border-l-[3px] pl-4 ${service.borderColor} active:bg-foreground/5 transition-colors`}
+                    className={`group flex items-start gap-4 py-4 border-l-[3px] pl-4 ${service.borderColor} active:bg-foreground/5 transition-colors`}
                   >
                     {/* Icon pill */}
                     <div
@@ -102,16 +109,11 @@ export default function Services() {
 
                     {/* Text */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-3">
-                        <h3 className="font-sarlotte font-bold text-foreground text-[1.05rem] leading-snug">
-                          {service.title}
-                        </h3>
-                        <ArrowRight
-                          className={`w-4 h-4 flex-shrink-0 mt-0.5 opacity-30 group-active:opacity-100 ${service.textColor} transition-opacity`}
-                        />
-                      </div>
-                      <p className="font-raleway text-[13px] text-muted-foreground leading-[1.65] mt-1.5">
-                        {service.desc}
+                      <h3 className="font-sarlotte font-bold text-foreground text-[1.05rem] leading-snug">
+                        {service.title}
+                      </h3>
+                      <p className="font-raleway text-[13px] text-muted-foreground leading-[1.5] mt-1">
+                        {service.short}
                       </p>
                     </div>
                   </Link>

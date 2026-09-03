@@ -23,10 +23,10 @@ export default function CTA() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.52, ease: [0.22, 1, 0.36, 1] }}
-          className="flex flex-col items-center text-center lg:items-start lg:text-left"
+          className="flex flex-col items-start text-left"
         >
-          {/* Eyebrow — flanked rules, centered on mobile */}
-          <div className="flex items-center gap-3 mb-6">
+          {/* Eyebrow — flanked rules, desktop only */}
+          <div className="hidden lg:flex items-center gap-3 mb-6">
             <span className="w-8 h-px bg-dsp-yellow/40" />
             <p className="font-raleway text-[10px] tracking-[0.22em] uppercase text-dsp-yellow">
               Ready to Begin
@@ -44,8 +44,11 @@ export default function CTA() {
             Together
           </h2>
 
-          {/* Body — shorter on mobile */}
-          <p className="font-raleway text-sm sm:text-base lg:text-lg text-muted-foreground leading-[1.7] max-w-[30ch] sm:max-w-sm lg:max-w-2xl mb-8 lg:mb-10">
+          {/* Body — one line on mobile, full on desktop */}
+          <p className="font-raleway text-[0.9375rem] text-muted-foreground leading-[1.7] text-balance mb-8 lg:hidden">
+            Tell us the occasion. We handle the rest.
+          </p>
+          <p className="hidden lg:block font-raleway text-lg text-muted-foreground leading-[1.7] max-w-2xl mb-10">
             Whether you need the perfect corporate gift, a luxury brand
             experience, or a bespoke partnership strategy, we make it happen.
           </p>
@@ -74,7 +77,7 @@ export default function CTA() {
           </div>
 
           {/* Trust — single compact line, no vertical stacking */}
-          <div className="flex items-center justify-center lg:justify-start gap-2.5 mt-8 font-raleway text-[11px] tracking-wide text-muted-foreground/50">
+          <div className="hidden lg:flex items-center justify-start gap-2.5 mt-8 font-raleway text-[11px] tracking-wide text-muted-foreground/50">
             <span>Premium Quality</span>
             <span className="w-[3px] h-[3px] rounded-full bg-dsp-yellow/50 flex-shrink-0" />
             <span>Global Sourcing</span>
