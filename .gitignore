@@ -9,6 +9,7 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+.zip
 
 # testing
 /coverage
@@ -31,6 +32,7 @@
 .agents
 .claude
 .mcp
+deploy.zip
 
 
 # debug
