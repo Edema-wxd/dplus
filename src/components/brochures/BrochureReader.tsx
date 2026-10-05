@@ -5,8 +5,10 @@ import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+type Page = { url: string; alt?: string };
+
 type Props = {
-  images: string[];
+  pages: Page[];
   title: string;
   /** Trim ratio of the printed page, so the sheet never letterboxes. */
   pageRatio: number;
@@ -14,11 +16,11 @@ type Props = {
 
 const folio = (n: number) => String(n).padStart(2, "0");
 
-export default function BrochureReader({ images, title, pageRatio }: Props) {
+export default function BrochureReader({ pages, title, pageRatio }: Props) {
   const [page, setPage] = useState(0);
   const [turn, setTurn] = useState(1);
   const reduceMotion = useReducedMotion();
-  const total = images.length;
+  const total = pages.length;
 
   // Tracks the live page so quick, repeated turns don't read a stale value.
   const pageRef = useRef(0);
@@ -37,10 +39,30 @@ export default function BrochureReader({ images, title, pageRatio }: Props) {
   const back = useCallback(() => turnTo(pageRef.current - 1), [turnTo]);
   const forward = useCallback(() => turnTo(pageRef.current + 1), [turnTo]);
 
+  // Arrow keys belong to this reader only while it is the thing being used:
+  // focus inside it, or the pointer over it. Otherwise typing in a form field
+  // elsewhere on the page would turn pages.
+  const rootRef = useRef<HTMLDivElement>(null);
+  const hoveredRef = useRef(false);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+
+      const root = rootRef.current;
+      if (!root) return;
+
+      const target = e.target as HTMLElement | null;
+      if (target?.closest("input, textarea, select, [contenteditable]")) return;
+
+      const owns =
+        (target && root.contains(target)) ||
+        (hoveredRef.current && (!target || target === document.body));
+      if (!owns) return;
+
+      e.preventDefault();
       if (e.key === "ArrowLeft") back();
-      if (e.key === "ArrowRight") forward();
+      else forward();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -61,7 +83,11 @@ export default function BrochureReader({ images, title, pageRatio }: Props) {
   }
 
   return (
-    <div>
+    <div
+      ref={rootRef}
+      onPointerEnter={() => (hoveredRef.current = true)}
+      onPointerLeave={() => (hoveredRef.current = false)}
+    >
       {/* The sheet — the one object on this page with weight */}
       <div
         className="relative select-none"
@@ -74,7 +100,7 @@ export default function BrochureReader({ images, title, pageRatio }: Props) {
         >
           <AnimatePresence initial={false} mode="popLayout">
             <motion.div
-              key={images[page]}
+              key={pages[page].url}
               drag={total > 1 ? "x" : false}
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.12}
@@ -93,8 +119,8 @@ export default function BrochureReader({ images, title, pageRatio }: Props) {
               className="absolute inset-0 cursor-grab active:cursor-grabbing"
             >
               <Image
-                src={images[page]}
-                alt={`${title}, page ${page + 1}`}
+                src={pages[page].url}
+                alt={pages[page].alt || `${title}, page ${page + 1}`}
                 fill
                 sizes="(max-width: 1023px) 100vw, 860px"
                 loading="eager"
@@ -132,7 +158,7 @@ export default function BrochureReader({ images, title, pageRatio }: Props) {
             </div>
 
             <a
-              href={images[page]}
+              href={pages[page].url}
               target="_blank"
               rel="noopener noreferrer"
               className="font-raleway text-[0.72rem] text-muted-foreground hover:text-foreground underline underline-offset-4 decoration-border hover:decoration-dsp-red transition-colors shrink-0"
@@ -165,9 +191,9 @@ export default function BrochureReader({ images, title, pageRatio }: Props) {
       {/* Contact sheet */}
       {total > 1 && (
         <div className="mt-8 flex gap-2.5 overflow-x-auto pb-2 snap-x">
-          {images.map((src, i) => (
+          {pages.map((p, i) => (
             <button
-              key={src}
+              key={p.url}
               type="button"
               onClick={() => turnTo(i)}
               aria-label={`Turn to page ${i + 1}`}
@@ -187,7 +213,7 @@ export default function BrochureReader({ images, title, pageRatio }: Props) {
                 }`}
                 style={{ aspectRatio: pageRatio }}
               >
-                <Image src={src} alt="" fill sizes="104px" className="object-cover" />
+                <Image src={p.url} alt="" fill sizes="104px" className="object-cover" />
               </span>
               <span className="block mt-1.5 font-raleway text-[0.6rem] tabular-nums text-muted-foreground">
                 {folio(i + 1)}

@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { Download } from "lucide-react";
 import BrochureReader from "@/components/brochures/BrochureReader";
-import { getBrochures, type Brochure } from "@/lib/brochures";
+import {
+  formatBytes,
+  getPublishedBrochures,
+  type Brochure,
+} from "@/lib/brochures";
+
+export const revalidate = 60;
 
 export const metadata = {
   title: "Brochures - De-Sign Plus",
@@ -9,17 +15,19 @@ export const metadata = {
     "Read the De-Sign Plus brochures online, including the 2026 Corporate Christmas collection of executive gifts, hampers and branded keepsakes, and download the PDF to share.",
 };
 
+/** Describes the PDF itself — never the page images, which may differ. */
 function fileNote(brochure: Brochure) {
-  const pages = brochure.images.length;
-  const size = brochure.pdfSizeLabel;
-  if (pages && size) return `A ${pages}-page PDF, ${size}.`;
-  if (pages) return `${pages} pages.`;
+  const count = brochure.pdfPageCount;
+  const size =
+    brochure.pdfSizeBytes === null ? null : formatBytes(brochure.pdfSizeBytes);
+  if (count && size) return `A ${count}-page PDF, ${size}.`;
+  if (count) return `A ${count}-page PDF.`;
   if (size) return `PDF, ${size}.`;
   return null;
 }
 
-export default function BrochuresPage() {
-  const brochures = getBrochures();
+export default async function BrochuresPage() {
+  const brochures = await getPublishedBrochures();
 
   return (
     <main className="bg-coal-grey/50">
@@ -36,6 +44,24 @@ export default function BrochuresPage() {
           </p>
         </div>
       </div>
+
+      {brochures.length === 0 && (
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-20">
+          <p className="font-sarlotte text-foreground text-2xl mb-3">
+            Nothing on the shelf yet
+          </p>
+          <p className="font-raleway text-sm text-muted-foreground max-w-[42ch] leading-relaxed">
+            Our next brochure is in production.{" "}
+            <Link
+              href="/contact-us"
+              className="text-foreground underline decoration-dsp-red decoration-2 underline-offset-4 hover:text-dsp-red transition-colors"
+            >
+              Tell us what you are planning
+            </Link>{" "}
+            and we will send it to you the moment it is ready.
+          </p>
+        </div>
+      )}
 
       {brochures.map((brochure) => {
         const note = fileNote(brochure);
@@ -60,8 +86,8 @@ export default function BrochuresPage() {
 
               <div className="min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-2">
                 <BrochureReader
-                  images={brochure.images}
-                  title={brochure.title}
+                  pages={brochure.pages}
+                  title={brochure.name}
                   pageRatio={brochure.pageRatio}
                 />
               </div>

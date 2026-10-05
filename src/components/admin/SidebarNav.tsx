@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   ShoppingBag,
   Images,
+  BookOpen,
   RefreshCw,
   SlidersHorizontal,
 } from "lucide-react";
@@ -15,6 +16,7 @@ const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { href: "/admin/content", label: "Content", icon: Images },
+  { href: "/admin/brochures", label: "Brochures", icon: BookOpen },
   { href: "/admin/amrod", label: "Amrod Sync", icon: RefreshCw },
   { href: "/admin/pricing", label: "Pricing", icon: SlidersHorizontal },
 ];
