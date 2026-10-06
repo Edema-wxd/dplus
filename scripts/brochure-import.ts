@@ -122,33 +122,75 @@ async function main() {
   const { UTApi, UTFile } = await import("uploadthing/server");
   const utapi = new UTApi();
 
-  console.log("\nUploading pages to UploadThing…");
-  const pageUploads = await utapi.uploadFiles(
-    optimised.map((f) => new UTFile([new Uint8Array(f.data)], f.name, { type: "image/webp" }))
-  );
+  // Uploaded a few at a time, with retries: sending two dozen at once makes the
+  // ingest endpoint drop connections, and a half-finished run leaves orphans.
+  const uploaded: { url: string; key: string; alt: string }[] = [];
 
-  const pages = pageUploads.map((result, i) => {
-    if (result.error || !result.data) {
-      throw new Error(`Upload failed for ${optimised[i].name}: ${result.error?.message}`);
+  async function uploadOne(file: { name: string; data: Buffer }, type: string) {
+    let lastError = "unknown error";
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const result = await utapi.uploadFiles(
+        new UTFile([new Uint8Array(file.data)], file.name, { type })
+      );
+      if (!result.error && result.data) return result.data;
+      lastError = result.error?.message ?? lastError;
+      if (attempt < 3) {
+        console.log(`  retrying ${file.name} (attempt ${attempt + 1})`);
+        await new Promise((r) => setTimeout(r, attempt * 1500));
+      }
     }
-    return { url: result.data.ufsUrl, key: result.data.key, alt: "" };
-  });
-  console.log(`  ${pages.length} pages uploaded`);
+    throw new Error(`Upload failed for ${file.name}: ${lastError}`);
+  }
+
+  /** Removes everything this run put in the account, so a failure leaves none. */
+  async function rollback() {
+    const keys = uploaded.map((p) => p.key);
+    if (!keys.length) return;
+    console.error(`Removing ${keys.length} files uploaded by this run…`);
+    try {
+      await utapi.deleteFiles(keys);
+    } catch {
+      console.error("Could not remove them — check the UploadThing dashboard.");
+    }
+  }
+
+  console.log("\nUploading pages to UploadThing…");
+  const BATCH = 4;
+  try {
+    for (let i = 0; i < optimised.length; i += BATCH) {
+      const batch = optimised.slice(i, i + BATCH);
+      const results = await Promise.all(
+        batch.map((file) => uploadOne(file, "image/webp"))
+      );
+      uploaded.push(
+        ...results.map((data) => ({ url: data.ufsUrl, key: data.key, alt: "" }))
+      );
+      console.log(`  ${uploaded.length}/${optimised.length} pages`);
+    }
+  } catch (err) {
+    await rollback();
+    throw err;
+  }
+
+  const pages = [...uploaded]; // copied: `uploaded` keeps growing for rollback
 
   let pdfUrl: string | null = null;
   let pdfKey: string | null = null;
   if (pdfPath) {
     console.log("Uploading PDF…");
-    const buffer = await fs.readFile(pdfPath);
-    const result = await utapi.uploadFiles(
-      new UTFile([new Uint8Array(buffer)], `${slug}.pdf`, { type: "application/pdf" })
-    );
-    if (result.error || !result.data) {
-      throw new Error(`PDF upload failed: ${result.error?.message}`);
+    try {
+      const data = await uploadOne(
+        { name: `${slug}.pdf`, data: await fs.readFile(pdfPath) },
+        "application/pdf"
+      );
+      pdfUrl = data.ufsUrl;
+      pdfKey = data.key;
+      uploaded.push({ url: data.ufsUrl, key: data.key, alt: "" });
+      console.log("  PDF uploaded");
+    } catch (err) {
+      await rollback();
+      throw err;
     }
-    pdfUrl = result.data.ufsUrl;
-    pdfKey = result.data.key;
-    console.log("  PDF uploaded");
   }
 
   // ── write the row ───────────────────────────────────────
@@ -171,20 +213,27 @@ async function main() {
     isPublished: flag("publish"),
   };
 
-  if (existing) {
-    const superseded = [
-      ...existing.pages.map((p) => p.key),
-      ...(existing.pdfKey ? [existing.pdfKey] : []),
-    ].filter(Boolean);
+  try {
+    if (existing) {
+      const superseded = [
+        ...existing.pages.map((p) => p.key),
+        ...(existing.pdfKey ? [existing.pdfKey] : []),
+      ].filter(Boolean);
 
-    await brochures.updateBrochure(existing.id, payload);
-    if (superseded.length) {
-      await utapi.deleteFiles(superseded);
-      console.log(`Replaced brochure #${existing.id}, removed ${superseded.length} old files`);
+      await brochures.updateBrochure(existing.id, payload);
+      if (superseded.length) {
+        await utapi.deleteFiles(superseded);
+        console.log(
+          `Replaced brochure #${existing.id}, removed ${superseded.length} old files`
+        );
+      }
+    } else {
+      const created = await brochures.createBrochure(payload);
+      console.log(`Created brochure #${created.id}`);
     }
-  } else {
-    const created = await brochures.createBrochure(payload);
-    console.log(`Created brochure #${created.id}`);
+  } catch (err) {
+    await rollback();
+    throw err;
   }
 
   console.log(
