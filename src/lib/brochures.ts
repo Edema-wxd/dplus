@@ -67,6 +67,15 @@ function rowToBrochure(row: BrochureRow): Brochure {
   };
 }
 
+/** Turns a name into a URL address. Shared by create and update. */
+export function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 export function formatBytes(bytes: number) {
   if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   return `${Math.max(1, Math.round(bytes / 1024))} KB`;
@@ -192,4 +201,21 @@ export async function deleteBrochure(id: number): Promise<Brochure | null> {
     [id]
   );
   return rows.length ? rowToBrochure(rows[0]) : null;
+}
+
+/**
+ * Rewrites sort_order to match the given id order, lowest first. Ids that do
+ * not exist are ignored. Returns the brochures in their new order.
+ */
+export async function reorderBrochures(ids: number[]): Promise<Brochure[]> {
+  if (ids.length) {
+    await pool.query(
+      `update brochures as b
+         set sort_order = v.ord, updated_at = now()
+       from (select * from unnest($1::bigint[], $2::int[]) as t(id, ord)) as v
+       where b.id = v.id`,
+      [ids, ids.map((_, i) => i)]
+    );
+  }
+  return getBrochures({ includeUnpublished: true });
 }

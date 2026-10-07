@@ -36,6 +36,7 @@ function Navbar() {
     { href: "/about-us", label: "About" },
     { href: "/services", label: "Services" },
     { href: "/products", label: "Products" },
+    { href: "/hampers", label: "Hampers" },
     { href: "/portfolio", label: "Portfolio" },
     { href: "/brochures", label: "Brochures" },
     { href: "/contact-us", label: "Contact" },

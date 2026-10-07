@@ -1,20 +1,8 @@
-/*
- * Migration — run once against your database:
- *
- * CREATE TABLE IF NOT EXISTS contact_submissions (
- *   id          SERIAL PRIMARY KEY,
- *   name        TEXT        NOT NULL,
- *   email       TEXT        NOT NULL,
- *   phone       TEXT,
- *   company     TEXT,
- *   message     TEXT        NOT NULL,
- *   details     JSONB,
- *   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
- * );
- */
+// Schema: docs/contact-schema.sql — apply with `npm run contact:schema`.
 
 import { NextRequest, NextResponse } from "next/server";
 import { pool } from "@/lib/db";
+import { scoreLead } from "@/lib/lead-score";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -24,13 +12,17 @@ interface ContactPayload {
   phone?: string;
   company?: string;
   message: string;
-  // extra form fields stored in details / included in notification email
-  position?: string;
+  // the brief, stored in details and shown in the notification email
   service?: string;
+  headcount?: number;
+  neededBy?: string;
+  role?: string;
   budget?: string;
-  timeline?: string;
-  location?: string;
-  inspiration?: string;
+  branding?: string;
+  hamper?: string;
+  // spam guards, never stored
+  website?: string;
+  elapsedMs?: number;
 }
 
 interface FieldErrors {
@@ -63,32 +55,51 @@ function validate(body: Record<string, unknown>): FieldErrors {
 
 // ── Email notification ────────────────────────────────────────────────────────
 
-async function sendNotification(data: ContactPayload): Promise<void> {
+async function sendNotification(
+  data: ContactPayload,
+  lead: ReturnType<typeof scoreLead>
+): Promise<void> {
   const resendKey = process.env.RESEND_API_KEY;
 
+  const row = (label: string, value?: string | number | null) =>
+    value === undefined || value === null || value === ""
+      ? ""
+      : `<tr><td style="padding:6px 12px 6px 0"><strong>${esc(label)}</strong></td><td style="padding:6px 0">${esc(String(value))}</td></tr>`;
+
   const html = `
-    <h2>New Project Inquiry - De-Sign Plus</h2>
-    <table cellpadding="6" style="border-collapse:collapse;font-family:sans-serif;font-size:14px">
-      <tr><td><strong>Name</strong></td><td>${esc(data.name)}</td></tr>
-      <tr><td><strong>Email</strong></td><td>${esc(data.email)}</td></tr>
-      ${data.phone ? `<tr><td><strong>Phone</strong></td><td>${esc(data.phone)}</td></tr>` : ""}
-      ${data.company ? `<tr><td><strong>Company</strong></td><td>${esc(data.company)}</td></tr>` : ""}
-      ${data.position ? `<tr><td><strong>Position</strong></td><td>${esc(data.position)}</td></tr>` : ""}
-      ${data.service ? `<tr><td><strong>Service</strong></td><td>${esc(data.service)}</td></tr>` : ""}
-      ${data.budget ? `<tr><td><strong>Budget</strong></td><td>${esc(data.budget)}</td></tr>` : ""}
-      ${data.timeline ? `<tr><td><strong>Timeline</strong></td><td>${esc(data.timeline)}</td></tr>` : ""}
-      ${data.location ? `<tr><td><strong>Location</strong></td><td>${esc(data.location)}</td></tr>` : ""}
+    <p style="font-family:sans-serif;font-size:13px;margin:0 0 4px">
+      <strong>${lead.tier.toUpperCase()}</strong> — lead score ${lead.score}/100
+    </p>
+    ${
+      lead.signals.length
+        ? `<p style="font-family:sans-serif;font-size:13px;color:#555;margin:0 0 18px">${lead.signals
+            .map(esc)
+            .join(" &middot; ")}</p>`
+        : ""
+    }
+    <h2 style="font-family:sans-serif">New brief from ${esc(data.name)}</h2>
+    <table cellpadding="0" style="border-collapse:collapse;font-family:sans-serif;font-size:14px">
+      ${row("Email", data.email)}
+      ${row("Phone", data.phone)}
+      ${row("Company", data.company)}
+      ${row("Signs off", data.role)}
+      ${row("Needs", data.service)}
+      ${row("Headcount", data.headcount)}
+      ${row("Needed by", data.neededBy)}
+      ${row("Budget", data.budget)}
+      ${row("Branding", data.branding)}
+      ${row("From hamper", data.hamper)}
     </table>
-    <h3 style="margin-top:20px">Project Objectives</h3>
-    <p style="white-space:pre-wrap">${esc(data.message)}</p>
-    ${data.inspiration ? `<h3>Inspiration &amp; References</h3><p style="white-space:pre-wrap">${esc(data.inspiration)}</p>` : ""}
+    <h3 style="font-family:sans-serif;margin-top:20px">The brief</h3>
+    <p style="font-family:sans-serif;font-size:14px;white-space:pre-wrap">${esc(data.message)}</p>
   `;
 
   if (!resendKey) {
-    console.log("[contact] No email transport configured. Inquiry received:", {
+    console.log("[contact] No email transport configured. Brief received:", {
       name: data.name,
       email: data.email,
-      company: data.company,
+      tier: lead.tier,
+      score: lead.score,
     });
     return;
   }
@@ -103,7 +114,9 @@ async function sendNotification(data: ContactPayload): Promise<void> {
       from: "notifications@de-signplus.com",
       to: "hello@de-signplus.com",
       reply_to: data.email,
-      subject: `New Inquiry from ${data.name}${data.company ? ` - ${data.company}` : ""}`,
+      subject: `[${lead.tier.toUpperCase()} ${lead.score}] ${data.name}${
+        data.company ? ` — ${data.company}` : ""
+      }${data.headcount ? ` — ${data.headcount} people` : ""}`,
       html,
     }),
   });
@@ -126,6 +139,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
+  // Bots fill hidden fields and submit instantly; people do neither.
+  const probe = body as Record<string, unknown>;
+  if (typeof probe.website === "string" && probe.website.trim()) {
+    return NextResponse.json({ ok: true });
+  }
+  if (typeof probe.elapsedMs === "number" && probe.elapsedMs < 2000) {
+    return NextResponse.json({ ok: true });
+  }
+
   const errors = validate(body as Record<string, unknown>);
   if (Object.keys(errors).length > 0) {
     return NextResponse.json({ errors }, { status: 400 });
@@ -138,13 +160,31 @@ export async function POST(req: NextRequest) {
   const company = data.company?.trim() || null;
   const message = data.message.trim();
 
+  const headcount =
+    typeof data.headcount === "number" && Number.isFinite(data.headcount)
+      ? Math.max(0, Math.round(data.headcount))
+      : null;
+
+  const lead = scoreLead({
+    headcount,
+    budget: data.budget,
+    neededBy: data.neededBy,
+    role: data.role,
+    company,
+    phone,
+  });
+
   const details = {
-    position: data.position || null,
     service: data.service || null,
+    headcount,
+    neededBy: data.neededBy || null,
+    role: data.role || null,
     budget: data.budget || null,
-    timeline: data.timeline || null,
-    location: data.location || null,
-    inspiration: data.inspiration || null,
+    branding: data.branding || null,
+    hamper: data.hamper || null,
+    leadScore: lead.score,
+    leadTier: lead.tier,
+    leadSignals: lead.signals,
   };
 
   await pool.query(
@@ -154,7 +194,10 @@ export async function POST(req: NextRequest) {
   );
 
   // Fire-and-forget — don't let email failure break the 200 response
-  sendNotification({ ...data, name, email, phone: phone ?? undefined, company: company ?? undefined, message }).catch(
+  sendNotification(
+    { ...data, name, email, phone: phone ?? undefined, company: company ?? undefined, message },
+    lead
+  ).catch(
     (err) => console.error("[contact] sendNotification threw:", err)
   );
 

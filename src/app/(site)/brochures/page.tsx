@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Download } from "lucide-react";
-import BrochureReader from "@/components/brochures/BrochureReader";
+import PageReader from "@/components/reader/PageReader";
 import {
   formatBytes,
   getPublishedBrochures,
@@ -85,7 +85,7 @@ export default async function BrochuresPage() {
               </div>
 
               <div className="min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-2">
-                <BrochureReader
+                <PageReader
                   pages={brochure.pages}
                   title={brochure.name}
                   pageRatio={brochure.pageRatio}

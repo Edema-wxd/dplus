@@ -7,6 +7,7 @@ import {
   ShoppingBag,
   Images,
   BookOpen,
+  Gift,
   RefreshCw,
   SlidersHorizontal,
 } from "lucide-react";
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { href: "/admin/content", label: "Content", icon: Images },
   { href: "/admin/brochures", label: "Brochures", icon: BookOpen },
+  { href: "/admin/hampers", label: "Hampers", icon: Gift },
   { href: "/admin/amrod", label: "Amrod Sync", icon: RefreshCw },
   { href: "/admin/pricing", label: "Pricing", icon: SlidersHorizontal },
 ];

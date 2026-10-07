@@ -13,7 +13,9 @@
     "test": "jest",
     "remotedeploy": "next build && zip -r deploy.zip .next public package.json package-lock.json server.js next.config.ts -x 'node_modules/*' && scp -P 21098 -i ~/.ssh/id_ed25519 deploy.zip desimrwr@162.0.229.137:~/dplus/",
     "brochure:import": "tsx scripts/brochure-import.ts",
-    "brochure:schema": "tsx scripts/apply-brochures-schema.ts"
+    "brochure:schema": "tsx scripts/apply-brochures-schema.ts",
+    "contact:schema": "tsx scripts/apply-contact-schema.ts",
+    "hamper:schema": "tsx scripts/apply-hampers-schema.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1075.0",

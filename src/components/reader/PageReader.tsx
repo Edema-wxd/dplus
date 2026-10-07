@@ -5,6 +5,10 @@ import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+/**
+ * Leafs through the pages of a printed thing — a brochure, a hamper
+ * presentation — as an object on a table rather than a web gallery.
+ */
 type Page = { url: string; alt?: string };
 
 type Props = {
@@ -12,11 +16,32 @@ type Props = {
   title: string;
   /** Trim ratio of the printed page, so the sheet never letterboxes. */
   pageRatio: number;
+  /** Which brand accent marks position — red for brochures, yellow elsewhere. */
+  accent?: "red" | "yellow";
 };
+
+const ACCENT = {
+  red: {
+    bar: "bg-dsp-red",
+    outline: "focus-visible:outline-dsp-red",
+    decoration: "hover:decoration-dsp-red",
+  },
+  yellow: {
+    bar: "bg-dsp-yellow",
+    outline: "focus-visible:outline-dsp-yellow",
+    decoration: "hover:decoration-dsp-yellow",
+  },
+} as const;
 
 const folio = (n: number) => String(n).padStart(2, "0");
 
-export default function BrochureReader({ pages, title, pageRatio }: Props) {
+export default function PageReader({
+  pages,
+  title,
+  pageRatio,
+  accent = "red",
+}: Props) {
+  const tone = ACCENT[accent];
   const [page, setPage] = useState(0);
   const [turn, setTurn] = useState(1);
   const reduceMotion = useReducedMotion();
@@ -152,7 +177,7 @@ export default function BrochureReader({ pages, title, pageRatio }: Props) {
               className="relative flex-1 h-px bg-border overflow-hidden"
             >
               <div
-                className="absolute inset-y-0 left-0 bg-dsp-red transition-[width] duration-500"
+                className={`absolute inset-y-0 left-0 transition-[width] duration-500 ${tone.bar}`}
                 style={{ width: `${((page + 1) / total) * 100}%` }}
               />
             </div>
@@ -161,7 +186,7 @@ export default function BrochureReader({ pages, title, pageRatio }: Props) {
               href={pages[page].url}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-raleway text-[0.72rem] text-muted-foreground hover:text-foreground underline underline-offset-4 decoration-border hover:decoration-dsp-red transition-colors shrink-0"
+              className={`font-raleway text-[0.72rem] text-muted-foreground hover:text-foreground underline underline-offset-4 decoration-border transition-colors shrink-0 ${tone.decoration}`}
             >
               Full size
             </a>
@@ -171,7 +196,7 @@ export default function BrochureReader({ pages, title, pageRatio }: Props) {
                 type="button"
                 onClick={back}
                 aria-label="Previous page"
-                className="w-9 h-9 flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-foreground/5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-dsp-red"
+                className={`w-9 h-9 flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-foreground/5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${tone.outline}`}
               >
                 <ChevronLeft className="w-5 h-5" strokeWidth={1.5} />
               </button>
@@ -179,7 +204,7 @@ export default function BrochureReader({ pages, title, pageRatio }: Props) {
                 type="button"
                 onClick={forward}
                 aria-label="Next page"
-                className="w-9 h-9 flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-foreground/5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-dsp-red"
+                className={`w-9 h-9 flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-foreground/5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${tone.outline}`}
               >
                 <ChevronRight className="w-5 h-5" strokeWidth={1.5} />
               </button>
@@ -198,11 +223,11 @@ export default function BrochureReader({ pages, title, pageRatio }: Props) {
               onClick={() => turnTo(i)}
               aria-label={`Turn to page ${i + 1}`}
               aria-current={i === page}
-              className="group shrink-0 snap-start focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-dsp-red"
+              className={`group shrink-0 snap-start focus-visible:outline-2 focus-visible:outline-offset-2 ${tone.outline}`}
             >
               <span
                 className={`block h-0.5 mb-1.5 transition-colors ${
-                  i === page ? "bg-dsp-red" : "bg-transparent"
+                  i === page ? tone.bar : "bg-transparent"
                 }`}
               />
               <span

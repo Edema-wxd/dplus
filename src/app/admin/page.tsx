@@ -22,22 +22,34 @@ type ContactSubmission = {
   created_at: string;
 };
 
+// The enquiries card is one panel of the dashboard, so it degrades to empty
+// rather than rejecting the Promise.all below and blanking the whole page.
 async function getRecentContactSubmissions(limit = 5): Promise<ContactSubmission[]> {
-  const { rows } = await pool.query<ContactSubmission>(
-    `select id, name, email, company, message, created_at
-     from contact_submissions
-     order by created_at desc
-     limit $1`,
-    [limit]
-  );
-  return rows;
+  try {
+    const { rows } = await pool.query<ContactSubmission>(
+      `select id, name, email, company, message, created_at
+       from contact_submissions
+       order by created_at desc
+       limit $1`,
+      [limit]
+    );
+    return rows;
+  } catch (err) {
+    console.error("[admin] recent contact submissions unavailable:", err);
+    return [];
+  }
 }
 
 async function getContactSubmissionCount(): Promise<number> {
-  const { rows } = await pool.query<{ count: string }>(
-    `select count(*) from contact_submissions`
-  );
-  return Number(rows[0].count);
+  try {
+    const { rows } = await pool.query<{ count: string }>(
+      `select count(*) from contact_submissions`
+    );
+    return Number(rows[0].count);
+  } catch (err) {
+    console.error("[admin] contact submission count unavailable:", err);
+    return 0;
+  }
 }
 
 function relativeTime(date: Date): string {

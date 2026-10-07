@@ -19,6 +19,24 @@ export const uploadRouter = {
     .middleware(requireAdmin)
     .onUploadComplete(({ file }) => ({ url: file.ufsUrl, key: file.key })),
 
+  // Hamper presentation pages.
+  hamperPage: f({
+    image: { maxFileSize: "8MB", maxFileCount: 40 },
+  })
+    .middleware(requireAdmin)
+    .onUploadComplete(({ file }) => ({ url: file.ufsUrl, key: file.key })),
+
+  // The hamper PDF people download.
+  hamperPdf: f({
+    pdf: { maxFileSize: "32MB", maxFileCount: 1 },
+  })
+    .middleware(requireAdmin)
+    .onUploadComplete(({ file }) => ({
+      url: file.ufsUrl,
+      key: file.key,
+      size: file.size,
+    })),
+
   // The brochure PDF people download.
   brochurePdf: f({
     pdf: { maxFileSize: "32MB", maxFileCount: 1 },

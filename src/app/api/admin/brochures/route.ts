@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { createBrochure, getBrochures } from "@/lib/brochures";
-
-function slugify(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
+import {
+  createBrochure,
+  getBrochures,
+  reorderBrochures,
+  slugify,
+} from "@/lib/brochures";
 
 export async function GET() {
   const session = await auth();
@@ -44,7 +41,13 @@ export async function POST(req: NextRequest) {
       edition: body.edition || null,
       description: body.description || null,
       pageRatio: Number(body.pageRatio) || 1.414,
-      pages: Array.isArray(body.pages) ? body.pages : [],
+      pages: Array.isArray(body.pages)
+        ? body.pages.map((p: Record<string, unknown>) => ({
+            url: String(p?.url ?? ""),
+            key: String(p?.key ?? ""),
+            alt: typeof p?.alt === "string" ? p.alt.trim() : "",
+          }))
+        : [],
       pdfUrl: body.pdfUrl || null,
       pdfKey: body.pdfKey || null,
       pdfSizeBytes: body.pdfSizeBytes ?? null,
@@ -62,4 +65,28 @@ export async function POST(req: NextRequest) {
     }
     throw err;
   }
+}
+
+export async function PUT(req: NextRequest) {
+  const session = await auth();
+  if (!session)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const body = await req.json().catch(() => null);
+  if (!Array.isArray(body?.ids)) {
+    return NextResponse.json(
+      { error: "Expected an array of brochure ids" },
+      { status: 400 }
+    );
+  }
+
+  const ids = body.ids
+    .map((v: unknown) => Number(v))
+    .filter((n: number) => Number.isInteger(n) && n > 0);
+
+  if (ids.length !== body.ids.length) {
+    return NextResponse.json({ error: "Invalid brochure id" }, { status: 400 });
+  }
+
+  return NextResponse.json(await reorderBrochures(ids));
 }

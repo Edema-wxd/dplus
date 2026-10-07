@@ -36,6 +36,7 @@ export async function POST(req: Request) {
   }
 
   const validatedItems = items as OrderItem[];
+
   const total = validatedItems.reduce((sum, i) => sum + i.quantity * i.price, 0);
 
   const order = await createOrder({
