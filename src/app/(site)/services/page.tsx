@@ -1,4 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import JsonLd from "@/components/JsonLd";
+import {
+  SERVICES,
+  breadcrumbSchema,
+  pageMetadata,
+  serviceSchema,
+} from "@/lib/seo";
 import { Gift, Package, HardHat, Palette, ArrowRight } from "lucide-react";
 
 const services = [
@@ -28,9 +36,25 @@ const services = [
   },
 ];
 
+export const metadata: Metadata = pageMetadata({
+  title: "Corporate Gifting, Branding & Workwear Services",
+  description:
+    "Corporate gifting, branded merchandise, workwear and PPE, and custom branding — embroidery, screen-printing, laser engraving and custom packaging, delivered across Nigeria.",
+  path: "/services",
+});
+
 export default function ServicesPage() {
   return (
     <main>
+      <JsonLd
+        data={[
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Services", path: "/services" },
+          ]),
+          ...SERVICES.map(serviceSchema),
+        ]}
+      />
       {/* ── Hero ──────────────────────────────────────────── */}
       <section className="relative py-20 lg:py-28 overflow-hidden bg-gradient-to-b from-background to-coal-grey/40">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">

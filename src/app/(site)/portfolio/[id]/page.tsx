@@ -1,9 +1,50 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { cache } from "react";
+import JsonLd from "@/components/JsonLd";
+import {
+  ORGANIZATION_ID,
+  absoluteUrl,
+  breadcrumbSchema,
+  pageMetadata,
+} from "@/lib/seo";
 import { getPortfolioItemById } from "@/lib/portfolio";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 export const revalidate = 60;
+
+/** Shared by generateMetadata and the page, so the row is read once. */
+const getItem = cache(async (id: string) => {
+  const numId = Number(id);
+  if (!Number.isFinite(numId)) return null;
+  const item = await getPortfolioItemById(numId);
+  return item && item.isPublished ? item : null;
+});
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const item = await getItem(id);
+  if (!item) return { title: "Project not found", robots: { index: false, follow: false } };
+
+  const image = item.images.find((i) => i.isMain) ?? item.images[0];
+  const description =
+    item.description?.trim() ||
+    `${item.title} — a corporate gifting and branding project delivered by De-Sign Plus${
+      item.client ? ` for ${item.client}` : ""
+    }.`;
+
+  return pageMetadata({
+    title: item.client ? `${item.title} — ${item.client}` : item.title,
+    description: description.slice(0, 300),
+    path: `/portfolio/${item.id}`,
+    images: image ? [image.url] : undefined,
+  });
+}
 
 export default async function PortfolioDetailPage({
   params,
@@ -11,17 +52,34 @@ export default async function PortfolioDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const numId = Number(id);
-  if (!Number.isFinite(numId)) notFound();
-
-  const item = await getPortfolioItemById(numId);
-  if (!item || !item.isPublished) notFound();
+  const item = await getItem(id);
+  if (!item) notFound();
 
   const mainImg = item.images.find((i) => i.isMain) ?? item.images[0] ?? null;
   const otherImgs = item.images.filter((i) => i !== mainImg);
 
   return (
     <main>
+      <JsonLd
+        data={[
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Portfolio", path: "/portfolio" },
+            { name: item.title, path: `/portfolio/${item.id}` },
+          ]),
+          {
+            "@context": "https://schema.org",
+            "@type": "CreativeWork",
+            name: item.title,
+            url: absoluteUrl(`/portfolio/${item.id}`),
+            ...(item.description ? { description: item.description } : {}),
+            ...(item.tags.length ? { keywords: item.tags.join(", ") } : {}),
+            ...(mainImg ? { image: mainImg.url } : {}),
+            creator: { "@id": ORGANIZATION_ID },
+            dateModified: item.updatedAt,
+          },
+        ]}
+      />
       {/* ── Hero image ──────────────────────────────────── */}
       <div className="w-full aspect-[16/7] bg-muted overflow-hidden">
         {mainImg ? (

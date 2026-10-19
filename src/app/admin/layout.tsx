@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { auth, signOut } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Toaster } from "@/components/ui/sonner";
@@ -5,6 +6,13 @@ import { SidebarNav } from "@/components/admin/SidebarNav";
 import { getNewOrderCount } from "@/lib/orders";
 
 export const dynamic = "force-dynamic";
+
+// robots.txt already disallows /admin, but a meta tag also covers anything that
+// reaches these pages through a link rather than a crawl of the root.
+export const metadata: Metadata = {
+  title: { default: "Admin", template: "%s | Admin" },
+  robots: { index: false, follow: false },
+};
 
 export default async function AdminLayout({
   children,

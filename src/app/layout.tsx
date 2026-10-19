@@ -61,7 +61,9 @@ export const metadata: Metadata = {
   },
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
-  alternates: { canonical: "/" },
+  // No canonical here on purpose: a canonical on the root layout is inherited
+  // by every page that doesn't set its own, which would declare the whole site
+  // a duplicate of the homepage. Each page sets its own via pageMetadata().
   openGraph: {
     type: "website",
     siteName: SITE_NAME,

@@ -1,8 +1,45 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { cache } from "react";
+import { pageMetadata } from "@/lib/seo";
 import { getProductDetail, getRelatedProducts } from "@/lib/products";
 import ProductDetailClient from "@/components/products/ProductDetailClient";
 import ProductCard from "@/components/products/ProductCard";
 import BackButton from "@/components/products/BackButton";
+
+/** Shared by generateMetadata and the page, so the product is read once. */
+const getProduct = cache(async (id: string) => getProductDetail(id));
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const product = await getProduct(id);
+  if (!product)
+    return { title: "Product not found", robots: { index: false, follow: false } };
+
+  const description =
+    product.description?.trim().replace(/\s+/g, " ").slice(0, 300) ||
+    `${product.productName} — available for custom branding from De-Sign Plus.`;
+
+  const image =
+    product.images.find((i) => i.isDefault) ?? product.images[0];
+  const ogImage = image?.urls?.length
+    ? [...image.urls].sort((a, b) => b.width - a.width)[0].url
+    : null;
+
+  return pageMetadata({
+    title: product.brandName
+      ? `${product.productName} — ${product.brandName}`
+      : product.productName,
+    description,
+    path: `/products/${id}`,
+    noindex: true,
+    images: ogImage ? [ogImage] : undefined,
+  });
+}
 
 export default async function ProductDetailPage({
   params,
@@ -10,7 +47,7 @@ export default async function ProductDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const product = await getProductDetail(id);
+  const product = await getProduct(id);
 
   if (!product) notFound();
 

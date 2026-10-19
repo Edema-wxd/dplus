@@ -16,6 +16,7 @@ import {
   breadcrumbSchema,
   faqSchema,
   ORGANIZATION_ID,
+  pageMetadata,
   SITE_NAME,
 } from "@/lib/seo";
 
@@ -47,24 +48,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const cover = hamper.pages[0];
 
-  return {
+  return pageMetadata({
     title,
     description,
-    alternates: { canonical: `/hampers/${hamper.slug}` },
-    openGraph: {
-      title,
-      description,
-      url: absoluteUrl(`/hampers/${hamper.slug}`),
-      type: "website",
-      images: cover ? [{ url: cover.url, alt: cover.alt || hamper.name }] : undefined,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: cover ? [cover.url] : undefined,
-    },
-  };
+    path: `/hampers/${hamper.slug}`,
+    // The cover is the hamper itself; it beats the generic site card.
+    images: cover ? [cover.url] : undefined,
+  });
 }
 
 export default async function HamperPage({ params }: Props) {

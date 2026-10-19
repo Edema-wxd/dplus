@@ -1,6 +1,11 @@
-export const metadata = {
-  title: "Terms of Service - De-Sign Plus",
-};
+import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
+export const metadata: Metadata = pageMetadata({
+  title: "Terms of Service",
+  description:
+    "The terms that govern use of the De-Sign Plus website and the supply of our corporate gifting and branding services.",
+  path: "/terms-of-service",
+});
 
 export default function TermsPage() {
   return (

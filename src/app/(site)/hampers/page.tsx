@@ -4,7 +4,12 @@ import { ArrowRight } from "lucide-react";
 import HamperCard from "@/components/hampers/HamperCard";
 import JsonLd from "@/components/JsonLd";
 import { getPublishedHampers } from "@/lib/hampers";
-import { absoluteUrl, breadcrumbSchema, ORGANIZATION_ID } from "@/lib/seo";
+import {
+  absoluteUrl,
+  breadcrumbSchema,
+  ORGANIZATION_ID,
+  pageMetadata,
+} from "@/lib/seo";
 
 export const revalidate = 300;
 
@@ -12,17 +17,11 @@ const TITLE = "Corporate Gift Hampers in Nigeria";
 const DESCRIPTION =
   "Curated corporate gift hampers for Nigerian businesses: Christmas hampers, client appreciation gifts and employee welcome packs, branded with your logo and delivered nationwide.";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: TITLE,
   description: DESCRIPTION,
-  alternates: { canonical: "/hampers" },
-  openGraph: {
-    title: TITLE,
-    description: DESCRIPTION,
-    url: absoluteUrl("/hampers"),
-    type: "website",
-  },
-};
+  path: "/hampers",
+});
 
 export default async function HampersPage() {
   const hampers = await getPublishedHampers();

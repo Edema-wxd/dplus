@@ -201,12 +201,12 @@ export default function BriefForm() {
     return (
       <section id="contact-form" className="py-20 lg:py-28">
         <div className="max-w-2xl mx-auto px-5 sm:px-6">
-          <h1
+          <h2
             className="font-sarlotte font-bold text-foreground leading-[1.05]"
             style={{ fontSize: "clamp(2rem, 5vw, 3rem)" }}
           >
             Got it, {sent.name}.
-          </h1>
+          </h2>
           <p className="font-raleway text-muted-foreground leading-relaxed mt-5 max-w-[52ch]">
             Your brief is with our team. You will have costings, options and a
             delivery schedule by email within one working day.
@@ -260,7 +260,7 @@ export default function BriefForm() {
             </p>
           )}
 
-          <h1
+          <h2
             className="font-sarlotte font-bold text-foreground leading-[1.25] tracking-[-0.01em]"
             style={{ fontSize: "clamp(1.75rem, 4.6vw, 3.1rem)" }}
           >
@@ -330,7 +330,7 @@ export default function BriefForm() {
                 />
               </span>
             </span>
-          </h1>
+          </h2>
 
           {errors.headcount && (
             <p role="alert" className="font-raleway text-sm text-dsp-red mt-4">

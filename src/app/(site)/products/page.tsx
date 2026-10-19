@@ -1,9 +1,17 @@
+import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { getProducts, getBrandOptions, getTopCategoryOptions, PAGE_SIZE } from "@/lib/products";
 import ProductsClient from "@/components/products/ProductsClient";
 
-export const metadata = {
-  title: "Products | De-Sign Plus",
-};
+// The catalogue is supplier-supplied copy shared with every other reseller, so
+// it is kept out of the index while its links are still followed.
+export const metadata: Metadata = pageMetadata({
+  title: "Product Catalogue",
+  description:
+    "Browse the full De-Sign Plus catalogue of brandable products, from apparel and drinkware to tech and executive gifts.",
+  path: "/products",
+  noindex: true,
+});
 
 export const revalidate = 0;
 

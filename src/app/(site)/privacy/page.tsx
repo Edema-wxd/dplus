@@ -1,6 +1,11 @@
-export const metadata = {
-  title: "Privacy Policy - De-Sign Plus",
-};
+import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
+export const metadata: Metadata = pageMetadata({
+  title: "Privacy Policy",
+  description:
+    "How De-Sign Plus collects, uses and protects the personal information of clients, suppliers and website visitors.",
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (

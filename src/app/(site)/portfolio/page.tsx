@@ -1,14 +1,39 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbSchema, itemListSchema, pageMetadata } from "@/lib/seo";
 import { getPublishedPortfolioItems } from "@/lib/portfolio";
 import { ArrowRight } from "lucide-react";
 
 export const revalidate = 60;
+
+export const metadata: Metadata = pageMetadata({
+  title: "Portfolio of Corporate Gifting & Branding Projects",
+  description:
+    "A selection of curated gifting, branding and merchandise projects De-Sign Plus has delivered for clients across Nigeria and beyond.",
+  path: "/portfolio",
+});
 
 export default async function PortfolioPage() {
   const items = await getPublishedPortfolioItems();
 
   return (
     <main>
+      <JsonLd
+        data={[
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Portfolio", path: "/portfolio" },
+          ]),
+          itemListSchema(
+            "De-Sign Plus portfolio",
+            items.map((item) => ({
+              name: item.title,
+              path: `/portfolio/${item.id}`,
+            }))
+          ),
+        ]}
+      />
       {/* ── Hero ──────────────────────────────────────────── */}
       <section className="py-20 lg:py-28 bg-gradient-to-b from-background to-coal-grey/40">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">

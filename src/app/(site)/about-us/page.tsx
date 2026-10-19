@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -8,11 +10,12 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-export const metadata = {
-  title: "About Us - De-Sign Plus",
+export const metadata: Metadata = pageMetadata({
+  title: "About Us",
   description:
-    "De-Sign Plus is Nigeria's luxury curation house for corporate gifting, branded merchandise, workwear, and custom branding.",
-};
+    "De-Sign Plus is Nigeria's luxury curation house for corporate gifting, branded merchandise, workwear and custom branding. Global sourcing, delivered with Nigerian precision.",
+  path: "/about-us",
+});
 
 const values = [
   {

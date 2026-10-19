@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { Download } from "lucide-react";
 import PageReader from "@/components/reader/PageReader";
@@ -9,11 +11,12 @@ import {
 
 export const revalidate = 60;
 
-export const metadata = {
-  title: "Brochures - De-Sign Plus",
+export const metadata: Metadata = pageMetadata({
+  title: "Brochures",
   description:
     "Read the De-Sign Plus brochures online, including the 2026 Corporate Christmas collection of executive gifts, hampers and branded keepsakes, and download the PDF to share.",
-};
+  path: "/brochures",
+});
 
 /** Describes the PDF itself — never the page images, which may differ. */
 function fileNote(brochure: Brochure) {
