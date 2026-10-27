@@ -11,7 +11,9 @@ import {
   pageMetadata,
 } from "@/lib/seo";
 
-export const revalidate = 300;
+// Cached for a day: every regeneration wakes the Neon compute. Admin edits
+// refresh it on demand (see src/lib/revalidate.ts).
+export const revalidate = 86400;
 
 const TITLE = "Corporate Gift Hampers in Nigeria";
 const DESCRIPTION =

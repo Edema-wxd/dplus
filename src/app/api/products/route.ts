@@ -5,7 +5,8 @@ const VALID_SORTS: SortOption[] = ["name_asc", "price_asc", "price_desc", "relev
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const q = searchParams.get("q") ?? undefined;
+  // Each distinct search is its own cache entry, so keep keys bounded.
+  const q = searchParams.get("q")?.slice(0, 100) ?? undefined;
   const brand = searchParams.get("brand") ?? undefined;
   const category = searchParams.get("category") ?? undefined;
   const offset = Number(searchParams.get("offset") ?? "0") || 0;

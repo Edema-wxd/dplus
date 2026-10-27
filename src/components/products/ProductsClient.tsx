@@ -38,6 +38,8 @@ export default function ProductsClient({
   const sentinelRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(initialItems.length);
   const filtersRef = useRef({ q: "", brand: "", category: "", sort: "name_asc" as SortOption });
+  // The server already rendered the first page for the default filters.
+  const loadedFiltersRef = useRef(JSON.stringify(filtersRef.current));
 
   const hasActiveFilters = Boolean(query || brand || category || sort !== "name_asc");
 
@@ -68,8 +70,12 @@ export default function ProductsClient({
 
   // Debounced search + filters
   useEffect(() => {
+    const filters = { q: query, brand, category, sort };
+    const filtersKey = JSON.stringify(filters);
+    if (filtersKey === loadedFiltersRef.current) return;
+
     const handle = setTimeout(() => {
-      const filters = { q: query, brand, category, sort };
+      loadedFiltersRef.current = filtersKey;
       filtersRef.current = filters;
       offsetRef.current = 0;
       setLoading(true);

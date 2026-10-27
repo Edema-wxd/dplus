@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { pool } from "@/lib/db";
 import { getPricingConfig, updatePricingConfig } from "@/lib/pricing";
+import { revalidateCatalogue } from "@/lib/revalidate";
 
 export async function GET() {
   const session = await auth();
@@ -71,5 +72,7 @@ export async function PATCH(req: NextRequest) {
   const updatedBy = rows[0]?.id ?? null;
 
   const config = await updatePricingConfig(patch, updatedBy);
+  // Catalogue pages show NGN prices built from this config.
+  revalidateCatalogue();
   return NextResponse.json(config);
 }

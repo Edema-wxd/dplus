@@ -8,6 +8,7 @@ import {
   type UpdateHamperInput,
 } from "@/lib/hampers";
 import { deleteUploadedFiles } from "@/lib/uploadthing";
+import { revalidateHampers } from "@/lib/revalidate";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -75,6 +76,7 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
 
   try {
     const hamper = await updateHamper(id, patch);
+    revalidateHampers();
     if (orphans.length) await deleteUploadedFiles(orphans);
     return NextResponse.json(hamper);
   } catch (err) {
@@ -100,6 +102,7 @@ export async function DELETE(_req: NextRequest, ctx: Ctx) {
   if (!removed)
     return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  revalidateHampers();
   await deleteUploadedFiles([
     ...removed.pages.map((p) => p.key),
     ...(removed.pdfKey ? [removed.pdfKey] : []),

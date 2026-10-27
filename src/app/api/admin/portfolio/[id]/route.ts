@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { updatePortfolioItem, deletePortfolioItem } from "@/lib/portfolio";
+import { revalidatePortfolio } from "@/lib/revalidate";
 
 export async function PATCH(
   req: NextRequest,
@@ -14,6 +15,7 @@ export async function PATCH(
 
   try {
     const item = await updatePortfolioItem(Number(id), body);
+    revalidatePortfolio();
     return NextResponse.json(item);
   } catch {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -29,5 +31,6 @@ export async function DELETE(
 
   const { id } = await params;
   await deletePortfolioItem(Number(id));
+  revalidatePortfolio();
   return new NextResponse(null, { status: 204 });
 }

@@ -12,7 +12,17 @@ import {
 import { getPortfolioItemById } from "@/lib/portfolio";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-export const revalidate = 60;
+// Cached for a day: every regeneration wakes the Neon compute. Admin edits
+// refresh it on demand (see src/lib/revalidate.ts).
+export const revalidate = 86400;
+
+/**
+ * Without this the route renders on every request despite `revalidate`; an
+ * empty list caches each project the first time it is visited.
+ */
+export async function generateStaticParams() {
+  return [];
+}
 
 /** Shared by generateMetadata and the page, so the row is read once. */
 const getItem = cache(async (id: string) => {

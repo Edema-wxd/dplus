@@ -7,6 +7,18 @@ import ProductDetailClient from "@/components/products/ProductDetailClient";
 import ProductCard from "@/components/products/ProductCard";
 import BackButton from "@/components/products/BackButton";
 
+// Cached for a day; the Amrod sync and pricing edits refresh it on demand
+// (see src/lib/revalidate.ts).
+export const revalidate = 86400;
+
+/**
+ * Without this the route renders on every request; an empty list caches each
+ * product the first time it is visited.
+ */
+export async function generateStaticParams() {
+  return [];
+}
+
 /** Shared by generateMetadata and the page, so the product is read once. */
 const getProduct = cache(async (id: string) => getProductDetail(id));
 

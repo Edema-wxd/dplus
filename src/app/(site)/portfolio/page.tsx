@@ -5,7 +5,9 @@ import { breadcrumbSchema, itemListSchema, pageMetadata } from "@/lib/seo";
 import { getPublishedPortfolioItems } from "@/lib/portfolio";
 import { ArrowRight } from "lucide-react";
 
-export const revalidate = 60;
+// Cached for a day: every regeneration wakes the Neon compute. Admin edits
+// refresh it on demand (see src/lib/revalidate.ts).
+export const revalidate = 86400;
 
 export const metadata: Metadata = pageMetadata({
   title: "Portfolio of Corporate Gifting & Branding Projects",

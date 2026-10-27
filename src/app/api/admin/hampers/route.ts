@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { createHamper, getHampers, slugifyHamper } from "@/lib/hampers";
+import { revalidateHampers } from "@/lib/revalidate";
 
 export async function GET() {
   const session = await auth();
@@ -50,6 +51,7 @@ export async function POST(req: NextRequest) {
       isPublished: Boolean(body.isPublished),
       sortOrder: Number(body.sortOrder) || 0,
     });
+    revalidateHampers();
     return NextResponse.json(hamper, { status: 201 });
   } catch (err) {
     if (err instanceof Error && /unique/i.test(err.message)) {
