@@ -1,4 +1,5 @@
 import type { Order, OrderItem } from "@/lib/orders";
+import { brandingLabel, lineTotals } from "@/lib/branding-pricing";
 
 // ── shared helpers ────────────────────────────────────────
 
@@ -11,32 +12,59 @@ function formatNGN(amount: number): string {
   }).format(amount);
 }
 
+/** Customer-entered text goes into HTML email, so escape it. */
+function esc(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function itemLabel(item: OrderItem): string {
   const parts = [item.productName];
   if (item.variantLabel) parts.push(item.variantLabel);
-  if (item.brandingLabel) parts.push(item.brandingLabel);
-  return parts.join(" · ");
+  if (item.brandings?.length) parts.push(...item.brandings.map(brandingLabel));
+  else if (item.brandingLabel) parts.push(item.brandingLabel);
+  return esc(parts.join(" · "));
+}
+
+function itemExtrasHtml(item: OrderItem): string {
+  const lines: string[] = [];
+  if (item.artwork?.length) {
+    const links = item.artwork
+      .map((a) => `<a href="${esc(a.url)}" style="color:#2563eb;">${esc(a.name)}</a>`)
+      .join(", ");
+    lines.push(`Artwork: ${links}`);
+  }
+  if (item.note) lines.push(`Printer note: ${esc(item.note).replace(/\n/g, "<br>")}`);
+  return lines.length
+    ? `<div style="margin-top:4px;font-size:12px;color:#6b7280;">${lines.join("<br>")}</div>`
+    : "";
 }
 
 function itemsTableHtml(items: OrderItem[]): string {
   const rows = items
-    .map(
-      (item) => `
+    .map((item) => {
+      const totals = lineTotals(item);
+      return `
       <tr>
         <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#374151;">
           ${itemLabel(item)}
+          ${itemExtrasHtml(item)}
         </td>
         <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;color:#374151;">
           ${item.quantity}
         </td>
         <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;color:#374151;">
-          ${formatNGN(item.price)}
+          ${formatNGN(totals.productUnit + totals.brandingUnit)}
+          ${totals.setup ? `<br><span style="font-size:12px;color:#6b7280;">+ ${formatNGN(totals.setup)} setup</span>` : ""}
         </td>
         <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;font-weight:600;color:#111827;">
-          ${formatNGN(item.quantity * item.price)}
+          ${formatNGN(totals.total)}
         </td>
-      </tr>`
-    )
+      </tr>`;
+    })
     .join("");
 
   return `
@@ -106,7 +134,7 @@ function wrapper(content: string): string {
 export function orderReceiptHtml(order: Order): string {
   const content = `
     <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">
-      Thank you, ${order.customerName}!
+      Thank you, ${esc(order.customerName)}!
     </h1>
     <p style="margin:0 0 24px;color:#6b7280;font-size:15px;">
       We've received your quote request and will be in touch shortly to confirm
@@ -136,8 +164,8 @@ export function orderReceiptHtml(order: Order): string {
 
     <p style="margin:0;font-size:14px;color:#6b7280;line-height:1.6;">
       A member of our team will contact you at
-      <strong style="color:#374151;">${order.customerEmail}</strong>
-      ${order.customerPhone ? `or <strong style="color:#374151;">${order.customerPhone}</strong> ` : ""}
+      <strong style="color:#374151;">${esc(order.customerEmail)}</strong>
+      ${order.customerPhone ? `or <strong style="color:#374151;">${esc(order.customerPhone)}</strong> ` : ""}
       to confirm availability, finalise branding details, and issue a formal
       proforma invoice.
     </p>`;
@@ -157,17 +185,17 @@ export function orderAlertHtml(order: Order): string {
            style="font-size:14px;margin-bottom:24px;line-height:1.8;">
       <tr>
         <td style="color:#6b7280;padding-right:16px;white-space:nowrap;">Customer</td>
-        <td style="color:#111827;font-weight:600;">${order.customerName}</td>
+        <td style="color:#111827;font-weight:600;">${esc(order.customerName)}</td>
       </tr>
       <tr>
         <td style="color:#6b7280;padding-right:16px;">Email</td>
-        <td style="color:#111827;">${order.customerEmail}</td>
+        <td style="color:#111827;">${esc(order.customerEmail)}</td>
       </tr>
       ${
         order.customerPhone
           ? `<tr>
                <td style="color:#6b7280;padding-right:16px;">Phone</td>
-               <td style="color:#111827;">${order.customerPhone}</td>
+               <td style="color:#111827;">${esc(order.customerPhone)}</td>
              </tr>`
           : ""
       }
@@ -175,7 +203,7 @@ export function orderAlertHtml(order: Order): string {
         order.notes
           ? `<tr>
                <td style="color:#6b7280;padding-right:16px;vertical-align:top;">Notes</td>
-               <td style="color:#111827;">${order.notes}</td>
+               <td style="color:#111827;">${esc(order.notes)}</td>
              </tr>`
           : ""
       }

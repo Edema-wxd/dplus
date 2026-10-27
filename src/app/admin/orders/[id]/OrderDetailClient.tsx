@@ -4,22 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { VALID_STATUSES, type OrderStatus } from "@/lib/order-constants";
+import {
+  STATUS_CLASSES,
+  STATUS_LABELS as STATUS_LABEL,
+  VALID_STATUSES,
+  type OrderStatus,
+} from "@/lib/order-constants";
 import type { Order } from "@/lib/orders";
-
-const STATUS_LABEL: Record<string, string> = {
-  new: "New",
-  reviewing: "Reviewing",
-  confirmed: "Confirmed",
-  cancelled: "Cancelled",
-};
-
-const STATUS_CLASSES: Record<string, string> = {
-  new: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-  reviewing: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-  confirmed: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",
-  cancelled: "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400",
-};
 
 export default function OrderDetailClient({ order }: { order: Order }) {
   const [status, setStatus] = useState<string>(order.status);

@@ -157,6 +157,62 @@ describe("updateQuantity", () => {
   });
 });
 
+// ── branding, artwork, notes ──────────────────────────────────────────────────
+
+const frontPrint = {
+  positionCode: "F",
+  positionName: "Front",
+  brandingCode: "SP",
+  brandingName: "Screen Print",
+  colours: null,
+  breaks: [{ minQuantity: 1, maxQuantity: -1, numberOfColours: -1, setup: 100, price: 2 }],
+};
+
+describe("branding and print details", () => {
+  it("includes print cost and setup in the total", () => {
+    const { result } = renderCart();
+
+    act(() => {
+      result.current.addItem({ ...baseItem, quantity: 5, brandings: [frontPrint] });
+    });
+
+    // (10 + 2) × 5 + 100 setup
+    expect(result.current.total).toBe(160);
+  });
+
+  it("keeps different print setups of the same variant on separate lines", () => {
+    const { result } = renderCart();
+
+    act(() => {
+      result.current.addItem({ ...baseItem });
+    });
+    act(() => {
+      result.current.addItem({ ...baseItem, brandings: [frontPrint] });
+    });
+
+    expect(result.current.items).toHaveLength(2);
+  });
+
+  it("updateItem sets the note and artwork, including functional updates", () => {
+    const { result } = renderCart();
+
+    act(() => {
+      result.current.addItem({ ...baseItem });
+    });
+    const id = result.current.items[0].id;
+    const file = { url: "https://x.ufs.sh/f/k", key: "k", name: "logo.png" };
+
+    act(() => {
+      result.current.updateItem(id, { note: "Centre the logo" });
+    });
+    act(() => {
+      result.current.updateItem(id, (item) => ({ artwork: [...(item.artwork ?? []), file] }));
+    });
+
+    expect(result.current.items[0]).toMatchObject({ note: "Centre the logo", artwork: [file] });
+  });
+});
+
 // ── clear ─────────────────────────────────────────────────────────────────────
 
 describe("clear", () => {

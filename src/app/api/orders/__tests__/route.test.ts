@@ -148,7 +148,7 @@ describe("POST /api/orders — success", () => {
     );
   });
 
-  it("uses the provided total when supplied", async () => {
+  it("ignores a client-supplied total and recomputes it", async () => {
     const req = makeRequest({
       customerName: "Jane Doe",
       customerEmail: "jane@example.com",
@@ -159,8 +159,49 @@ describe("POST /api/orders — success", () => {
     await POST(req);
 
     expect(mockCreateOrder).toHaveBeenCalledWith(
-      expect.objectContaining({ total: 9999 })
+      expect.objectContaining({ total: 10000 })
     );
+  });
+
+  it("includes branding setup and print costs in the total", async () => {
+    const req = makeRequest({
+      customerName: "Jane Doe",
+      customerEmail: "jane@example.com",
+      items: [
+        {
+          ...validItem,
+          brandings: [
+            {
+              positionCode: "F",
+              positionName: "Front",
+              brandingCode: "SP",
+              brandingName: "Screen Print",
+              colours: null,
+              breaks: [{ minQuantity: 1, maxQuantity: -1, numberOfColours: -1, setup: 1000, price: 100 }],
+            },
+          ],
+        },
+      ],
+    });
+
+    await POST(req);
+
+    // (5000 + 100) × 2 + 1000 setup
+    expect(mockCreateOrder).toHaveBeenCalledWith(
+      expect.objectContaining({ total: 11200 })
+    );
+  });
+
+  it("returns 400 for artwork hosted outside UploadThing", async () => {
+    const req = makeRequest({
+      customerName: "Jane Doe",
+      customerEmail: "jane@example.com",
+      items: [{ ...validItem, artwork: [{ url: "https://evil.com/a.png", key: "k", name: "a" }] }],
+    });
+
+    const res = await POST(req);
+
+    expect(res.status).toBe(400);
   });
 
   it("passes customerName and customerEmail through to createOrder", async () => {

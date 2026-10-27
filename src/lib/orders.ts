@@ -1,4 +1,6 @@
 import { pool } from "@/lib/db";
+import type { SelectedBranding } from "@/lib/branding-pricing";
+import type { ArtworkFile } from "@/context/cart-context";
 
 export type OrderItem = {
   simpleCode: string;
@@ -8,7 +10,11 @@ export type OrderItem = {
   variantLabel: string | null;
   brandingLabel: string | null;
   quantity: number;
+  /** Product price per unit, excluding branding. */
   price: number;
+  brandings?: SelectedBranding[];
+  artwork?: ArtworkFile[];
+  note?: string;
 };
 
 export type Order = {
