@@ -4,7 +4,9 @@ import { getPublishedHampers } from "@/lib/hampers";
 import { getPublishedBrochures } from "@/lib/brochures";
 import { getPublishedPortfolioItems } from "@/lib/portfolio";
 
-export const revalidate = 3600;
+// Cached for a day: every regeneration wakes the Neon compute. Admin edits
+// refresh it on demand (see src/lib/revalidate.ts).
+export const revalidate = 86400;
 
 const STATIC_ROUTES: Array<{
   path: string;

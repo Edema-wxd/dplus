@@ -8,6 +8,7 @@ import {
   type UpdateBrochureInput,
 } from "@/lib/brochures";
 import { deleteUploadedFiles } from "@/lib/uploadthing";
+import { revalidateBrochures } from "@/lib/revalidate";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -90,6 +91,7 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
     throw err;
   }
 
+  revalidateBrochures();
   if (orphans.length) await deleteUploadedFiles(orphans);
 
   return NextResponse.json(brochure);
@@ -107,6 +109,7 @@ export async function DELETE(_req: NextRequest, ctx: Ctx) {
   if (!removed)
     return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  revalidateBrochures();
   await deleteUploadedFiles([
     ...removed.pages.map((p) => p.key),
     ...(removed.pdfKey ? [removed.pdfKey] : []),

@@ -49,7 +49,9 @@ npm test
 ## Notes
 
 - `/admin/*` is rendered `force-dynamic` (see `src/app/admin/layout.tsx`) since it's authenticated and DB-backed — it should never be statically prerendered.
-- `/portfolio` and `/portfolio/[id]` use ISR (`revalidate = 60`); a build-time DB connectivity hiccup to Neon can fail `next build` for these routes — see the "Known issues" section in [PROJECT-STATUS.md](./PROJECT-STATUS.md).
+- Public DB-backed pages (`/products`, `/portfolio`, `/brochures`, `/hampers` and their detail pages, `/sitemap.xml`) use ISR with `revalidate = 86400`. Admin edits, pricing changes and the Amrod cron refresh them on demand via `src/lib/revalidate.ts`, so add a call there when a new admin mutation changes a public page.
+- Catalogue reads in `src/lib/products.ts` are cached in Redis under `products:*` (`src/lib/cache.ts`), cleared by pricing updates and the Amrod sync. Neon only suspends after 5 minutes without queries, so anything that queries on every request, or on a short timer, keeps the compute awake and burns the monthly CU-hour allowance.
+- A build-time DB connectivity hiccup to Neon can fail `next build` for prerendered routes, see the "Known issues" section in [PROJECT-STATUS.md](./PROJECT-STATUS.md).
 
 ## Deploy
 

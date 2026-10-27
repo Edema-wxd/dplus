@@ -64,9 +64,11 @@ Stack: shadcn/ui (Radix), framer-motion, sonner, next-themes, NextAuth v5 (beta,
 - `src/context/cart-context.tsx` — client cart: `addItem`/`removeItem`/`updateQuantity`/`clear`, localStorage-persisted, computes `count`/`total`.
 
 ## Known issues / operational notes
-- **Neon DB connectivity from local dev machine is flaky** — DNS lookups and/or TCP connects to the Neon Postgres host intermittently time out from this machine's network, which broke `next build` static prerendering for DB-backed pages (`/portfolio`, formerly `/admin`). `/admin/*` is now `force-dynamic` so it's immune to this at build time; `/portfolio` and `/portfolio/[id]` still use `revalidate = 60` (ISR) by choice, so a build-time DB hiccup there will still fail `next build` — worth keeping an eye on if builds start failing again.
+- **Neon DB connectivity from local dev machine is flaky** — DNS lookups and/or TCP connects to the Neon Postgres host intermittently time out from this machine's network, which broke `next build` static prerendering for DB-backed pages (`/portfolio`, formerly `/admin`). `/admin/*` is now `force-dynamic` so it's immune to this at build time; `/portfolio`, `/brochures` and `/hampers` are prerendered (ISR, `revalidate = 86400`), so a build-time DB hiccup there will still fail `next build` — worth keeping an eye on if builds start failing again.
+
+- **Neon compute hours** - the free plan's CU-hour allowance was exhausted because uncached catalogue pages (`/products`, `/products/[id]`) queried Neon on every request and crawlers walked the whole catalogue, so the compute never scaled to zero. Fixed by ISR on public pages, a Redis read-through cache for catalogue queries (`src/lib/cache.ts`), and `Disallow: /products/` in `robots.ts`. Make sure only one deployment (and no local `next dev`) points at the production database; use a Neon branch for development.
 
 ## Likely next steps
 1. **Payment integration** — orders are currently created as "new" with no payment step; decide on a provider (Stripe/PayFast/etc.) if checkout needs to be self-service rather than manual-review.
-2. **Revisit `/portfolio` build-time behavior** — decide whether to keep ISR (`revalidate = 60`, current choice) or move to `force-dynamic` like `/admin` if Neon connectivity issues keep breaking builds.
+2. **Revisit `/portfolio` build-time behavior** — decide whether to keep ISR (`revalidate = 86400`, current choice) or move to `force-dynamic` like `/admin` if Neon connectivity issues keep breaking builds.
 3. **Verify email transport is configured in production** — `sendEmail()` silently no-ops if neither `RESEND_API_KEY` nor `SMTP_HOST` is set; confirm one is set in the deploy environment so order receipts/alerts and contact form emails actually send.

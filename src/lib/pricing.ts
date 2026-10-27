@@ -1,8 +1,8 @@
 import { pool } from "@/lib/db";
 import { redis } from "@/lib/redis";
+import { invalidateCachePrefix, PRODUCT_CACHE_PREFIX } from "@/lib/cache";
 
 const CACHE_KEY = "pricing:config";
-const PRODUCT_CACHE_PREFIX = "products:";
 
 export type PricingConfig = {
   vatRate: number;
@@ -71,10 +71,8 @@ export async function getPricingConfig(): Promise<PricingConfig> {
 
 export async function invalidatePricingCache() {
   memCache = null;
-  if (!redis) return;
-
-  const keys = await redis.keys(`${PRODUCT_CACHE_PREFIX}*`);
-  await redis.del(CACHE_KEY, ...keys);
+  // Cached product reads carry prices computed from the old config.
+  await invalidateCachePrefix(PRODUCT_CACHE_PREFIX, CACHE_KEY);
 }
 
 export async function updatePricingConfig(

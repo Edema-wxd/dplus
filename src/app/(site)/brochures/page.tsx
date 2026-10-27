@@ -9,7 +9,9 @@ import {
   type Brochure,
 } from "@/lib/brochures";
 
-export const revalidate = 60;
+// Cached for a day: every regeneration wakes the Neon compute. Admin edits
+// refresh it on demand (see src/lib/revalidate.ts).
+export const revalidate = 86400;
 
 export const metadata: Metadata = pageMetadata({
   title: "Brochures",

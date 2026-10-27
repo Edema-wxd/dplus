@@ -4,7 +4,7 @@ import { getProducts, getBrandOptions, getTopCategoryOptions, PAGE_SIZE } from "
 import ProductsClient from "@/components/products/ProductsClient";
 
 // The catalogue is supplier-supplied copy shared with every other reseller, so
-// it is kept out of the index while its links are still followed.
+// it is kept out of the index; robots.ts also stops crawlers fetching each product.
 export const metadata: Metadata = pageMetadata({
   title: "Product Catalogue",
   description:
@@ -13,7 +13,9 @@ export const metadata: Metadata = pageMetadata({
   noindex: true,
 });
 
-export const revalidate = 0;
+// Cached for a day; the Amrod sync and pricing edits refresh it on demand
+// (see src/lib/revalidate.ts).
+export const revalidate = 86400;
 
 export default async function ProductsPage() {
   const [{ items, hasMore, total }, brands, categories] = await Promise.all([

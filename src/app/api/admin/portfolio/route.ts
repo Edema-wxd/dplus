@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getPortfolioItems, createPortfolioItem } from "@/lib/portfolio";
+import { revalidatePortfolio } from "@/lib/revalidate";
 
 export async function GET() {
   const session = await auth();
@@ -22,5 +23,6 @@ export async function POST(req: NextRequest) {
   }
 
   const item = await createPortfolioItem({ title, client, description, tags, images, isPublished });
+  revalidatePortfolio();
   return NextResponse.json(item, { status: 201 });
 }

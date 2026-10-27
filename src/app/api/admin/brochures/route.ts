@@ -6,6 +6,7 @@ import {
   reorderBrochures,
   slugify,
 } from "@/lib/brochures";
+import { revalidateBrochures } from "@/lib/revalidate";
 
 export async function GET() {
   const session = await auth();
@@ -55,6 +56,7 @@ export async function POST(req: NextRequest) {
       isPublished: Boolean(body.isPublished),
       sortOrder: Number(body.sortOrder) || 0,
     });
+    revalidateBrochures();
     return NextResponse.json(brochure, { status: 201 });
   } catch (err) {
     if (err instanceof Error && /unique/i.test(err.message)) {
@@ -88,5 +90,7 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Invalid brochure id" }, { status: 400 });
   }
 
-  return NextResponse.json(await reorderBrochures(ids));
+  const reordered = await reorderBrochures(ids);
+  revalidateBrochures();
+  return NextResponse.json(reordered);
 }

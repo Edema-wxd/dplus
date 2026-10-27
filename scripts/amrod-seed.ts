@@ -30,6 +30,10 @@ async function main() {
   console.log("stock:", await syncStock(false));
   console.log("prices:", await syncPrices(false));
 
+  // Clears the shared Redis catalogue cache; ISR pages refresh within the hour.
+  const { invalidateProductCache } = await import("../src/lib/products");
+  await invalidateProductCache();
+
   await pool.end();
   console.log("\nDone.");
 }

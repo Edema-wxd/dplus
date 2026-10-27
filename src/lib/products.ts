@@ -1,4 +1,5 @@
 import { pool } from "@/lib/db";
+import { cached, invalidateCachePrefix, PRODUCT_CACHE_PREFIX } from "@/lib/cache";
 import { calcPrice, getPricingConfig } from "@/lib/pricing";
 
 export type ProductListItem = {
@@ -24,6 +25,17 @@ type ProductRow = {
 
 const PAGE_SIZE = 24;
 
+/**
+ * The catalogue only changes when the Amrod sync runs or pricing is edited, and
+ * both invalidate this cache, so the TTL is just a backstop.
+ */
+const CACHE_TTL_SECONDS = 24 * 60 * 60;
+
+/** Clears cached catalogue reads; call after a sync or a pricing change. */
+export async function invalidateProductCache() {
+  await invalidateCachePrefix(PRODUCT_CACHE_PREFIX);
+}
+
 function pickImage(images: ProductRow["images"]): string | null {
   if (!images || !images.length) return null;
   const defaultImg = images.find((img) => img.isDefault) ?? images[0];
@@ -33,6 +45,8 @@ function pickImage(images: ProductRow["images"]): string | null {
 export type SortOption = "name_asc" | "price_asc" | "price_desc" | "relevance";
 
 type ProductRowFull = ProductRow & { total_count: string; rank: string };
+
+type ProductPage = { items: ProductListItem[]; hasMore: boolean; total: number };
 
 export async function getProducts({
   q,
@@ -48,10 +62,31 @@ export async function getProducts({
   sort?: SortOption;
   offset?: number;
   limit?: number;
-}): Promise<{ items: ProductListItem[]; hasMore: boolean; total: number }> {
-  const search = q?.trim() || null;
+}): Promise<ProductPage> {
+  const search = q?.trim().toLowerCase() || null;
   const effectiveSort: SortOption = search && sort === "name_asc" ? "relevance" : sort;
+  const key = `${PRODUCT_CACHE_PREFIX}list:${JSON.stringify([
+    search,
+    brand || null,
+    category || null,
+    effectiveSort,
+    offset,
+    limit,
+  ])}`;
 
+  return cached(key, CACHE_TTL_SECONDS, () =>
+    queryProducts(search, brand || null, category || null, effectiveSort, offset, limit)
+  );
+}
+
+async function queryProducts(
+  search: string | null,
+  brand: string | null,
+  category: string | null,
+  effectiveSort: SortOption,
+  offset: number,
+  limit: number
+): Promise<ProductPage> {
   const { rows } = await pool.query<ProductRowFull>(
     `
     with prices as (
@@ -131,7 +166,7 @@ export async function getProducts({
       d.simple_code asc
     limit $2 offset $3
     `,
-    [search, limit + 1, offset, brand || null, category || null, effectiveSort]
+    [search, limit + 1, offset, brand, category, effectiveSort]
   );
 
   const hasMore = rows.length > limit;
@@ -208,6 +243,12 @@ type ProductDetailRow = {
 };
 
 export async function getProductDetail(simpleCode: string): Promise<ProductDetail | null> {
+  return cached(`${PRODUCT_CACHE_PREFIX}detail:${simpleCode}`, CACHE_TTL_SECONDS, () =>
+    queryProductDetail(simpleCode)
+  );
+}
+
+async function queryProductDetail(simpleCode: string): Promise<ProductDetail | null> {
   const { rows } = await pool.query<ProductDetailRow>(
     `
     select p.simple_code, p.product_name, p.brand_code, b.name as brand_name, p.data
@@ -258,6 +299,16 @@ export async function getRelatedProducts(
 ): Promise<ProductListItem[]> {
   if (!categoryIds.length) return [];
 
+  return cached(`${PRODUCT_CACHE_PREFIX}related:${simpleCode}:${limit}`, CACHE_TTL_SECONDS, () =>
+    queryRelatedProducts(simpleCode, categoryIds, limit)
+  );
+}
+
+async function queryRelatedProducts(
+  simpleCode: string,
+  categoryIds: string[],
+  limit: number
+): Promise<ProductListItem[]> {
   const { rows } = await pool.query<ProductRow>(
     `
     select
@@ -293,17 +344,21 @@ export async function getRelatedProducts(
 }
 
 export async function getBrandOptions(): Promise<BrandOption[]> {
-  const { rows } = await pool.query<BrandOption>(
-    `select code, name from brands order by name asc`
-  );
-  return rows;
+  return cached(`${PRODUCT_CACHE_PREFIX}brands`, CACHE_TTL_SECONDS, async () => {
+    const { rows } = await pool.query<BrandOption>(
+      `select code, name from brands order by name asc`
+    );
+    return rows;
+  });
 }
 
 export async function getTopCategoryOptions(): Promise<CategoryOption[]> {
-  const { rows } = await pool.query<CategoryOption>(
-    `select id, name from categories where parent_id is null order by name asc`
-  );
-  return rows;
+  return cached(`${PRODUCT_CACHE_PREFIX}categories`, CACHE_TTL_SECONDS, async () => {
+    const { rows } = await pool.query<CategoryOption>(
+      `select id, name from categories where parent_id is null order by name asc`
+    );
+    return rows;
+  });
 }
 
 export { PAGE_SIZE };
