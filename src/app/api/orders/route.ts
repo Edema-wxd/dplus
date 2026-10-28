@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createOrder, type OrderItem } from "@/lib/orders";
+import { parseOrderItem } from "@/lib/order-items";
+import { lineTotals } from "@/lib/branding-pricing";
 import { sendEmail } from "@/lib/email";
 import { orderReceiptHtml, orderAlertHtml } from "@/lib/email-templates";
 
@@ -18,26 +20,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  const invalidItem = items.findIndex(
-    (i) =>
-      typeof i !== "object" ||
-      i === null ||
-      !Number.isInteger((i as Record<string, unknown>).quantity) ||
-      ((i as Record<string, unknown>).quantity as number) < 1 ||
-      typeof (i as Record<string, unknown>).price !== "number" ||
-      ((i as Record<string, unknown>).price as number) <= 0
-  );
-
-  if (invalidItem !== -1) {
-    return NextResponse.json(
-      { error: `Item at index ${invalidItem} has invalid quantity or price` },
-      { status: 400 }
-    );
+  const validatedItems: OrderItem[] = [];
+  for (const [index, raw] of items.entries()) {
+    const parsed = parseOrderItem(raw);
+    if (typeof parsed === "string") {
+      return NextResponse.json({ error: `Item at index ${index} ${parsed}` }, { status: 400 });
+    }
+    validatedItems.push(parsed);
   }
 
-  const validatedItems = items as OrderItem[];
-
-  const total = validatedItems.reduce((sum, i) => sum + i.quantity * i.price, 0);
+  // Includes branding setup fees and per-unit print costs.
+  const total = validatedItems.reduce((sum, i) => sum + lineTotals(i).total, 0);
 
   const order = await createOrder({
     customerName,

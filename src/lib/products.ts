@@ -1,6 +1,7 @@
 import { pool } from "@/lib/db";
 import { cached, invalidateCachePrefix, PRODUCT_CACHE_PREFIX } from "@/lib/cache";
 import { calcPrice, getPricingConfig } from "@/lib/pricing";
+import type { BrandingPriceBreak } from "@/lib/branding-pricing";
 
 export type ProductListItem = {
   simpleCode: string;
@@ -224,6 +225,12 @@ export type ProductDetail = {
   variants: ProductVariant[];
   brandings: ProductBranding[];
   prices: Record<string, number>;
+  /** Units in stock per variant full code. */
+  stock: Record<string, number>;
+  /** Hex colour per variant colour code, from Amrod's colour swatches. */
+  swatches: Record<string, string>;
+  /** NGN price breaks per branding code used by this product. */
+  brandingPrices: Record<string, BrandingPriceBreak[]>;
   inStock: boolean;
   categories: ProductCategory[];
 };
@@ -243,7 +250,8 @@ type ProductDetailRow = {
 };
 
 export async function getProductDetail(simpleCode: string): Promise<ProductDetail | null> {
-  return cached(`${PRODUCT_CACHE_PREFIX}detail:${simpleCode}`, CACHE_TTL_SECONDS, () =>
+  // v2: added stock, swatches and branding prices to the cached shape.
+  return cached(`${PRODUCT_CACHE_PREFIX}detail:v2:${simpleCode}`, CACHE_TTL_SECONDS, () =>
     queryProductDetail(simpleCode)
   );
 }
@@ -262,20 +270,59 @@ async function queryProductDetail(simpleCode: string): Promise<ProductDetail | n
   if (!rows.length) return null;
   const row = rows[0];
 
-  const [{ rows: priceRows }, { rows: stockRows }] = await Promise.all([
-    pool.query<{ full_code: string; price: string }>(
-      `select full_code, data->>'price' as price from product_prices where simple_code = $1`,
-      [simpleCode]
-    ),
-    pool.query<{ in_stock: boolean }>(
-      `select coalesce(bool_or((data->>'stock')::numeric > 0), false) as in_stock from product_stock where simple_code = $1`,
-      [simpleCode]
-    ),
-  ]);
+  const variants = row.data.variants ?? [];
+  const brandings = row.data.brandings ?? [];
+  const brandingCodes = [
+    ...new Set(brandings.flatMap((b) => (b.method ?? []).map((m) => m.brandingCode))),
+  ];
+
+  const [{ rows: priceRows }, { rows: stockRows }, { rows: brandingRows }, swatchIndex] =
+    await Promise.all([
+      pool.query<{ full_code: string; price: string }>(
+        `select full_code, data->>'price' as price from product_prices where simple_code = $1`,
+        [simpleCode]
+      ),
+      pool.query<{ full_code: string; stock: string | null }>(
+        `select full_code, data->>'stock' as stock from product_stock where simple_code = $1`,
+        [simpleCode]
+      ),
+      brandingCodes.length
+        ? pool.query<{ branding_code: string; data: { data?: BrandingPriceBreak[] } }>(
+            `select branding_code, data from branding_prices where branding_code = any($1::text[])`,
+            [brandingCodes]
+          )
+        : Promise.resolve({ rows: [] }),
+      getSwatchIndex(),
+    ]);
 
   const cfg = await getPricingConfig();
+  const ngn = (zar: number) => calcPrice(zar, cfg).priceNgn;
+
   const prices: Record<string, number> = {};
-  for (const r of priceRows) prices[r.full_code] = calcPrice(Number(r.price), cfg).priceNgn;
+  for (const r of priceRows) prices[r.full_code] = ngn(Number(r.price));
+
+  const stock: Record<string, number> = {};
+  for (const r of stockRows) stock[r.full_code] = Math.max(0, Number(r.stock) || 0);
+
+  const brandingPrices: Record<string, BrandingPriceBreak[]> = {};
+  for (const r of brandingRows) {
+    brandingPrices[r.branding_code] = (r.data.data ?? []).map((b) => ({
+      minQuantity: Number(b.minQuantity) || 1,
+      maxQuantity: Number(b.maxQuantity) || -1,
+      numberOfColours: Number(b.numberOfColours) || -1,
+      setup: ngn(Number(b.setup) || 0),
+      price: ngn(Number(b.price) || 0),
+    }));
+  }
+
+  const swatches: Record<string, string> = {};
+  for (const v of variants) {
+    if (!v.codeColour || swatches[v.codeColour]) continue;
+    const hex =
+      swatchIndex[v.codeColour.toUpperCase()] ??
+      (v.codeColourName ? swatchIndex[v.codeColourName.toUpperCase()] : undefined);
+    if (hex) swatches[v.codeColour] = hex;
+  }
 
   return {
     simpleCode: row.simple_code,
@@ -284,12 +331,48 @@ async function queryProductDetail(simpleCode: string): Promise<ProductDetail | n
     brandCode: row.brand_code,
     brandName: row.brand_name,
     images: row.data.images ?? [],
-    variants: row.data.variants ?? [],
-    brandings: row.data.brandings ?? [],
+    variants,
+    brandings,
     prices,
-    inStock: stockRows[0]?.in_stock ?? false,
+    stock,
+    swatches,
+    brandingPrices,
+    inStock: Object.values(stock).some((n) => n > 0),
     categories: row.data.categories ?? [],
   };
+}
+
+const HEX_RE = /^#?[0-9a-f]{6}$/i;
+
+/** First hex colour found in a swatch record, whatever Amrod names the field. */
+function findHex(value: unknown, depth = 0): string | null {
+  if (typeof value === "string") {
+    return HEX_RE.test(value.trim()) ? `#${value.trim().replace(/^#/, "")}` : null;
+  }
+  if (depth > 3 || value === null || typeof value !== "object") return null;
+  for (const v of Object.values(value)) {
+    const hex = findHex(v, depth + 1);
+    if (hex) return hex;
+  }
+  return null;
+}
+
+/** Colour code and colour name (upper-cased) -> hex, across all Amrod swatches. */
+async function getSwatchIndex(): Promise<Record<string, string>> {
+  return cached(`${PRODUCT_CACHE_PREFIX}swatches`, CACHE_TTL_SECONDS, async () => {
+    const { rows } = await pool.query<{ id: string; data: Record<string, unknown> }>(
+      `select id, data from colour_swatches`
+    );
+    const index: Record<string, string> = {};
+    for (const r of rows) {
+      const hex = findHex(r.data);
+      if (!hex) continue;
+      for (const key of [r.id, r.data.code, r.data.name]) {
+        if (typeof key === "string" && key) index[key.toUpperCase()] = hex;
+      }
+    }
+    return index;
+  });
 }
 
 export async function getRelatedProducts(

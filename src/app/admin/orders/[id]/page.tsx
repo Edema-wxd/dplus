@@ -2,7 +2,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getOrderById } from "@/lib/orders";
+import { brandingCost, brandingLabel, lineTotals } from "@/lib/branding-pricing";
 import OrderDetailClient from "./OrderDetailClient";
+import AmrodOrderSheet from "./AmrodOrderSheet";
 
 export default async function OrderDetailPage({
   params,
@@ -25,7 +27,7 @@ export default async function OrderDetailPage({
   });
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-6 max-w-4xl">
       {/* Back */}
       <Link
         href="/admin/orders"
@@ -98,27 +100,81 @@ export default async function OrderDetailPage({
           Items
         </h2>
         <div className="divide-y divide-border">
-          {order.items.map((item, idx) => (
-            <div key={idx} className="flex items-start justify-between gap-4 px-5 py-4">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground">{item.productName}</p>
-                <p className="text-xs text-muted-foreground mt-0.5 font-mono">{item.fullCode}</p>
-                {(item.variantLabel || item.brandingLabel) && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {[item.variantLabel, item.brandingLabel].filter(Boolean).join(" · ")}
-                  </p>
+          {order.items.map((item, idx) => {
+            const totals = lineTotals(item);
+            return (
+              <div key={idx} className="px-5 py-4 space-y-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">{item.productName}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 font-mono">{item.fullCode}</p>
+                    {item.variantLabel && (
+                      <p className="text-xs text-muted-foreground mt-1">{item.variantLabel}</p>
+                    )}
+                    {item.brandings?.length ? (
+                      <ul className="text-xs text-muted-foreground mt-1">
+                        {item.brandings.map((b) => {
+                          const cost = brandingCost(b, item.quantity);
+                          return (
+                            <li key={b.positionCode}>
+                              {brandingLabel(b)}{" "}
+                              <span className="font-mono">[{b.brandingCode}]</span>{" "}
+                              {NGN.format(cost.unit)}/unit + {NGN.format(cost.setup)} setup
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      item.brandingLabel && (
+                        <p className="text-xs text-muted-foreground mt-1">{item.brandingLabel}</p>
+                      )
+                    )}
+                  </div>
+                  <div className="shrink-0 text-right tabular-nums">
+                    <p className="text-sm text-foreground">
+                      {item.quantity} × {NGN.format(totals.productUnit + totals.brandingUnit)}
+                    </p>
+                    {totals.setup > 0 && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        + {NGN.format(totals.setup)} setup
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-0.5">{NGN.format(totals.total)}</p>
+                  </div>
+                </div>
+
+                {(item.artwork?.length || item.note) && (
+                  <div className="rounded-lg bg-muted/30 px-3 py-2 space-y-2 text-xs">
+                    {item.artwork?.length ? (
+                      <div>
+                        <p className="font-medium text-muted-foreground mb-1">Artwork</p>
+                        <ul className="flex flex-wrap gap-2">
+                          {item.artwork.map((a) => (
+                            <li key={a.key}>
+                              <a
+                                href={a.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex rounded-md border border-border bg-background px-2 py-1 hover:underline"
+                              >
+                                {a.name}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                    {item.note && (
+                      <div>
+                        <p className="font-medium text-muted-foreground mb-0.5">Printer note</p>
+                        <p className="text-foreground whitespace-pre-wrap">{item.note}</p>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
-              <div className="shrink-0 text-right tabular-nums">
-                <p className="text-sm text-foreground">
-                  {item.quantity} × {NGN.format(item.price)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {NGN.format(item.quantity * item.price)}
-                </p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         <div className="flex items-center justify-between border-t border-border bg-muted/30 px-5 py-3">
           <span className="text-sm font-medium text-foreground">Total</span>
@@ -127,6 +183,8 @@ export default async function OrderDetailPage({
           </span>
         </div>
       </section>
+
+      <AmrodOrderSheet orderId={order.id} items={order.items} />
     </div>
   );
 }

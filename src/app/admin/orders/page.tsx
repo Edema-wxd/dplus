@@ -5,26 +5,19 @@ import { ChevronDown, ChevronUp, Search } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { Order } from "@/lib/orders";
+import {
+  STATUS_CLASSES,
+  STATUS_LABELS,
+  VALID_STATUSES,
+  type OrderStatus,
+} from "@/lib/order-constants";
 
 // ── constants ─────────────────────────────────────────────
 
 const PAGE_SIZE = 20;
-const STATUSES = ["new", "reviewing", "confirmed", "cancelled"] as const;
-type Status = (typeof STATUSES)[number];
-
-const STATUS_LABEL: Record<string, string> = {
-  new: "New",
-  reviewing: "Reviewing",
-  confirmed: "Confirmed",
-  cancelled: "Cancelled",
-};
-
-const STATUS_CLASSES: Record<string, string> = {
-  new: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-  reviewing: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-  confirmed: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",
-  cancelled: "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400",
-};
+const STATUSES = VALID_STATUSES;
+type Status = OrderStatus;
+const STATUS_LABEL = STATUS_LABELS;
 
 const NGN = new Intl.NumberFormat("en-NG", {
   style: "currency",

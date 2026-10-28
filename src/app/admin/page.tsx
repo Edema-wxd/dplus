@@ -2,6 +2,7 @@ import Link from "next/link";
 import OrderRow from "./_components/OrderRow";
 import { pool } from "@/lib/db";
 import { getOrderStats, getRecentOrders } from "@/lib/orders";
+import { STATUS_CLASSES, STATUS_LABELS, VALID_STATUSES } from "@/lib/order-constants";
 import { getLastSyncTime } from "@/lib/amrod/sync/log";
 
 // ── helpers ────────────────────────────────────────────────
@@ -60,20 +61,6 @@ function relativeTime(date: Date): string {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  new: "New",
-  reviewing: "Reviewing",
-  confirmed: "Confirmed",
-  cancelled: "Cancelled",
-};
-
-const STATUS_CLASSES: Record<string, string> = {
-  new: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-  reviewing: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-  confirmed: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",
-  cancelled: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
-};
-
 // ── page ──────────────────────────────────────────────────
 
 export default async function AdminDashboardPage() {
@@ -88,7 +75,7 @@ export default async function AdminDashboardPage() {
     ]);
 
   const newCount = stats.byStatus["new"] ?? 0;
-  const STATUS_ORDER = ["new", "reviewing", "confirmed", "cancelled"] as const;
+  const STATUS_ORDER = VALID_STATUSES;
 
   return (
     <div className="space-y-8">

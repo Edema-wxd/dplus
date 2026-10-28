@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/context/cart-context";
-import type { CartItem } from "@/context/cart-context";
+import type { CartItem, CartItemPatch } from "@/context/cart-context";
+import { useUploadThing } from "@/lib/uploadthing-client";
+import { brandingCost, brandingLabel, lineTotals } from "@/lib/branding-pricing";
+import { MAX_ARTWORK_FILES, MAX_NOTE_LENGTH } from "@/lib/order-items";
 
 const ngn = new Intl.NumberFormat("en-NG", {
   style: "currency",
@@ -47,17 +50,151 @@ function Stepper({ value, onChange }: { value: number; onChange: (v: number) => 
   );
 }
 
+// ─── Artwork + printer notes ──────────────────────────────────────────────────
+
+const ARTWORK_ACCEPT = "image/*,application/pdf,application/postscript,.ai,.eps,.svg";
+
+function PrintDetails({
+  item,
+  onChange,
+  onUploadingChange,
+}: {
+  item: CartItem;
+  onChange: (patch: CartItemPatch | ((item: CartItem) => CartItemPatch)) => void;
+  onUploadingChange: (uploading: boolean) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const artwork = item.artwork ?? [];
+  const remaining = MAX_ARTWORK_FILES - artwork.length;
+
+  const { startUpload, isUploading } = useUploadThing("customerArtwork", {
+    onClientUploadComplete: (res) => {
+      // Functional update: the item may have changed while the upload ran.
+      onChange((current) => ({
+        artwork: [
+          ...(current.artwork ?? []),
+          ...res.map((f) => ({ url: f.ufsUrl, key: f.key, name: f.name })),
+        ].slice(0, MAX_ARTWORK_FILES),
+      }));
+      onUploadingChange(false);
+      toast.success(`${res.length} file${res.length === 1 ? "" : "s"} attached`);
+    },
+    onUploadError: (e) => {
+      onUploadingChange(false);
+      toast.error(`Upload failed: ${e.message}`);
+    },
+  });
+
+  const handleFiles = (files: FileList | null) => {
+    if (!files?.length) return;
+    const picked = Array.from(files).slice(0, remaining);
+    if (files.length > remaining) {
+      toast.warning(`Only ${MAX_ARTWORK_FILES} files per item, extra files were skipped`);
+    }
+    onUploadingChange(true);
+    startUpload(picked);
+    if (inputRef.current) inputRef.current.value = "";
+  };
+
+  return (
+    <div className="mt-3 rounded-xl border border-dashed border-border p-3 flex flex-col gap-3">
+      <div>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Logo / artwork
+          </span>
+          {remaining > 0 && (
+            <button
+              type="button"
+              disabled={isUploading}
+              onClick={() => inputRef.current?.click()}
+              className="text-xs font-medium underline underline-offset-2 hover:opacity-70 disabled:opacity-50"
+            >
+              {isUploading ? "Uploading…" : artwork.length ? "Add more" : "Upload files"}
+            </button>
+          )}
+        </div>
+        <input
+          ref={inputRef}
+          type="file"
+          multiple
+          accept={ARTWORK_ACCEPT}
+          className="hidden"
+          onChange={(e) => handleFiles(e.target.files)}
+        />
+        {artwork.length > 0 ? (
+          <ul className="mt-2 flex flex-col gap-1">
+            {artwork.map((file) => (
+              <li key={file.key} className="flex items-center justify-between gap-2 text-xs">
+                <a
+                  href={file.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="truncate hover:underline"
+                >
+                  {file.name}
+                </a>
+                <button
+                  type="button"
+                  onClick={() =>
+                    onChange((current) => ({
+                      artwork: (current.artwork ?? []).filter((f) => f.key !== file.key),
+                    }))
+                  }
+                  className="flex-shrink-0 text-muted-foreground/60 hover:text-destructive"
+                  aria-label={`Remove ${file.name}`}
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            {item.brandings?.length
+              ? "Add your logo or graphic for this print. PNG, JPG, SVG, PDF, AI or EPS, up to 16MB each."
+              : "Optional. PNG, JPG, SVG, PDF, AI or EPS, up to 16MB each."}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label
+          htmlFor={`note-${item.id}`}
+          className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground"
+        >
+          Note for the printers
+        </label>
+        <textarea
+          id={`note-${item.id}`}
+          rows={2}
+          maxLength={MAX_NOTE_LENGTH}
+          placeholder="Placement, size, Pantone colours, names per item…"
+          value={item.note ?? ""}
+          onChange={(e) => onChange({ note: e.target.value })}
+          className={`${fieldClass} resize-y`}
+        />
+      </div>
+    </div>
+  );
+}
+
 // ─── Single cart item ─────────────────────────────────────────────────────────
 
 function CartRow({
   item,
   onRemove,
   onQty,
+  onChange,
+  onUploadingChange,
 }: {
   item: CartItem;
   onRemove: () => void;
   onQty: (v: number) => void;
+  onChange: (patch: CartItemPatch | ((item: CartItem) => CartItemPatch)) => void;
+  onUploadingChange: (uploading: boolean) => void;
 }) {
+  const totals = lineTotals(item);
   return (
     <motion.div
       layout
@@ -89,14 +226,46 @@ function CartRow({
       </div>
 
       {/* Meta */}
-      <div className="flex-1 min-w-0 flex flex-col justify-between gap-3">
-        <div>
-          <p className="text-sm font-medium leading-snug line-clamp-2">{item.productName}</p>
-          {(item.variantLabel || item.brandingLabel) && (
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {[item.variantLabel, item.brandingLabel].filter(Boolean).join("  ·  ")}
-            </p>
-          )}
+      <div className="flex-1 min-w-0 flex flex-col gap-3">
+        <div className="flex justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-sm font-medium leading-snug line-clamp-2">{item.productName}</p>
+            {item.variantLabel && (
+              <p className="mt-0.5 text-xs text-muted-foreground">{item.variantLabel}</p>
+            )}
+            {item.brandings?.length ? (
+              <ul className="mt-1 text-xs text-muted-foreground">
+                {item.brandings.map((b) => {
+                  const cost = brandingCost(b, item.quantity);
+                  return (
+                    <li key={b.positionCode}>
+                      {brandingLabel(b)}{" "}
+                      <span className="tabular-nums">
+                        ({ngn.format(cost.unit)}/unit + {ngn.format(cost.setup)} setup)
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              item.brandingLabel && (
+                <p className="mt-0.5 text-xs text-muted-foreground">{item.brandingLabel}</p>
+              )
+            )}
+          </div>
+
+          {/* Price */}
+          <div className="flex-shrink-0 flex flex-col items-end">
+            <span className="text-sm font-semibold tabular-nums">{ngn.format(totals.total)}</span>
+            <span className="text-[11px] text-muted-foreground tabular-nums">
+              {ngn.format(totals.productUnit + totals.brandingUnit)} ea.
+            </span>
+            {totals.setup > 0 && (
+              <span className="text-[11px] text-muted-foreground tabular-nums">
+                + {ngn.format(totals.setup)} setup
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <Stepper value={item.quantity} onChange={onQty} />
@@ -108,18 +277,7 @@ function CartRow({
             Remove
           </button>
         </div>
-      </div>
-
-      {/* Price */}
-      <div className="flex-shrink-0 flex flex-col items-end justify-between">
-        <span className="text-sm font-semibold tabular-nums">
-          {ngn.format(item.price * item.quantity)}
-        </span>
-        {item.quantity > 1 && (
-          <span className="text-[11px] text-muted-foreground tabular-nums">
-            {ngn.format(item.price)} ea.
-          </span>
-        )}
+        <PrintDetails item={item} onChange={onChange} onUploadingChange={onUploadingChange} />
       </div>
     </motion.div>
   );
@@ -254,7 +412,8 @@ const fieldClass =
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function BasketPage() {
-  const { items, removeItem, updateQuantity, clear, total } = useCart();
+  const { items, removeItem, updateQuantity, updateItem, clear, total } = useCart();
+  const [uploadingIds, setUploadingIds] = useState<Set<string>>(new Set());
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [orderId, setOrderId] = useState<number | null>(null);
@@ -265,9 +424,19 @@ export default function BasketPage() {
     notes: "",
   });
 
+  const setUploading = useCallback((id: string, uploading: boolean) => {
+    setUploadingIds((prev) => {
+      const next = new Set(prev);
+      if (uploading) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }, []);
+  const uploading = uploadingIds.size > 0;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!items.length) return;
+    if (!items.length || uploading) return;
     setSubmitting(true);
     try {
       const res = await fetch("/api/orders", {
@@ -315,6 +484,8 @@ export default function BasketPage() {
                 item={item}
                 onRemove={() => removeItem(item.id)}
                 onQty={(v) => updateQuantity(item.id, v)}
+                onChange={(patch) => updateItem(item.id, patch)}
+                onUploadingChange={(u) => setUploading(item.id, u)}
               />
             ))}
           </AnimatePresence>
@@ -383,10 +554,10 @@ export default function BasketPage() {
                 />
               </Field>
 
-              <Field label="Notes / requirements">
+              <Field label="General notes">
                 <textarea
                   rows={3}
-                  placeholder="Branding colours, deadlines, quantities…"
+                  placeholder="Deadlines, delivery details, anything else…"
                   value={form.notes}
                   onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
                   className={`${fieldClass} resize-none`}
@@ -395,10 +566,12 @@ export default function BasketPage() {
 
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || uploading}
                 className="mt-2 w-full h-12 rounded-full bg-foreground text-background text-sm font-semibold tracking-wide hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                {submitting ? (
+                {uploading && !submitting ? (
+                  "Waiting for uploads…"
+                ) : submitting ? (
                   <>
                     <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <circle cx="12" cy="12" r="10" strokeOpacity=".25" />

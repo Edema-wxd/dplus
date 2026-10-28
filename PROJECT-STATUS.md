@@ -19,8 +19,8 @@ Stack: shadcn/ui (Radix), framer-motion, sonner, next-themes, NextAuth v5 (beta,
 |---|---|
 | `/` | ✅ Built — Hero, Services, CTA |
 | `/products` | ✅ Built — paginated/searchable listing from Postgres, NGN pricing via `calcPrice()` |
-| `/products/[id]` | ✅ Built — variants, branding/logo selection, basket integration |
-| `/basket` | ✅ Built — cart UI (localStorage + context), submits to `/api/orders` |
+| `/products/[id]` | ✅ Built — colour swatches with per-colour price and stock, sizes, every print position/method with Amrod branding price breaks (setup + per unit, marked up via `calcPrice()`), live estimate, basket integration |
+| `/basket` | ✅ Built — cart UI (localStorage + context), per-item logo/artwork upload (UploadThing `customerArtwork`, rate limited per IP via Redis) and printer notes, submits to `/api/orders` |
 | `/portfolio` | ✅ Built — project listing, DB-backed (`getPublishedPortfolioItems()`), no longer uses mock data |
 | `/portfolio/[id]` | ✅ Built — hero image, tags, client, description, additional images, CTA |
 | `/contact-us` | ✅ Built — Hero + Contact form with validation and submission handling |
@@ -32,7 +32,7 @@ Stack: shadcn/ui (Radix), framer-motion, sonner, next-themes, NextAuth v5 (beta,
 | Route | Status |
 |---|---|
 | `/admin` | ✅ Built — dashboard: stat cards (new/total orders, catalogue size, contact inquiries), order status breakdown, recent orders table, recent contact inquiries |
-| `/admin/orders` | ✅ Built — order list + `/admin/orders/[id]` detail view, status transitions via `PATCH /api/admin/orders/[id]/status` |
+| `/admin/orders` | ✅ Built — order list + `/admin/orders/[id]` detail view (print details, artwork links, printer notes, Amrod order sheet with copy/CSV), status transitions via `PATCH /api/admin/orders/[id]/status` incl. "Placed with Amrod" (`ordered`) |
 | `/admin/pricing` | ✅ Built — VAT / markup / ZAR→NGN exchange rate config form, shows last-updated-by |
 | `/admin/amrod` | ✅ Built — sync status/log UI (per-resource status, record counts, errors, manual trigger) |
 | `/admin/content` | ✅ Built — portfolio CRUD UI (create/edit/publish projects, image upload) |
@@ -69,6 +69,7 @@ Stack: shadcn/ui (Radix), framer-motion, sonner, next-themes, NextAuth v5 (beta,
 - **Neon compute hours** - the free plan's CU-hour allowance was exhausted because uncached catalogue pages (`/products`, `/products/[id]`) queried Neon on every request and crawlers walked the whole catalogue, so the compute never scaled to zero. Fixed by ISR on public pages, a Redis read-through cache for catalogue queries (`src/lib/cache.ts`), and `Disallow: /products/` in `robots.ts`. Make sure only one deployment (and no local `next dev`) points at the production database; use a Neon branch for development.
 
 ## Likely next steps
+0. **Amrod cart automation** — Amrod's Vendor API (v2.0.11) is catalogue-only, with no cart/order endpoint, so orders reach Amrod via the admin order sheet. If Amrod (api.support@amrod.co.za) grants an ordering API, submit from `src/lib/amrod-order-sheet.ts` rows.
 1. **Payment integration** — orders are currently created as "new" with no payment step; decide on a provider (Stripe/PayFast/etc.) if checkout needs to be self-service rather than manual-review.
 2. **Revisit `/portfolio` build-time behavior** — decide whether to keep ISR (`revalidate = 86400`, current choice) or move to `force-dynamic` like `/admin` if Neon connectivity issues keep breaking builds.
 3. **Verify email transport is configured in production** — `sendEmail()` silently no-ops if neither `RESEND_API_KEY` nor `SMTP_HOST` is set; confirm one is set in the deploy environment so order receipts/alerts and contact form emails actually send.
