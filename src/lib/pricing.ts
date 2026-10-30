@@ -47,8 +47,13 @@ let memCache: { config: PricingConfig; expiresAt: number } | null = null;
 
 export async function getPricingConfig(): Promise<PricingConfig> {
   if (redis) {
-    const cached = await redis.get<PricingConfig>(CACHE_KEY);
-    if (cached) return cached;
+    // A Redis outage shouldn't take every priced page down with it.
+    try {
+      const cached = await redis.get<PricingConfig>(CACHE_KEY);
+      if (cached) return cached;
+    } catch (err) {
+      console.error("[pricing] cache read failed:", err);
+    }
   } else if (memCache && memCache.expiresAt > Date.now()) {
     return memCache.config;
   }
@@ -61,7 +66,11 @@ export async function getPricingConfig(): Promise<PricingConfig> {
   const config = mapConfig(rows[0]);
 
   if (redis) {
-    await redis.set(CACHE_KEY, config, { ex: CACHE_TTL_SECONDS });
+    try {
+      await redis.set(CACHE_KEY, config, { ex: CACHE_TTL_SECONDS });
+    } catch (err) {
+      console.error("[pricing] cache write failed:", err);
+    }
   } else {
     memCache = { config, expiresAt: Date.now() + CACHE_TTL_SECONDS * 1000 };
   }
