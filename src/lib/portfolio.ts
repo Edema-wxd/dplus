@@ -1,4 +1,5 @@
 import { pool } from "@/lib/db";
+import { cached, invalidateCachePrefix } from "@/lib/cache";
 
 export type PortfolioImage = {
   url: string;
@@ -29,6 +30,15 @@ type PortfolioRow = {
   created_at: string;
   updated_at: string;
 };
+
+const CACHE_PREFIX = "portfolio:";
+// Every write below clears the cache, so the TTL is just a backstop.
+const CACHE_TTL_SECONDS = 24 * 60 * 60;
+
+/** Clears cached public portfolio reads; every write in this file calls it. */
+export async function invalidatePortfolioCache() {
+  await invalidateCachePrefix(CACHE_PREFIX);
+}
 
 function rowToItem(row: PortfolioRow): PortfolioItem {
   return {
@@ -81,6 +91,7 @@ export async function createPortfolioItem(
       input.isPublished ?? false,
     ]
   );
+  await invalidatePortfolioCache();
   return rowToItem(rows[0]);
 }
 
@@ -118,11 +129,13 @@ export async function updatePortfolioItem(
   );
 
   if (!rows.length) throw new Error("Not found");
+  await invalidatePortfolioCache();
   return rowToItem(rows[0]);
 }
 
 export async function deletePortfolioItem(id: number): Promise<void> {
   await pool.query(`delete from portfolio_items where id = $1`, [id]);
+  await invalidatePortfolioCache();
 }
 
 export async function togglePublished(
@@ -132,18 +145,27 @@ export async function togglePublished(
   return updatePortfolioItem(id, { isPublished: published });
 }
 
+/**
+ * The public reads below are cached in Redis rather than relying on ISR: on
+ * the self-hosted server ISR revalidation state lives in each Node process's
+ * memory, so an admin edit only reached the process that handled it.
+ */
 export async function getPublishedPortfolioItems(): Promise<PortfolioItem[]> {
-  return getPortfolioItems({ includeUnpublished: false });
+  return cached(`${CACHE_PREFIX}published`, CACHE_TTL_SECONDS, () =>
+    getPortfolioItems({ includeUnpublished: false })
+  );
 }
 
 export async function getPortfolioItemById(
   id: number
 ): Promise<PortfolioItem | null> {
-  const { rows } = await pool.query<PortfolioRow>(
-    `select id, title, client, description, tags, images, is_published, created_at, updated_at
-     from portfolio_items
-     where id = $1 and is_published = true`,
-    [id]
-  );
-  return rows.length ? rowToItem(rows[0]) : null;
+  return cached(`${CACHE_PREFIX}item:${id}`, CACHE_TTL_SECONDS, async () => {
+    const { rows } = await pool.query<PortfolioRow>(
+      `select id, title, client, description, tags, images, is_published, created_at, updated_at
+       from portfolio_items
+       where id = $1 and is_published = true`,
+      [id]
+    );
+    return rows.length ? rowToItem(rows[0]) : null;
+  });
 }

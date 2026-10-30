@@ -49,8 +49,8 @@ npm test
 ## Notes
 
 - `/admin/*` is rendered `force-dynamic` (see `src/app/admin/layout.tsx`) since it's authenticated and DB-backed — it should never be statically prerendered.
-- Public DB-backed pages (`/products`, `/portfolio`, `/brochures`, `/hampers` and their detail pages, `/sitemap.xml`) use ISR with `revalidate = 86400`. Admin edits, pricing changes and the Amrod cron refresh them on demand via `src/lib/revalidate.ts`, so add a call there when a new admin mutation changes a public page.
-- Catalogue reads in `src/lib/products.ts` are cached in Redis under `products:*` (`src/lib/cache.ts`), cleared by pricing updates and the Amrod sync. Neon only suspends after 5 minutes without queries, so anything that queries on every request, or on a short timer, keeps the compute awake and burns the monthly CU-hour allowance.
+- `/products/[id]` and `/sitemap.xml` use ISR with `revalidate = 86400`. Admin edits, pricing changes and the Amrod cron refresh them on demand via `src/lib/revalidate.ts`, so add a call there when a new admin mutation changes a public page.
+- Catalogue reads in `src/lib/products.ts` are cached in Redis under `products:*` (`src/lib/cache.ts`), cleared by pricing updates and the Amrod sync. `/products`, `/brochures`, `/hampers`, `/portfolio` and their detail pages render per request instead, so `next build` never queries Neon, reading from Redis under `brochures:*`, `hampers:*` and `portfolio:*`, which every write in `src/lib/brochures.ts`, `src/lib/hampers.ts` and `src/lib/portfolio.ts` clears. ISR state lives in each Node process's memory on the self-hosted server, so on-demand revalidation only reaches the process that handled the admin request. Neon only suspends after 5 minutes without queries, so anything that queries on every request, or on a short timer, keeps the compute awake and burns the monthly CU-hour allowance.
 - A build-time DB connectivity hiccup to Neon can fail `next build` for prerendered routes, see the "Known issues" section in [PROJECT-STATUS.md](./PROJECT-STATUS.md).
 
 ## Deploy
