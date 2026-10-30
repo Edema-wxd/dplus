@@ -8,7 +8,6 @@ import HamperCard from "@/components/hampers/HamperCard";
 import JsonLd from "@/components/JsonLd";
 import {
   getHamperBySlug,
-  getPublishedHampers,
   getRelatedHampers,
 } from "@/lib/hampers";
 import {
@@ -20,17 +19,12 @@ import {
   SITE_NAME,
 } from "@/lib/seo";
 
-// Cached for a day: every regeneration wakes the Neon compute. Admin edits
-// refresh it on demand (see src/lib/revalidate.ts).
-export const revalidate = 86400;
+// Rendered per request so the live page never comes from a build-time
+// snapshot or one process's stale ISR copy. The queries are cached in Redis
+// (see src/lib/cache.ts), so this doesn't wake the Neon compute.
+export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ slug: string }> };
-
-/** Prerenders every published hamper, so the first crawl hits a static page. */
-export async function generateStaticParams() {
-  const hampers = await getPublishedHampers();
-  return hampers.map((hamper) => ({ slug: hamper.slug }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;

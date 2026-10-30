@@ -11,9 +11,10 @@ import {
   pageMetadata,
 } from "@/lib/seo";
 
-// Cached for a day: every regeneration wakes the Neon compute. Admin edits
-// refresh it on demand (see src/lib/revalidate.ts).
-export const revalidate = 86400;
+// Rendered per request so the live page never comes from a build-time
+// snapshot or one process's stale ISR copy. The queries are cached in Redis
+// (see src/lib/cache.ts), so this doesn't wake the Neon compute.
+export const dynamic = "force-dynamic";
 
 const TITLE = "Corporate Gift Hampers in Nigeria";
 const DESCRIPTION =

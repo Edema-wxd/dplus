@@ -5,9 +5,10 @@ import { breadcrumbSchema, itemListSchema, pageMetadata } from "@/lib/seo";
 import { getPublishedPortfolioItems } from "@/lib/portfolio";
 import { ArrowRight } from "lucide-react";
 
-// Cached for a day: every regeneration wakes the Neon compute. Admin edits
-// refresh it on demand (see src/lib/revalidate.ts).
-export const revalidate = 86400;
+// Rendered per request so the live page never comes from a build-time
+// snapshot or one process's stale ISR copy. The queries are cached in Redis
+// (see src/lib/cache.ts), so this doesn't wake the Neon compute.
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = pageMetadata({
   title: "Portfolio of Corporate Gifting & Branding Projects",

@@ -12,17 +12,10 @@ import {
 import { getPortfolioItemById } from "@/lib/portfolio";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-// Cached for a day: every regeneration wakes the Neon compute. Admin edits
-// refresh it on demand (see src/lib/revalidate.ts).
-export const revalidate = 86400;
-
-/**
- * Without this the route renders on every request despite `revalidate`; an
- * empty list caches each project the first time it is visited.
- */
-export async function generateStaticParams() {
-  return [];
-}
+// Rendered per request so the live page never comes from a build-time
+// snapshot or one process's stale ISR copy. The queries are cached in Redis
+// (see src/lib/cache.ts), so this doesn't wake the Neon compute.
+export const dynamic = "force-dynamic";
 
 /** Shared by generateMetadata and the page, so the row is read once. */
 const getItem = cache(async (id: string) => {

@@ -1,4 +1,5 @@
 import { pool } from "@/lib/db";
+import { cached, invalidateCachePrefix } from "@/lib/cache";
 
 export type HamperPage = { url: string; key: string; alt: string };
 export type HamperContent = { item: string; note?: string };
@@ -108,16 +109,34 @@ export async function getHampers({
   return rows.map(rowToHamper);
 }
 
+const CACHE_PREFIX = "hampers:";
+// Every write below clears the cache, so the TTL is just a backstop.
+const CACHE_TTL_SECONDS = 24 * 60 * 60;
+
+/** Clears cached public hamper reads; every write in this file calls it. */
+export async function invalidateHamperCache() {
+  await invalidateCachePrefix(CACHE_PREFIX);
+}
+
+/**
+ * The public reads below are cached in Redis rather than relying on ISR: on
+ * the self-hosted server ISR revalidation state lives in each Node process's
+ * memory, so an admin edit only reached the process that handled it.
+ */
 export async function getPublishedHampers(): Promise<Hamper[]> {
-  return getHampers({ includeUnpublished: false });
+  return cached(`${CACHE_PREFIX}published`, CACHE_TTL_SECONDS, () =>
+    getHampers({ includeUnpublished: false })
+  );
 }
 
 export async function getHamperBySlug(slug: string): Promise<Hamper | null> {
-  const { rows } = await pool.query<HamperRow>(
-    `select ${COLUMNS} from hampers where slug = $1 and is_published = true`,
-    [slug]
-  );
-  return rows.length ? rowToHamper(rows[0]) : null;
+  return cached(`${CACHE_PREFIX}slug:${slug}`, CACHE_TTL_SECONDS, async () => {
+    const { rows } = await pool.query<HamperRow>(
+      `select ${COLUMNS} from hampers where slug = $1 and is_published = true`,
+      [slug]
+    );
+    return rows.length ? rowToHamper(rows[0]) : null;
+  });
 }
 
 export async function getHamperById(id: number): Promise<Hamper | null> {
@@ -134,14 +153,17 @@ export async function getRelatedHampers(
   occasions: string[],
   limit = 3
 ): Promise<Hamper[]> {
-  const { rows } = await pool.query<HamperRow>(
-    `select ${COLUMNS} from hampers
-     where is_published = true and slug <> $1
-     order by (occasions && $2::text[]) desc, sort_order asc, created_at desc
-     limit $3`,
-    [slug, occasions, limit]
-  );
-  return rows.map(rowToHamper);
+  // Occasions come from the hamper itself, so the slug identifies them.
+  return cached(`${CACHE_PREFIX}related:${slug}:${limit}`, CACHE_TTL_SECONDS, async () => {
+    const { rows } = await pool.query<HamperRow>(
+      `select ${COLUMNS} from hampers
+       where is_published = true and slug <> $1
+       order by (occasions && $2::text[]) desc, sort_order asc, created_at desc
+       limit $3`,
+      [slug, occasions, limit]
+    );
+    return rows.map(rowToHamper);
+  });
 }
 
 export type CreateHamperInput = {
@@ -194,6 +216,7 @@ export async function createHamper(input: CreateHamperInput): Promise<Hamper> {
       input.sortOrder ?? 0,
     ]
   );
+  await invalidateHamperCache();
   return rowToHamper(rows[0]);
 }
 
@@ -249,6 +272,7 @@ export async function updateHamper(
     values
   );
   if (!rows.length) throw new Error("Not found");
+  await invalidateHamperCache();
   return rowToHamper(rows[0]);
 }
 
@@ -257,6 +281,7 @@ export async function deleteHamper(id: number): Promise<Hamper | null> {
     `delete from hampers where id = $1 returning ${COLUMNS}`,
     [id]
   );
+  if (rows.length) await invalidateHamperCache();
   return rows.length ? rowToHamper(rows[0]) : null;
 }
 
