@@ -23,7 +23,7 @@ function brandCode(brand: AmrodProduct["brand"]): string | null {
 }
 
 async function upsertBatch(
-  client: import("@neondatabase/serverless").PoolClient,
+  client: import("pg").PoolClient,
   products: AmrodProduct[],
 ) {
   await batchUpsert(

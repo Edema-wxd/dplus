@@ -5,7 +5,7 @@ _Last reviewed: 2026-07-16_
 ## Overview
 "dplus" (De-Sign Plus) is a Next.js 15 (App Router) + React 19 + Tailwind v4 site that has grown from a marketing/portfolio site into a small e-commerce + admin platform: a customer-facing storefront (products, basket, checkout-to-order) backed by Postgres, an Amrod catalogue sync integration, and a password-protected admin dashboard for orders, pricing, Amrod sync, and portfolio content.
 
-Stack: shadcn/ui (Radix), framer-motion, sonner, next-themes, NextAuth v5 (beta, credentials provider), `pg` for Postgres (Neon), `@upstash/redis` for caching, custom "Sarlotte" + Raleway fonts.
+Stack: shadcn/ui (Radix), framer-motion, sonner, next-themes, NextAuth v5 (beta, credentials provider), `pg` for Postgres (Neon, moving to the shared server), `@upstash/redis` for caching, custom "Sarlotte" + Raleway fonts.
 
 ## Current branch state
 - On `main`, working tree clean aside from small in-progress edits.
@@ -52,7 +52,7 @@ Stack: shadcn/ui (Radix), framer-motion, sonner, next-themes, NextAuth v5 (beta,
 | `/api/cron/amrod-daily`, `/api/cron/amrod-weekly` | ✅ Scheduled Amrod sync jobs |
 
 ## Data layer
-- **Postgres (Neon)** (`src/lib/db.ts` — pooled client). Tables: `products`, `brands`, `categories`, `product_prices`, `product_stock` (via Amrod sync), `orders` (JSONB items + status), `pricing_config` (single-row, see `docs/pricing-schema.sql`), `admin_users`, `portfolio_items` (see `docs/portfolio-schema.sql`), `contact_submissions`.
+- **Postgres** (`src/lib/db.ts` — `pg` pool; Neon until the move in `docs/moving-off-vercel-and-neon.md`). Tables: `products`, `brands`, `categories`, `product_prices`, `product_stock` (via Amrod sync), `orders` (JSONB items + status), `pricing_config` (single-row, see `docs/pricing-schema.sql`), `admin_users`, `portfolio_items` (see `docs/portfolio-schema.sql`), `contact_submissions`.
 - `src/lib/products.ts` — `getProducts()`, `getProductDetail()`, `getRelatedProducts()`, `getBrandOptions()`, `getTopCategoryOptions()`.
 - `src/lib/orders.ts` — `createOrder()`, `getOrders()`, `getOrderStats()`, `getRecentOrders()`, `getNewOrderCount()`; status enum lives in `src/lib/order-constants.ts`.
 - `src/lib/pricing.ts` — `getPricingConfig()`, `updatePricingConfig()`, `calcPrice()` (ZAR ex-VAT → inc-VAT → +markup → NGN), `getPricingPreview()`.
@@ -69,6 +69,7 @@ Stack: shadcn/ui (Radix), framer-motion, sonner, next-themes, NextAuth v5 (beta,
 - **Neon compute hours** - the free plan's CU-hour allowance was exhausted because uncached catalogue pages (`/products`, `/products/[id]`) queried Neon on every request and crawlers walked the whole catalogue, so the compute never scaled to zero. Fixed by ISR on public pages, a Redis read-through cache for catalogue queries (`src/lib/cache.ts`), and `Disallow: /products/` in `robots.ts`. Make sure only one deployment (and no local `next dev`) points at the production database; use a Neon branch for development.
 
 ## Likely next steps
+- **Move off Vercel and Neon** — follow `docs/moving-off-vercel-and-neon.md` once Neon is reachable to copy the data out.
 0. **Amrod cart automation** — Amrod's Vendor API (v2.0.11) is catalogue-only, with no cart/order endpoint, so orders reach Amrod via the admin order sheet. If Amrod (api.support@amrod.co.za) grants an ordering API, submit from `src/lib/amrod-order-sheet.ts` rows.
 1. **Payment integration** — orders are currently created as "new" with no payment step; decide on a provider (Stripe/PayFast/etc.) if checkout needs to be self-service rather than manual-review.
 2. **Verify email transport is configured in production** — `sendEmail()` silently no-ops if neither `RESEND_API_KEY` nor `SMTP_HOST` is set; confirm one is set in the deploy environment so order receipts/alerts and contact form emails actually send.

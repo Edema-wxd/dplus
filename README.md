@@ -9,7 +9,7 @@ See [PROJECT-STATUS.md](./PROJECT-STATUS.md) for current route/feature status an
 - Next.js 15 App Router, React 19, Tailwind v4
 - shadcn/ui (Radix), framer-motion, sonner, next-themes
 - NextAuth v5 (beta, credentials provider) for admin auth
-- Postgres (Neon) via `pg`, `@upstash/redis` for caching
+- Postgres via `pg` (Neon today, moving to the shared server), `@upstash/redis` for caching
 - Resend / SMTP for transactional email, S3-compatible storage for uploads
 
 ## Getting started
@@ -25,7 +25,8 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Copy `.env.local` (not committed) with at least:
 
-- `DATABASE_URL` — Postgres (Neon) connection string
+- `DATABASE_URL` — Postgres connection string
+- `PG_POOL_MAX` — optional, max database connections per process (default 5)
 - `NEXTAUTH_URL`, admin auth secrets
 - `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` — pricing config cache
 - `AMROD_API_URL`, `AMROD_IDENTITY_URL`, `AMROD_CUSTOMER_CODE`, `AMROD_USERNAME`, `AMROD_PASSWORD` — Amrod catalogue sync
@@ -49,10 +50,12 @@ npm test
 ## Notes
 
 - `/admin/*` is rendered `force-dynamic` (see `src/app/admin/layout.tsx`) since it's authenticated and DB-backed — it should never be statically prerendered.
-- `/products/[id]` and `/sitemap.xml` use ISR with `revalidate = 86400`. Admin edits, pricing changes and the Amrod cron refresh them on demand via `src/lib/revalidate.ts`, so add a call there when a new admin mutation changes a public page.
-- Catalogue reads in `src/lib/products.ts` are cached in Redis under `products:*` (`src/lib/cache.ts`), cleared by pricing updates and the Amrod sync. `/products`, `/brochures`, `/hampers`, `/portfolio` and their detail pages render per request instead, so `next build` never queries Neon, reading from Redis under `brochures:*`, `hampers:*` and `portfolio:*`, which every write in `src/lib/brochures.ts`, `src/lib/hampers.ts` and `src/lib/portfolio.ts` clears. ISR state lives in each Node process's memory on the self-hosted server, so on-demand revalidation only reaches the process that handled the admin request. Neon only suspends after 5 minutes without queries, so anything that queries on every request, or on a short timer, keeps the compute awake and burns the monthly CU-hour allowance.
-- A build-time DB connectivity hiccup to Neon can fail `next build` for prerendered routes, see the "Known issues" section in [PROJECT-STATUS.md](./PROJECT-STATUS.md).
+- Every DB-backed page (`/products`, `/brochures`, `/hampers`, `/portfolio` and their detail pages) renders per request, so `next build` never queries the database. On the self-hosted server ISR revalidation state lives in each Node process's memory, so on-demand revalidation would only reach the process that handled the admin request.
+- Those pages read through a Redis cache (`src/lib/cache.ts`) shared by every process: `products:*` (cleared by pricing updates and the Amrod sync), and `brochures:*`, `hampers:*` and `portfolio:*` (cleared by every write in `src/lib/brochures.ts`, `src/lib/hampers.ts` and `src/lib/portfolio.ts`). Expired entries are kept a week as a fallback if the database is unreachable.
+- `/sitemap.xml` uses ISR with `revalidate = 86400`, refreshed on demand via `src/lib/revalidate.ts`.
 
 ## Deploy
 
-Deployed on [Vercel](https://vercel.com). See [Next.js deployment docs](https://nextjs.org/docs/app/building-your-application/deploying) for general guidance.
+Moving from Vercel and Neon to the shared cPanel server, with Postgres on the same machine. Follow [docs/moving-off-vercel-and-neon.md](./docs/moving-off-vercel-and-neon.md) for the one-off migration.
+
+`npm run remotedeploy` (`scripts/deploy.sh`) builds locally, uploads the build and, with `DEPLOY_NODEENV` set to cPanel's virtual-environment command, installs dependencies and restarts the app. Scheduled jobs (Amrod sync, nightly `scripts/backup-db.sh`) run from cPanel cron.

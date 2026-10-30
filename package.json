@@ -11,7 +11,7 @@
     "seed:admin": "tsx scripts/seed-admin.ts",
     "seed:amrod": "tsx scripts/amrod-seed.ts",
     "test": "jest",
-    "remotedeploy": "next build && zip -r deploy.zip .next public package.json package-lock.json server.js next.config.ts -x 'node_modules/*' && scp -P 21098 -i ~/.ssh/id_ed25519 deploy.zip desimrwr@162.0.229.137:~/dplus/",
+    "remotedeploy": "bash scripts/deploy.sh",
     "brochure:import": "tsx scripts/brochure-import.ts",
     "brochure:schema": "tsx scripts/apply-brochures-schema.ts",
     "contact:schema": "tsx scripts/apply-contact-schema.ts",
@@ -19,7 +19,6 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1075.0",
-    "@neondatabase/serverless": "^1.1.0",
     "@radix-ui/react-navigation-menu": "^1.2.13",
     "@radix-ui/react-slot": "^1.2.3",
     "@uploadthing/react": "^7.3.3",
