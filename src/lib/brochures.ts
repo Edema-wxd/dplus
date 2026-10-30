@@ -1,4 +1,5 @@
 import { pool } from "@/lib/db";
+import { cached, invalidateCachePrefix } from "@/lib/cache";
 
 export type BrochurePage = {
   url: string;
@@ -92,8 +93,25 @@ export async function getBrochures({
   return rows.map(rowToBrochure);
 }
 
+const CACHE_PREFIX = "brochures:";
+// Every write below clears the cache, so the TTL is just a backstop.
+const CACHE_TTL_SECONDS = 24 * 60 * 60;
+
+/**
+ * Cached in Redis rather than relying on ISR alone: the self-hosted server's
+ * revalidation state lives in each Node process's memory, so an admin edit
+ * only reached the process that handled it, and every deploy shipped the
+ * build machine's snapshot of this list.
+ */
 export async function getPublishedBrochures(): Promise<Brochure[]> {
-  return getBrochures({ includeUnpublished: false });
+  return cached(`${CACHE_PREFIX}published`, CACHE_TTL_SECONDS, () =>
+    getBrochures({ includeUnpublished: false })
+  );
+}
+
+/** Clears cached brochure reads; every write in this file calls it. */
+export async function invalidateBrochureCache() {
+  await invalidateCachePrefix(CACHE_PREFIX);
 }
 
 export type CreateBrochureInput = {
@@ -135,6 +153,7 @@ export async function createBrochure(
       input.sortOrder ?? 0,
     ]
   );
+  await invalidateBrochureCache();
   return rowToBrochure(rows[0]);
 }
 
@@ -184,6 +203,7 @@ export async function updateBrochure(
     values
   );
   if (!rows.length) throw new Error("Not found");
+  await invalidateBrochureCache();
   return rowToBrochure(rows[0]);
 }
 
@@ -200,6 +220,7 @@ export async function deleteBrochure(id: number): Promise<Brochure | null> {
     `delete from brochures where id = $1 returning ${COLUMNS}`,
     [id]
   );
+  if (rows.length) await invalidateBrochureCache();
   return rows.length ? rowToBrochure(rows[0]) : null;
 }
 
@@ -216,6 +237,7 @@ export async function reorderBrochures(ids: number[]): Promise<Brochure[]> {
        where b.id = v.id`,
       [ids, ids.map((_, i) => i)]
     );
+    await invalidateBrochureCache();
   }
   return getBrochures({ includeUnpublished: true });
 }

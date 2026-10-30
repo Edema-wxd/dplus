@@ -9,9 +9,10 @@ import {
   type Brochure,
 } from "@/lib/brochures";
 
-// Cached for a day: every regeneration wakes the Neon compute. Admin edits
-// refresh it on demand (see src/lib/revalidate.ts).
-export const revalidate = 86400;
+// Rendered per request so the live list never comes from a build-time
+// snapshot or one process's stale ISR copy. The query itself is cached in
+// Redis (see getPublishedBrochures), so this doesn't wake the Neon compute.
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = pageMetadata({
   title: "Brochures",
