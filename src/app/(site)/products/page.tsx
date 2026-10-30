@@ -13,9 +13,10 @@ export const metadata: Metadata = pageMetadata({
   noindex: true,
 });
 
-// Cached for a day; the Amrod sync and pricing edits refresh it on demand
-// (see src/lib/revalidate.ts).
-export const revalidate = 86400;
+// Rendered per request so `next build` never needs the database: a Neon
+// outage or exhausted quota otherwise fails every deploy. The queries are
+// cached in Redis (see src/lib/products.ts), so this doesn't wake Neon.
+export const dynamic = "force-dynamic";
 
 export default async function ProductsPage() {
   const [{ items, hasMore, total }, brands, categories] = await Promise.all([

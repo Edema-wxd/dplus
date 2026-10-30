@@ -64,7 +64,7 @@ Stack: shadcn/ui (Radix), framer-motion, sonner, next-themes, NextAuth v5 (beta,
 - `src/context/cart-context.tsx` — client cart: `addItem`/`removeItem`/`updateQuantity`/`clear`, localStorage-persisted, computes `count`/`total`.
 
 ## Known issues / operational notes
-- **Neon DB connectivity from local dev machine is flaky** — DNS lookups and/or TCP connects to the Neon Postgres host intermittently time out from this machine's network, which broke `next build` static prerendering for DB-backed pages (`/portfolio`, formerly `/admin`). `/admin/*`, `/portfolio`, `/brochures` and `/hampers` are now `force-dynamic` so they're immune to this at build time; `/products` and the sitemap are still prerendered, so a build-time DB hiccup there can still fail `next build`.
+- **Neon DB connectivity from local dev machine is flaky** — DNS lookups and/or TCP connects to the Neon Postgres host intermittently time out from this machine's network, which broke `next build` static prerendering for DB-backed pages (`/portfolio`, formerly `/admin`). `/admin/*`, `/products`, `/portfolio`, `/brochures` and `/hampers` are now `force-dynamic`, so `next build` no longer queries the database (the sitemap catches its own DB errors).
 
 - **Neon compute hours** - the free plan's CU-hour allowance was exhausted because uncached catalogue pages (`/products`, `/products/[id]`) queried Neon on every request and crawlers walked the whole catalogue, so the compute never scaled to zero. Fixed by ISR on public pages, a Redis read-through cache for catalogue queries (`src/lib/cache.ts`), and `Disallow: /products/` in `robots.ts`. Make sure only one deployment (and no local `next dev`) points at the production database; use a Neon branch for development.
 
