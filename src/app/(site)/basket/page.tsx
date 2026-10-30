@@ -10,6 +10,7 @@ import type { CartItem, CartItemPatch } from "@/context/cart-context";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { brandingCost, brandingLabel, lineTotals } from "@/lib/branding-pricing";
 import { MAX_ARTWORK_FILES, MAX_NOTE_LENGTH } from "@/lib/order-items";
+import { discardArtwork } from "@/lib/artwork-client";
 
 const ngn = new Intl.NumberFormat("en-NG", {
   style: "currency",
@@ -73,7 +74,12 @@ function PrintDetails({
       onChange((current) => ({
         artwork: [
           ...(current.artwork ?? []),
-          ...res.map((f) => ({ url: f.ufsUrl, key: f.key, name: f.name })),
+          ...res.map((f) => ({
+            url: f.ufsUrl,
+            key: f.key,
+            name: f.name,
+            deleteToken: f.serverData?.deleteToken ?? null,
+          })),
         ].slice(0, MAX_ARTWORK_FILES),
       }));
       onUploadingChange(false);
@@ -136,11 +142,12 @@ function PrintDetails({
                 </a>
                 <button
                   type="button"
-                  onClick={() =>
+                  onClick={() => {
                     onChange((current) => ({
                       artwork: (current.artwork ?? []).filter((f) => f.key !== file.key),
-                    }))
-                  }
+                    }));
+                    discardArtwork([file]);
+                  }}
                   className="flex-shrink-0 text-muted-foreground/60 hover:text-destructive"
                   aria-label={`Remove ${file.name}`}
                 >
@@ -482,7 +489,10 @@ export default function BasketPage() {
               <CartRow
                 key={item.id}
                 item={item}
-                onRemove={() => removeItem(item.id)}
+                onRemove={() => {
+                  removeItem(item.id);
+                  discardArtwork(item.artwork);
+                }}
                 onQty={(v) => updateQuantity(item.id, v)}
                 onChange={(patch) => updateItem(item.id, patch)}
                 onUploadingChange={(u) => setUploading(item.id, u)}
@@ -494,7 +504,10 @@ export default function BasketPage() {
           <div className="mt-6 flex items-center justify-between">
             <button
               type="button"
-              onClick={() => clear()}
+              onClick={() => {
+                clear();
+                discardArtwork(items.flatMap((i) => i.artwork ?? []));
+              }}
               className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors underline underline-offset-2"
             >
               Clear all

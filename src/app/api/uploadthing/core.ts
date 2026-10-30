@@ -2,6 +2,7 @@ import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import { auth } from "@/lib/auth";
 import { redis } from "@/lib/redis";
+import { signArtworkKey } from "@/lib/artwork-token";
 
 const f = createUploadthing();
 
@@ -39,7 +40,12 @@ export const uploadRouter = {
     "application/postscript": { maxFileSize: "16MB", maxFileCount: 5 },
   })
     .middleware(limitArtworkUploads)
-    .onUploadComplete(({ file }) => ({ url: file.ufsUrl, key: file.key, name: file.name })),
+    .onUploadComplete(({ file }) => ({
+      url: file.ufsUrl,
+      key: file.key,
+      name: file.name,
+      deleteToken: signArtworkKey(file.key),
+    })),
 
   // Brochure page images, already optimised before they reach here.
   brochurePage: f({

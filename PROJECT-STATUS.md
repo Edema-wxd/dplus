@@ -20,7 +20,7 @@ Stack: shadcn/ui (Radix), framer-motion, sonner, next-themes, NextAuth v5 (beta,
 | `/` | ✅ Built — Hero, Services, CTA |
 | `/products` | ✅ Built — paginated/searchable listing from Postgres, NGN pricing via `calcPrice()` |
 | `/products/[id]` | ✅ Built — colour swatches with per-colour price and stock, sizes, every print position/method with Amrod branding price breaks (setup + per unit, marked up via `calcPrice()`), live estimate, basket integration |
-| `/basket` | ✅ Built — cart UI (localStorage + context), per-item logo/artwork upload (UploadThing `customerArtwork`, rate limited per IP via Redis) and printer notes, submits to `/api/orders` |
+| `/basket` | ✅ Built — cart UI (localStorage + context), per-item logo/artwork upload (UploadThing `customerArtwork`, rate limited per IP via Redis; removed files are deleted through `/api/artwork/delete` using a signed per-file token, never if a submitted order uses them) and printer notes, submits to `/api/orders` |
 | `/portfolio` | ✅ Built — project listing, DB-backed (`getPublishedPortfolioItems()`), no longer uses mock data |
 | `/portfolio/[id]` | ✅ Built — hero image, tags, client, description, additional images, CTA |
 | `/contact-us` | ✅ Built — Hero + Contact form with validation and submission handling |

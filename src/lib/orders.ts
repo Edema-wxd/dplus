@@ -122,6 +122,22 @@ export async function getOrders(opts?: {
   return { orders: rows.map(mapRow), total };
 }
 
+/** The given artwork keys that are attached to a submitted order. */
+export async function getArtworkKeysInOrders(keys: string[]): Promise<Set<string>> {
+  if (!keys.length) return new Set();
+  const { rows } = await pool.query<{ key: string }>(
+    `
+    select distinct a ->> 'key' as key
+    from orders,
+      jsonb_array_elements(items) as i,
+      jsonb_array_elements(coalesce(i -> 'artwork', '[]'::jsonb)) as a
+    where a ->> 'key' = any($1::text[])
+    `,
+    [keys]
+  );
+  return new Set(rows.map((r) => r.key));
+}
+
 export async function getOrderById(id: number): Promise<Order | null> {
   const { rows } = await pool.query<OrderRow>(
     `select * from orders where id = $1`,

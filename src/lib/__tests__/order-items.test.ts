@@ -52,6 +52,15 @@ describe("parseOrderItem", () => {
     });
   });
 
+  it("never stores an artwork delete token with the order", () => {
+    const item = parseOrderItem({
+      ...base,
+      artwork: [{ url: "https://x.ufs.sh/f/k1", key: "k1", name: "logo.png", deleteToken: "secret" }],
+    });
+    expect(item).toMatchObject({ artwork: [{ url: "https://x.ufs.sh/f/k1", key: "k1", name: "logo.png" }] });
+    expect((item as { artwork: object[] }).artwork[0]).not.toHaveProperty("deleteToken");
+  });
+
   it("drops unknown fields", () => {
     const item = parseOrderItem({ ...base, injected: "<script>" });
     expect(item).not.toHaveProperty("injected");

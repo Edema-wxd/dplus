@@ -11,7 +11,13 @@ import {
 import { lineTotals, type SelectedBranding } from "@/lib/branding-pricing";
 
 /** A logo or graphic the customer uploaded for the printers. */
-export type ArtworkFile = { url: string; key: string; name: string };
+export type ArtworkFile = {
+  url: string;
+  key: string;
+  name: string;
+  /** Lets this browser delete the file again; never stored with an order. */
+  deleteToken?: string | null;
+};
 
 export type CartItem = {
   id: string;
