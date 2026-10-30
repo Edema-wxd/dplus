@@ -18,9 +18,9 @@ Neon until the cutover below.
   downgrade after the move.
 - **Check cPanel has "PostgreSQL Databases".** MySQL won't do: the code uses
   JSONB, full-text search and array operators.
-- **Compare Postgres versions.** Run `select version();` in the Neon SQL editor
-  and note the version cPanel shows. If the server's Postgres is older than
-  Neon's, the dump may contain settings the older server rejects (see step 2).
+- **The server runs PostgreSQL 10.23** (shown at the top of phpPgAdmin). The
+  schema files in `docs/` are tested against 10, but Neon runs a newer version,
+  so step 2 builds the tables from those files and copies only the data.
 - **Node.js 20.9 or newer** must be available in cPanel's "Setup Node.js App"
   (Next.js 16 requires it).
 
@@ -43,41 +43,57 @@ URL-encode any special characters in the password.
 
 ## 2. Copy the data
 
-On your own machine, dump Neon. Use the **direct** connection string from the
-Neon dashboard, not the `-pooler` one, and a `pg_dump` at least as new as
-Neon's Postgres:
+A full `pg_dump` from Neon would carry table definitions written for a newer
+Postgres than the server's 10.23, so build the tables from the repository's
+schema files and copy only the rows.
+
+**Create the tables.** Upload the schema files and run them, in this order
+(later files refer to tables made by earlier ones):
 
 ```bash
-pg_dump --no-owner --no-acl "$NEON_DATABASE_URL" -f dplus.sql
-scp -P 21098 dplus.sql desimrwr@162.0.229.137:~/
+scp -P 21098 docs/*-schema.sql desimrwr@162.0.229.137:~/
+ssh -p 21098 desimrwr@162.0.229.137
+export DB='postgres://desimrwr_app:PASSWORD@localhost:5432/desimrwr_dplus'
+for f in admin amrod pricing orders portfolio contact brochures hampers; do
+  psql "$DB" -v ON_ERROR_STOP=1 -f ~/$f-schema.sql || break
+done
+```
+
+**Copy the rows.** On your own machine, dump Neon's data only. Use the
+**direct** connection string from the Neon dashboard, not the `-pooler` one:
+
+```bash
+pg_dump --data-only --no-owner --no-acl "$NEON_DATABASE_URL" -f dplus-data.sql
+# A pg_dump from Postgres 17 adds a setting Postgres 10 doesn't know:
+sed -i.bak '/^SET transaction_timeout/d' dplus-data.sql
+scp -P 21098 dplus-data.sql desimrwr@162.0.229.137:~/
 ```
 
 On the server:
 
 ```bash
-ssh -p 21098 desimrwr@162.0.229.137
-psql "postgres://desimrwr_app:PASSWORD@localhost:5432/desimrwr_dplus" \
-  -v ON_ERROR_STOP=1 -f dplus.sql
+psql "$DB" -v ON_ERROR_STOP=1 --single-transaction -f ~/dplus-data.sql
 ```
 
-If it stops on an unrecognised setting near the top of the file (for example
-`SET transaction_timeout`, which only exists from Postgres 17), the server is
-older than Neon. Delete that line from `dplus.sql` and run it again against an
-empty database.
+`--single-transaction` means a failure leaves the tables empty rather than half
+filled. If it stops with `column "..." does not exist`, the Neon database has a
+column the schema files don't: add it with `alter table`, empty the tables and
+run it again.
 
 Check the row counts match Neon:
 
 ```sql
 select 'products', count(*) from products
 union all select 'orders', count(*) from orders
+union all select 'admin_users', count(*) from admin_users
 union all select 'brochures', count(*) from brochures
 union all select 'hampers', count(*) from hampers
 union all select 'portfolio_items', count(*) from portfolio_items;
 ```
 
-If Neon can't be reached at all, you can recreate the tables from `docs/*.sql`
-and reload the catalogue with `npm run seed:amrod`, but orders, admin users,
-brochures, hampers, portfolio items and pricing settings would be lost.
+If Neon can't be reached at all, the tables can stay empty and the catalogue
+can be reloaded with `npm run seed:amrod`, but orders, admin users, brochures,
+hampers, portfolio items and pricing settings would be lost.
 
 ## 3. Create the Node.js app
 
@@ -154,8 +170,9 @@ sync is the heaviest thing the app does.
 1. Stop making admin changes. Orders placed on the Vercel site after the copy
    in step 2 would be lost, so do the final copy as close to the switch as
    possible.
-2. Repeat step 2 into a fresh, empty database (or drop and recreate the tables)
-   to pick up anything that changed since the first copy.
+2. Repeat step 2 to pick up anything that changed since the first copy: empty
+   the tables first (`psql "$DB" -c 'drop schema public cascade; create schema public;'`
+   then recreate them), or use a fresh database.
 3. Point the domain's DNS at the server: `A` records for `de-signplus.com` and
    `www` to `162.0.229.137`. Remove any Vercel `CNAME`.
 4. Once DNS has moved, issue the SSL certificate with cPanel's **SSL/TLS
