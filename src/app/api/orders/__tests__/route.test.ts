@@ -192,7 +192,7 @@ describe("POST /api/orders — success", () => {
     );
   });
 
-  it("returns 400 for artwork hosted outside UploadThing", async () => {
+  it("returns 400 for artwork not uploaded to the site", async () => {
     const req = makeRequest({
       customerName: "Jane Doe",
       customerEmail: "jane@example.com",

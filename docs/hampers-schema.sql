@@ -1,5 +1,5 @@
 -- Hampers schema (Neon Postgres)
--- Each row is one indexable page at /hampers/<slug>. Images live in UploadThing.
+-- Each row is one indexable page at /hampers/<slug>. Images live in UPLOADS_DIR.
 -- Hampers are an enquiry product: no prices, no basket. Every page routes to
 -- the contact form.
 

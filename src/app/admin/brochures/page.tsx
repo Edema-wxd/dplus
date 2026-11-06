@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useUploadThing } from "@/lib/uploadthing-client";
+import { useUpload } from "@/lib/use-upload";
 
 // ── types ─────────────────────────────────────────────────
 
@@ -285,14 +285,14 @@ export default function AdminBrochuresPage() {
   // ── uploads ───────────────────────────────────────────
 
   const { startUpload: uploadPages, isUploading: uploadingPages } =
-    useUploadThing("brochurePage", {
+    useUpload("brochurePage", {
       onClientUploadComplete: (res) => {
         res.forEach((f) => sessionKeys.current.add(f.key));
         setForm((prev) => ({
           ...prev,
           pages: [
             ...prev.pages,
-            ...res.map((f) => ({ url: f.ufsUrl, key: f.key, alt: "" })),
+            ...res.map((f) => ({ url: f.url, key: f.key, alt: "" })),
           ],
         }));
         toast.success(`${res.length} page${res.length === 1 ? "" : "s"} added`);
@@ -302,7 +302,7 @@ export default function AdminBrochuresPage() {
       },
     });
 
-  const { startUpload: uploadPdf, isUploading: uploadingPdf } = useUploadThing(
+  const { startUpload: uploadPdf, isUploading: uploadingPdf } = useUpload(
     "brochurePdf",
     {
       onClientUploadComplete: (res) => {
@@ -311,7 +311,7 @@ export default function AdminBrochuresPage() {
         sessionKeys.current.add(file.key);
         setForm((prev) => ({
           ...prev,
-          pdfUrl: file.ufsUrl,
+          pdfUrl: file.url,
           pdfKey: file.key,
           pdfSizeBytes: file.size,
         }));

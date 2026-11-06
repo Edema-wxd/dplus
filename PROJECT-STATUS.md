@@ -20,7 +20,7 @@ Stack: shadcn/ui (Radix), framer-motion, sonner, next-themes, NextAuth v5 (beta,
 | `/` | ✅ Built — Hero, Services, CTA |
 | `/products` | ✅ Built — paginated/searchable listing from Postgres, NGN pricing via `calcPrice()` |
 | `/products/[id]` | ✅ Built — colour swatches with per-colour price and stock, sizes, every print position/method with Amrod branding price breaks (setup + per unit, marked up via `calcPrice()`), live estimate, basket integration |
-| `/basket` | ✅ Built — cart UI (localStorage + context), per-item logo/artwork upload (UploadThing `customerArtwork`, rate limited per IP via Redis) and printer notes, submits to `/api/orders` |
+| `/basket` | ✅ Built — cart UI (localStorage + context), per-item logo/artwork upload (`/api/uploads/customerArtwork`, rate limited per IP via Redis) and printer notes, submits to `/api/orders` |
 | `/portfolio` | ✅ Built — project listing, DB-backed (`getPublishedPortfolioItems()`), no longer uses mock data |
 | `/portfolio/[id]` | ✅ Built — hero image, tags, client, description, additional images, CTA |
 | `/contact-us` | ✅ Built — Hero + Contact form with validation and submission handling |
@@ -60,7 +60,7 @@ Stack: shadcn/ui (Radix), framer-motion, sonner, next-themes, NextAuth v5 (beta,
 - `src/lib/redis.ts` — Upstash Redis client, used to cache pricing config.
 - `src/lib/amrod/` — Amrod API auth + catalogue sync (brands, categories, products, stock), with sync log table backing `/admin/amrod`.
 - `src/lib/email.ts` + `src/lib/email-templates.ts` — order receipt/alert and contact-form emails, via Resend (`RESEND_API_KEY`) with SMTP/nodemailer fallback; no-ops (logs only) if neither is configured.
-- Portfolio/content image uploads go through an S3-compatible bucket (`STORAGE_*` env vars, `@aws-sdk/client-s3`).
+- Uploads (artwork, brochure and hamper pages and PDFs, portfolio images) go through `/api/uploads/[slot]` (`src/lib/upload-slots.ts`, `src/lib/uploads.ts`) and are saved to `UPLOADS_DIR` on the server's disk. UploadThing is no longer used.
 - `src/context/cart-context.tsx` — client cart: `addItem`/`removeItem`/`updateQuantity`/`clear`, localStorage-persisted, computes `count`/`total`.
 
 ## Known issues / operational notes

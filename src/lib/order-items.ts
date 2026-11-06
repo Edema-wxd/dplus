@@ -1,23 +1,11 @@
 import type { BrandingPriceBreak, SelectedBranding } from "@/lib/branding-pricing";
 import type { ArtworkFile } from "@/context/cart-context";
 import type { OrderItem } from "@/lib/orders";
+import { isUploadedFileUrl } from "@/lib/upload-slots";
 
 export const MAX_NOTE_LENGTH = 1000;
 export const MAX_ARTWORK_FILES = 5;
 const MAX_BRANDINGS = 10;
-
-/** Artwork must live in our UploadThing app, not an arbitrary link. */
-export function isUploadedFileUrl(url: string): boolean {
-  try {
-    const { protocol, hostname } = new URL(url);
-    return (
-      protocol === "https:" &&
-      (hostname === "utfs.io" || hostname.endsWith(".ufs.sh") || hostname === "ufs.sh")
-    );
-  } catch {
-    return false;
-  }
-}
 
 type Raw = Record<string, unknown>;
 

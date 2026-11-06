@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/context/cart-context";
 import type { CartItem, CartItemPatch } from "@/context/cart-context";
-import { useUploadThing } from "@/lib/uploadthing-client";
+import { useUpload } from "@/lib/use-upload";
 import { brandingCost, brandingLabel, lineTotals } from "@/lib/branding-pricing";
 import { MAX_ARTWORK_FILES, MAX_NOTE_LENGTH } from "@/lib/order-items";
 
@@ -67,13 +67,13 @@ function PrintDetails({
   const artwork = item.artwork ?? [];
   const remaining = MAX_ARTWORK_FILES - artwork.length;
 
-  const { startUpload, isUploading } = useUploadThing("customerArtwork", {
+  const { startUpload, isUploading } = useUpload("customerArtwork", {
     onClientUploadComplete: (res) => {
       // Functional update: the item may have changed while the upload ran.
       onChange((current) => ({
         artwork: [
           ...(current.artwork ?? []),
-          ...res.map((f) => ({ url: f.ufsUrl, key: f.key, name: f.name })),
+          ...res.map((f) => ({ url: f.url, key: f.key, name: f.name })),
         ].slice(0, MAX_ARTWORK_FILES),
       }));
       onUploadingChange(false);
