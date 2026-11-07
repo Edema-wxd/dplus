@@ -200,7 +200,7 @@ describe("branding and print details", () => {
       result.current.addItem({ ...baseItem });
     });
     const id = result.current.items[0].id;
-    const file = { url: "https://x.ufs.sh/f/k", key: "k", name: "logo.png" };
+    const file = { url: "https://www.de-signplus.com/uploads/customerArtwork/2026/11/0f8e3a52-5d0b-4a8e-9a0c-2b8f5c1d7e44.png", key: "k", name: "logo.png" };
 
     act(() => {
       result.current.updateItem(id, { note: "Centre the logo" });

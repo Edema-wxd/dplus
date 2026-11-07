@@ -1,6 +1,6 @@
 -- Brochures schema (Neon Postgres)
--- Page images and the PDF live in UploadThing; this table holds the ordering,
--- the copy, and the UploadThing keys so files can be deleted when a row is.
+-- Page images and the PDF live in UPLOADS_DIR; this table holds the ordering,
+-- the copy, and the upload keys so files can be deleted when a row is.
 
 create table if not exists brochures (
   id             bigserial primary key,

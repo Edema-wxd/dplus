@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { deleteUploadedFiles } from "@/lib/uploadthing";
+import { deleteUploadedFiles } from "@/lib/uploads";
 
 /**
- * Drops files from UploadThing by key. Used when an editor uploads pages and
- * then abandons the edit, so the account doesn't fill with files no row owns.
+ * Deletes uploaded files by key. Used when an editor uploads pages and
+ * then abandons the edit, so the disk doesn't fill with files no row owns.
  */
 export async function DELETE(req: NextRequest) {
   const session = await auth();

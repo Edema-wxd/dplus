@@ -1,6 +1,6 @@
 /**
- * Optimises a folder of brochure page images, uploads them (and the PDF) to
- * UploadThing, and writes the brochure row.
+ * Optimises a folder of brochure page images, saves them (and the PDF) to
+ * UPLOADS_DIR, and writes the brochure row.
  *
  *   npx tsx scripts/brochure-import.ts \
  *     --dir "public/brochures/corporate-christmas-2026" \
@@ -11,6 +11,9 @@
  *
  * Pages are ordered by filename. Re-running with the same slug replaces the
  * brochure's files and deletes the ones it supersedes.
+ *
+ * The files have to land where the site serves them, so run this on the server
+ * (UPLOADS_DIR=~/public_html/uploads) or copy ./uploads there afterwards.
  */
 import { config } from "dotenv";
 config({ path: ".env.local" });
@@ -49,10 +52,6 @@ async function main() {
 
   if (!dir || !slug || !name) {
     console.error("Usage: tsx scripts/brochure-import.ts --dir <folder> --slug <slug> --name <name> [--edition ..] [--description ..] [--publish] [--dry-run]");
-    process.exit(1);
-  }
-  if (!dryRun && !process.env.UPLOADTHING_TOKEN) {
-    console.error("UPLOADTHING_TOKEN is not set in .env.local");
     process.exit(1);
   }
 
@@ -114,59 +113,30 @@ async function main() {
   }
 
   if (dryRun) {
-    console.log("\nDry run — nothing uploaded, nothing written.");
+    console.log("\nDry run — nothing saved, nothing written.");
     process.exit(0);
   }
 
   // ── upload ──────────────────────────────────────────────
-  const { UTApi, UTFile } = await import("uploadthing/server");
-  const utapi = new UTApi();
+  const { saveUpload, deleteUploadedFiles } = await import("../src/lib/uploads");
 
-  // Uploaded a few at a time, with retries: sending two dozen at once makes the
-  // ingest endpoint drop connections, and a half-finished run leaves orphans.
   const uploaded: { url: string; key: string; alt: string }[] = [];
 
-  async function uploadOne(file: { name: string; data: Buffer }, type: string) {
-    let lastError = "unknown error";
-    for (let attempt = 1; attempt <= 3; attempt++) {
-      const result = await utapi.uploadFiles(
-        new UTFile([new Uint8Array(file.data)], file.name, { type })
-      );
-      if (!result.error && result.data) return result.data;
-      lastError = result.error?.message ?? lastError;
-      if (attempt < 3) {
-        console.log(`  retrying ${file.name} (attempt ${attempt + 1})`);
-        await new Promise((r) => setTimeout(r, attempt * 1500));
-      }
-    }
-    throw new Error(`Upload failed for ${file.name}: ${lastError}`);
-  }
-
-  /** Removes everything this run put in the account, so a failure leaves none. */
+  /** Removes everything this run saved, so a failure leaves none. */
   async function rollback() {
     const keys = uploaded.map((p) => p.key);
     if (!keys.length) return;
-    console.error(`Removing ${keys.length} files uploaded by this run…`);
-    try {
-      await utapi.deleteFiles(keys);
-    } catch {
-      console.error("Could not remove them — check the UploadThing dashboard.");
-    }
+    console.error(`Removing ${keys.length} files saved by this run…`);
+    await deleteUploadedFiles(keys);
   }
 
-  console.log("\nUploading pages to UploadThing…");
-  const BATCH = 4;
+  console.log("\nSaving pages…");
   try {
-    for (let i = 0; i < optimised.length; i += BATCH) {
-      const batch = optimised.slice(i, i + BATCH);
-      const results = await Promise.all(
-        batch.map((file) => uploadOne(file, "image/webp"))
-      );
-      uploaded.push(
-        ...results.map((data) => ({ url: data.ufsUrl, key: data.key, alt: "" }))
-      );
-      console.log(`  ${uploaded.length}/${optimised.length} pages`);
+    for (const file of optimised) {
+      const data = await saveUpload("brochurePage", file.data, "webp", file.name);
+      uploaded.push({ url: data.url, key: data.key, alt: "" });
     }
+    console.log(`  ${uploaded.length}/${optimised.length} pages`);
   } catch (err) {
     await rollback();
     throw err;
@@ -177,16 +147,12 @@ async function main() {
   let pdfUrl: string | null = null;
   let pdfKey: string | null = null;
   if (pdfPath) {
-    console.log("Uploading PDF…");
     try {
-      const data = await uploadOne(
-        { name: `${slug}.pdf`, data: await fs.readFile(pdfPath) },
-        "application/pdf"
-      );
-      pdfUrl = data.ufsUrl;
+      const data = await saveUpload("brochurePdf", await fs.readFile(pdfPath), "pdf", `${slug}.pdf`);
+      pdfUrl = data.url;
       pdfKey = data.key;
-      uploaded.push({ url: data.ufsUrl, key: data.key, alt: "" });
-      console.log("  PDF uploaded");
+      uploaded.push({ url: data.url, key: data.key, alt: "" });
+      console.log("  PDF saved");
     } catch (err) {
       await rollback();
       throw err;
@@ -222,7 +188,7 @@ async function main() {
 
       await brochures.updateBrochure(existing.id, payload);
       if (superseded.length) {
-        await utapi.deleteFiles(superseded);
+        await deleteUploadedFiles(superseded);
         console.log(
           `Replaced brochure #${existing.id}, removed ${superseded.length} old files`
         );

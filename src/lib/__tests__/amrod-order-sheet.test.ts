@@ -14,7 +14,7 @@ const shirt: OrderItem = {
     { positionCode: "F", positionName: "Front", brandingCode: "SP-1", brandingName: "Screen Print", colours: 1, breaks: [] },
     { positionCode: "B", positionName: "Back", brandingCode: "EMB-A", brandingName: "Embroidery", colours: null, breaks: [] },
   ],
-  artwork: [{ url: "https://x.ufs.sh/f/k", key: "k", name: "logo.png" }],
+  artwork: [{ url: "https://www.de-signplus.com/uploads/customerArtwork/2026/11/0f8e3a52-5d0b-4a8e-9a0c-2b8f5c1d7e44.png", key: "k", name: "logo.png" }],
   note: 'Logo 8cm, "centred"',
 };
 

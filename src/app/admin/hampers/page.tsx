@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useUploadThing } from "@/lib/uploadthing-client";
+import { useUpload } from "@/lib/use-upload";
 
 type HamperPage = { url: string; key: string; alt: string };
 type HamperContent = { item: string; note?: string };
@@ -183,13 +183,13 @@ export default function AdminHampersPage() {
     fetchItems();
   }, [fetchItems]);
 
-  const { startUpload, isUploading } = useUploadThing("hamperPage", {
+  const { startUpload, isUploading } = useUpload("hamperPage", {
     onClientUploadComplete: (res) => {
       setForm((prev) => ({
         ...prev,
         pages: [
           ...prev.pages,
-          ...res.map((f) => ({ url: f.ufsUrl, key: f.key, alt: "" })),
+          ...res.map((f) => ({ url: f.url, key: f.key, alt: "" })),
         ],
       }));
       toast.success(`${res.length} page${res.length === 1 ? "" : "s"} added`);
@@ -199,7 +199,7 @@ export default function AdminHampersPage() {
     },
   });
 
-  const { startUpload: uploadPdf, isUploading: uploadingPdf } = useUploadThing(
+  const { startUpload: uploadPdf, isUploading: uploadingPdf } = useUpload(
     "hamperPdf",
     {
       onClientUploadComplete: (res) => {
@@ -207,7 +207,7 @@ export default function AdminHampersPage() {
         if (!file) return;
         setForm((prev) => ({
           ...prev,
-          pdfUrl: file.ufsUrl,
+          pdfUrl: file.url,
           pdfKey: file.key,
           pdfSizeBytes: file.size,
         }));
