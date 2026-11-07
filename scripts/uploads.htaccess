@@ -17,4 +17,9 @@ RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8
   <FilesMatch "\.svg$">
     Header set Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; sandbox"
   </FilesMatch>
+  # Shopper artwork is private to the order; keep it out of search results.
+  # Public uploads (brochures, hampers, portfolio) stay indexable.
+  <If "%{REQUEST_URI} =~ m#^/uploads/customerArtwork/#">
+    Header set X-Robots-Tag "noindex, nofollow"
+  </If>
 </IfModule>

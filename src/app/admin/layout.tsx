@@ -7,8 +7,8 @@ import { getNewOrderCount } from "@/lib/orders";
 
 export const dynamic = "force-dynamic";
 
-// robots.txt already disallows /admin, but a meta tag also covers anything that
-// reaches these pages through a link rather than a crawl of the root.
+// Kept out of search by this tag and the X-Robots-Tag header in next.config.
+// robots.txt leaves /admin crawlable on purpose so crawlers can see them.
 export const metadata: Metadata = {
   title: { default: "Admin", template: "%s | Admin" },
   robots: { index: false, follow: false },

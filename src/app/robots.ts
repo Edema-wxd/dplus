@@ -7,10 +7,13 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        // Private or thin pages that should never appear in search. Product
-        // pages are supplier copy, and crawling thousands of them kept the
-        // database awake; /products itself stays crawlable so its noindex is seen.
-        disallow: ["/admin", "/admin/", "/portal", "/api/", "/basket", "/products/"],
+        // Only block what is expensive to crawl. A blocked URL can still be
+        // indexed from links, because the crawler never sees its noindex — so
+        // /admin, /portal and /basket stay fetchable and rely on their noindex
+        // meta tags and X-Robots-Tag headers (next.config). Product pages are
+        // supplier copy, and crawling thousands of them kept the database awake;
+        // /products itself stays crawlable so its noindex is seen.
+        disallow: ["/api/", "/products/"],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
