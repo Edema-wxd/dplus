@@ -1,14 +1,8 @@
-/*
- * Migration — run once against your database:
- *
- * CREATE TABLE IF NOT EXISTS newsletter_subscribers (
- *   email          TEXT        PRIMARY KEY,
- *   subscribed_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
- * );
- */
+// Schema: docs/contact-schema.sql — apply with `npm run contact:schema`.
 
 import { NextRequest, NextResponse } from "next/server";
 import { pool } from "@/lib/db";
+import { CAPTCHA_ERROR, CAPTCHA_FIELD, verifyCaptcha } from "@/lib/captcha";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -17,6 +11,10 @@ export async function POST(req: NextRequest) {
 
   if (!body || typeof body.email !== "string" || !EMAIL_RE.test(body.email.trim())) {
     return NextResponse.json({ error: "A valid email address is required" }, { status: 400 });
+  }
+
+  if (!(await verifyCaptcha(body[CAPTCHA_FIELD]))) {
+    return NextResponse.json({ error: CAPTCHA_ERROR }, { status: 400 });
   }
 
   const email = body.email.trim().toLowerCase();

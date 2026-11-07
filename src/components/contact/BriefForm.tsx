@@ -4,32 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-
-// ── What the brief collects ───────────────────────────────
-
-const NEEDS = [
-  { value: "hampers", label: "gift hampers" },
-  { value: "branded-merchandise", label: "branded merchandise" },
-  { value: "executive-gifts", label: "executive gifts" },
-  { value: "workwear", label: "workwear & PPE" },
-  { value: "packaging", label: "custom packaging" },
-  { value: "not-sure", label: "something else" },
-];
-
-const BUDGETS = [
-  { value: "under-1m", label: "Under ₦1M" },
-  { value: "1-5m", label: "₦1M – ₦5M" },
-  { value: "5-15m", label: "₦5M – ₦15M" },
-  { value: "15-50m", label: "₦15M – ₦50M" },
-  { value: "50m-plus", label: "Over ₦50M" },
-  { value: "unsure", label: "Not sure yet" },
-];
-
-const ROLES = [
-  { value: "decide", label: "I decide" },
-  { value: "recommend", label: "I recommend, someone else signs" },
-  { value: "researching", label: "I'm gathering options" },
-];
+import { Turnstile, captchaEnabled, type TurnstileHandle } from "@/components/Turnstile";
+import { BUDGETS, NEEDS, ROLES } from "@/lib/brief-options";
 
 type Form = {
   need: string;
@@ -77,6 +53,8 @@ export default function BriefForm() {
   const [sent, setSent] = useState<{ name: string } | null>(null);
   const [about, setAbout] = useState<string | null>(null);
   const startedAt = useRef(Date.now());
+  const captcha = useRef<TurnstileHandle>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const detailRef = useRef<HTMLDivElement>(null);
 
   const set = <K extends keyof Form>(key: K, value: Form[K]) => {
@@ -141,6 +119,13 @@ export default function BriefForm() {
       return;
     }
 
+    if (captchaEnabled && !captchaToken) {
+      toast.error("Just a moment", {
+        description: "We're still checking you're not a bot. Try again in a few seconds.",
+      });
+      return;
+    }
+
     setSending(true);
     const need = NEEDS.find((n) => n.value === form.need)?.label ?? form.need;
 
@@ -171,6 +156,7 @@ export default function BriefForm() {
           hamper: about || undefined,
           website: form.website,
           elapsedMs: Date.now() - startedAt.current,
+          "cf-turnstile-response": captchaToken,
         }),
       });
 
@@ -187,6 +173,7 @@ export default function BriefForm() {
       }
       setSent({ name: form.name.trim().split(" ")[0] });
     } catch (err) {
+      captcha.current?.reset();
       toast.error(
         err instanceof Error ? err.message : "Could not send the brief",
         { description: "Try again, or message us on WhatsApp." }
@@ -483,6 +470,8 @@ export default function BriefForm() {
                   onChange={(e) => set("website", e.target.value)}
                 />
               </div>
+
+              <Turnstile ref={captcha} onToken={setCaptchaToken} />
 
               <div className="mt-10 flex flex-col sm:flex-row sm:items-center gap-4">
                 <button

@@ -3,6 +3,8 @@ import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/portal/SubmitButton";
+import { Turnstile } from "@/components/Turnstile";
+import { CAPTCHA_FIELD, verifyCaptcha } from "@/lib/captcha";
 
 export default async function PortalLoginPage({
   searchParams,
@@ -13,6 +15,10 @@ export default async function PortalLoginPage({
 
   async function login(formData: FormData) {
     "use server";
+
+    if (!(await verifyCaptcha(formData.get(CAPTCHA_FIELD)))) {
+      redirect("/portal?error=captcha");
+    }
 
     try {
       await signIn("credentials", {
@@ -38,7 +44,9 @@ export default async function PortalLoginPage({
 
         {error && (
           <p className="text-sm text-destructive">
-            Invalid email or password.
+            {error === "captcha"
+              ? "We couldn't confirm you're not a bot. Please try again."
+              : "Invalid email or password."}
           </p>
         )}
 
@@ -55,6 +63,8 @@ export default async function PortalLoginPage({
           </label>
           <Input id="password" name="password" type="password" required />
         </div>
+
+        <Turnstile />
 
         <SubmitButton />
       </form>

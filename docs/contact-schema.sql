@@ -1,6 +1,6 @@
--- Contact form schema (Neon Postgres)
+-- Contact form and newsletter schema (Postgres)
 -- Written to by /api/contact on every contact-form submission; read by the
--- admin dashboard's "Recent enquiries" card.
+-- admin dashboard and the Contacts page (/admin/contacts).
 
 create table if not exists contact_submissions (
   id         serial primary key,
@@ -16,3 +16,10 @@ create table if not exists contact_submissions (
 -- The dashboard reads the newest submissions first.
 create index if not exists contact_submissions_created_at_idx
   on contact_submissions (created_at desc);
+
+-- Written to by /api/newsletter from the footer sign-up form; the admin
+-- Contacts page lists subscribers alongside enquiries and orders.
+create table if not exists newsletter_subscribers (
+  email          text        primary key,
+  subscribed_at  timestamptz not null default now()
+);

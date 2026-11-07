@@ -34,6 +34,7 @@ Copy `.env.local` (not committed) with at least:
 - `RESEND_API_KEY` or `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASS`/`SMTP_SECURE`, `EMAIL_FROM`, `ADMIN_EMAIL`/`NOTIFY_EMAIL` — order/contact email notifications (no-op if unset)
 - `UPLOADS_DIR` — where uploaded files are saved (default `./uploads`; on the server `~/public_html/uploads`, which the web server serves at `/uploads`)
 - `NEXT_PUBLIC_SITE_URL` — the live domain; uploaded file URLs and canonical links are built from it
+- `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (build time) and `TURNSTILE_SECRET_KEY` (server) — Cloudflare Turnstile on the contact, newsletter, basket and admin login forms (off if the secret is unset)
 
 ### Seed scripts
 
