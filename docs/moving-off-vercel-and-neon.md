@@ -168,16 +168,27 @@ The daily sync takes about 10 seconds. Backups keep 14 days in `~/backups/dplus`
 download one now and then, and include `~/public_html/uploads` in whatever you
 copy off the server.
 
-## 8. Shut down Vercel, Neon and UploadThing
+## 8. Vercel and Neon become the dev site; shut down UploadThing
 
-1. Done on 2026-11-07: the Vercel `dplus` project is paused (its URL answers
-   503, so its cron jobs no longer reach the app) and `vercel.json` is gone.
-   Pausing doesn't unhook Git, so pushes to `main` may still build there;
-   disconnect the repository in the project's Git settings, or delete the
-   project once Neon goes.
-2. Keep Neon for a week in case something was missed, then delete the project.
-   Keep the last dump.
+1. On 2026-11-07 Vercel stopped serving the live site and became the dev
+   site, at `https://dplus-iota.vercel.app`:
+   - Its production branch is `dev`. Push to `dev` to try a change there, then
+     merge `dev` into `main` and deploy `main` to the server. Other branches
+     still get their own preview links.
+   - It uses Neon as its database: a copy of the live data from the 2026-11-06
+     switch-over, so nothing done on dev touches the live site. Neon has the
+     same tables as the server; when a schema file changes, apply it to both.
+   - `next.config` sends `X-Robots-Tag: noindex` on every Vercel deployment
+     (`VERCEL_ENV` is set there and never on the server), so dev stays out of
+     search results.
+   - It has no email, Turnstile or cron settings, so it sends no mail, shows no
+     captcha and runs no Amrod syncs. Uploads go to `/tmp` and vanish when
+     Vercel recycles the function; images uploaded on the live site don't
+     show on dev.
+   - `vercel.json` is gone, so Vercel runs no cron jobs.
+2. Keep the Neon project: it is the dev database now. Keep the last dump too.
 3. Once no row mentions `ufs.sh` (`select count(*) from brochures where pages::text like '%ufs.sh%'`,
-   same for `hampers` and `orders.items`), cancel UploadThing.
+   same for `hampers` and `orders.items`), cancel UploadThing. Neon still
+   points at UploadThing for its images, so those break on dev afterwards.
 4. The old app folders `~/dplus` and `~/neon_dump.sql` (Aug 31) can go once the
    new build has run for a while.
