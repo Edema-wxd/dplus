@@ -7,7 +7,8 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/context/cart-context";
 import type { CartItem, CartItemPatch } from "@/context/cart-context";
-import { useUploadThing } from "@/lib/uploadthing-client";
+import { useUpload } from "@/lib/use-upload";
+import { Turnstile, captchaEnabled, type TurnstileHandle } from "@/components/Turnstile";
 import { brandingCost, brandingLabel, lineTotals } from "@/lib/branding-pricing";
 import { MAX_ARTWORK_FILES, MAX_NOTE_LENGTH } from "@/lib/order-items";
 
@@ -67,13 +68,13 @@ function PrintDetails({
   const artwork = item.artwork ?? [];
   const remaining = MAX_ARTWORK_FILES - artwork.length;
 
-  const { startUpload, isUploading } = useUploadThing("customerArtwork", {
+  const { startUpload, isUploading } = useUpload("customerArtwork", {
     onClientUploadComplete: (res) => {
       // Functional update: the item may have changed while the upload ran.
       onChange((current) => ({
         artwork: [
           ...(current.artwork ?? []),
-          ...res.map((f) => ({ url: f.ufsUrl, key: f.key, name: f.name })),
+          ...res.map((f) => ({ url: f.url, key: f.key, name: f.name })),
         ].slice(0, MAX_ARTWORK_FILES),
       }));
       onUploadingChange(false);
@@ -433,24 +434,36 @@ export default function BasketPage() {
     });
   }, []);
   const uploading = uploadingIds.size > 0;
+  const captcha = useRef<TurnstileHandle>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!items.length || uploading) return;
+    if (captchaEnabled && !captchaToken) {
+      toast.error("We're still checking you're not a bot. Try again in a few seconds.");
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, items, total }),
+        body: JSON.stringify({ ...form, items, total, "cf-turnstile-response": captchaToken }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error);
+      }
       const data = await res.json();
       clear();
       setOrderId(data?.order?.id ?? null);
       setSubmitted(true);
-    } catch {
-      toast.error("Something went wrong. Please try again.");
+    } catch (err) {
+      captcha.current?.reset();
+      toast.error(
+        (err instanceof Error && err.message) || "Something went wrong. Please try again."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -563,6 +576,8 @@ export default function BasketPage() {
                   className={`${fieldClass} resize-none`}
                 />
               </Field>
+
+              <Turnstile ref={captcha} onToken={setCaptchaToken} />
 
               <button
                 type="submit"

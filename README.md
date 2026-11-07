@@ -9,7 +9,7 @@ See [PROJECT-STATUS.md](./PROJECT-STATUS.md) for current route/feature status an
 - Next.js 15 App Router, React 19, Tailwind v4
 - shadcn/ui (Radix), framer-motion, sonner, next-themes
 - NextAuth v5 (beta, credentials provider) for admin auth
-- Postgres via `pg` (Neon today, moving to the shared server), `@upstash/redis` for caching
+- Postgres via `pg` (Neon today, moving to the shared server), `@upstash/redis` for caching, uploads saved to the server's disk
 - Resend / SMTP for transactional email, S3-compatible storage for uploads
 
 ## Getting started
@@ -32,7 +32,9 @@ Copy `.env.local` (not committed) with at least:
 - `AMROD_API_URL`, `AMROD_IDENTITY_URL`, `AMROD_CUSTOMER_CODE`, `AMROD_USERNAME`, `AMROD_PASSWORD` — Amrod catalogue sync
 - `CRON_SECRET` — protects `/api/cron/*` sync endpoints
 - `RESEND_API_KEY` or `SMTP_HOST`/`SMTP_PORT`/`SMTP_USER`/`SMTP_PASS`/`SMTP_SECURE`, `EMAIL_FROM`, `ADMIN_EMAIL`/`NOTIFY_EMAIL` — order/contact email notifications (no-op if unset)
-- `STORAGE_ENDPOINT`, `STORAGE_REGION`, `STORAGE_BUCKET`, `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY` — S3-compatible bucket for portfolio image uploads
+- `UPLOADS_DIR` — where uploaded files are saved (default `./uploads`; on the server `~/public_html/uploads`, which the web server serves at `/uploads`)
+- `NEXT_PUBLIC_SITE_URL` — the live domain; uploaded file URLs and canonical links are built from it
+- `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (build time) and `TURNSTILE_SECRET_KEY` (server) — Cloudflare Turnstile on the contact, newsletter, basket and admin login forms (off if the secret is unset)
 
 ### Seed scripts
 

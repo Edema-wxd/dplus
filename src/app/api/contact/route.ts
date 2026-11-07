@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { pool } from "@/lib/db";
 import { scoreLead } from "@/lib/lead-score";
+import { CAPTCHA_ERROR, CAPTCHA_FIELD, verifyCaptcha } from "@/lib/captcha";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -146,6 +147,9 @@ export async function POST(req: NextRequest) {
   }
   if (typeof probe.elapsedMs === "number" && probe.elapsedMs < 2000) {
     return NextResponse.json({ ok: true });
+  }
+  if (!(await verifyCaptcha(probe[CAPTCHA_FIELD]))) {
+    return NextResponse.json({ error: CAPTCHA_ERROR }, { status: 400 });
   }
 
   const errors = validate(body as Record<string, unknown>);

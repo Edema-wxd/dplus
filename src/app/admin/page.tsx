@@ -170,10 +170,16 @@ export default async function AdminDashboardPage() {
 
       {/* ── Recent contact inquiries ─────────────────────── */}
       <div className="rounded-xl border border-border bg-background">
-        <div className="border-b border-border px-5 py-4">
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <h2 className="text-sm font-semibold text-foreground">
             Recent Contact Inquiries
           </h2>
+          <Link
+            href="/admin/contacts"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            View all contacts →
+          </Link>
         </div>
 
         {recentContacts.length === 0 ? (

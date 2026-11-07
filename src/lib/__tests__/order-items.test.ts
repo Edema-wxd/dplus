@@ -1,4 +1,7 @@
-import { isUploadedFileUrl, parseOrderItem } from "@/lib/order-items";
+import { parseOrderItem } from "@/lib/order-items";
+import { isUploadedFileUrl } from "@/lib/upload-slots";
+
+const UPLOAD = "https://www.de-signplus.com/uploads/customerArtwork/2026/11/0f8e3a52-5d0b-4a8e-9a0c-2b8f5c1d7e44.png";
 
 const base = {
   simpleCode: "ABC",
@@ -22,11 +25,12 @@ const branding = {
 
 describe("isUploadedFileUrl", () => {
   it.each([
-    ["https://abc123.ufs.sh/f/key", true],
-    ["https://utfs.io/f/key", true],
-    ["http://abc123.ufs.sh/f/key", false],
-    ["https://evil.com/ufs.sh", false],
-    ["https://ufs.sh.evil.com/f", false],
+    [UPLOAD, true],
+    [UPLOAD.replace("https:", "http:"), false],
+    ["https://evil.com/uploads/customerArtwork/2026/11/0f8e3a52-5d0b-4a8e-9a0c-2b8f5c1d7e44.png", false],
+    ["https://www.de-signplus.com.evil.com/uploads/x.png", false],
+    ["https://www.de-signplus.com/uploads/../admin", false],
+    ["https://abc123.ufs.sh/f/key", false],
     ["not a url", false],
   ])("%s -> %s", (url, ok) => {
     expect(isUploadedFileUrl(url)).toBe(ok);
@@ -42,12 +46,12 @@ describe("parseOrderItem", () => {
     const item = parseOrderItem({
       ...base,
       brandings: [branding],
-      artwork: [{ url: "https://x.ufs.sh/f/k1", key: "k1", name: "logo.png" }],
+      artwork: [{ url: UPLOAD, key: "k1", name: "logo.png" }],
       note: "  Centre it, 8cm wide  ",
     });
     expect(item).toMatchObject({
       brandings: [branding],
-      artwork: [{ url: "https://x.ufs.sh/f/k1", key: "k1", name: "logo.png" }],
+      artwork: [{ url: UPLOAD, key: "k1", name: "logo.png" }],
       note: "Centre it, 8cm wide",
     });
   });
@@ -63,7 +67,7 @@ describe("parseOrderItem", () => {
     [{ ...base, price: 0 }, /price/],
     [{ ...base, fullCode: "" }, /code/],
     [{ ...base, artwork: [{ url: "https://evil.com/x.png", key: "k", name: "x" }] }, /artwork/],
-    [{ ...base, artwork: Array(6).fill({ url: "https://x.ufs.sh/f/k", key: "k", name: "x" }) }, /at most/],
+    [{ ...base, artwork: Array(6).fill({ url: UPLOAD, key: "k", name: "x" }) }, /at most/],
     [{ ...base, note: "x".repeat(1001) }, /note/],
     [{ ...base, note: 5 }, /note/],
     [{ ...base, brandings: [{ ...branding, breaks: [{ price: "free" }] }] }, /branding/],

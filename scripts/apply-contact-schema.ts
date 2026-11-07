@@ -1,4 +1,4 @@
-/** Creates the contact_submissions table. Safe to re-run — everything is `if not exists`. */
+/** Creates the contact_submissions and newsletter_subscribers tables. Safe to re-run — everything is `if not exists`. */
 import { config } from "dotenv";
 config({ path: ".env.local" });
 

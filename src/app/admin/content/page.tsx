@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, UploadCloud, Link2 } from "lucide-react";
+import type { UploadedFile } from "@/lib/upload-slots";
 
 // ── types ─────────────────────────────────────────────────
 
@@ -171,16 +172,17 @@ export default function AdminContentPage() {
         const uploadId = newUploads[i].id;
         try {
           const fd = new FormData();
-          fd.append("file", file);
-          const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+          fd.append("files", file);
+          const res = await fetch("/api/uploads/portfolioImage", { method: "POST", body: fd });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error ?? "Upload failed");
+          const [uploaded] = data as UploadedFile[];
 
           setForm((prev) => {
             const isMain = prev.images.length === 0;
             return {
               ...prev,
-              images: [...prev.images, { url: data.url, alt: "", isMain }],
+              images: [...prev.images, { url: uploaded.url, alt: "", isMain }],
             };
           });
           setUploads((prev) =>

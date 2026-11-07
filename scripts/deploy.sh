@@ -14,7 +14,7 @@ set -euo pipefail
 DEPLOY_HOST="${DEPLOY_HOST:-162.0.229.137}"
 DEPLOY_PORT="${DEPLOY_PORT:-21098}"
 DEPLOY_USER="${DEPLOY_USER:-desimrwr}"
-DEPLOY_DIR="${DEPLOY_DIR:-dplus}"
+DEPLOY_DIR="${DEPLOY_DIR:-dplus24}"
 DEPLOY_KEY="${DEPLOY_KEY:-$HOME/.ssh/id_ed25519}"
 # cPanel's "Setup Node.js App" page shows this command ("Enter to the virtual
 # environment"); npm on the server has to run inside it.
@@ -26,7 +26,7 @@ npx next build
 
 rm -f deploy.zip
 # .next/cache is build-time only; public/brochures holds source files for
-# scripts/brochure-import.ts, which are served from UploadThing instead.
+# scripts/brochure-import.ts, which serves them from /uploads instead.
 zip -qr deploy.zip .next public package.json package-lock.json server.js \
   next.config.js next.config.ts \
   -x '.next/cache/*' 'public/brochures/*'

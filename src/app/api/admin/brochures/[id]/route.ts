@@ -7,7 +7,7 @@ import {
   updateBrochure,
   type UpdateBrochureInput,
 } from "@/lib/brochures";
-import { deleteUploadedFiles } from "@/lib/uploadthing";
+import { deleteUploadedFiles } from "@/lib/uploads";
 import { revalidateBrochures } from "@/lib/revalidate";
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -67,7 +67,7 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
     );
   }
 
-  // Files dropped from the brochure are removed from UploadThing too, so the
+  // Files dropped from the brochure are deleted from the server too, so the
   // account doesn't fill with orphans.
   const orphans: string[] = [];
   if (patch.pages) {

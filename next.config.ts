@@ -7,6 +7,9 @@ const NOINDEX = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
 
 const nextConfig: NextConfig = {
   async headers() {
+    // Vercel now only hosts the dev site (VERCEL_ENV is set on every Vercel
+    // deployment, never on the cPanel server), so keep all of it out of search.
+    if (process.env.VERCEL_ENV) return [{ source: "/:path*", headers: NOINDEX }];
     return [
       // Private pages. Their layouts set the meta tag too; the header also
       // covers the redirects and errors those routes return.
@@ -22,10 +25,19 @@ const nextConfig: NextConfig = {
       // RSC payloads for client navigation: same URL as the page, but data.
       { source: "/:path*", has: [{ type: "header", key: "rsc" }], headers: NOINDEX },
       { source: "/:path*", has: [{ type: "query", key: "_rsc" }], headers: NOINDEX },
-      // Supplier product photos. Portfolio and hamper images stay indexable.
+      // Logos shoppers attach to orders. In production the web server answers
+      // /uploads itself, so scripts/uploads.htaccess sets the same header.
+      { source: "/uploads/customerArtwork/:path*", headers: NOINDEX },
+      // Supplier product photos and shopper artwork through the image
+      // optimiser. Portfolio and hamper images stay indexable.
       {
         source: "/_next/image",
         has: [{ type: "query", key: "url", value: "https://amrcdn\\.amrod\\.co\\.za/.*" }],
+        headers: NOINDEX,
+      },
+      {
+        source: "/_next/image",
+        has: [{ type: "query", key: "url", value: ".*/uploads/customerArtwork/.*" }],
         headers: NOINDEX,
       },
     ];
@@ -33,9 +45,9 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "amrcdn.amrod.co.za" },
-      // UploadThing: app-scoped host (v7+) and the legacy one.
-      { protocol: "https", hostname: "**.ufs.sh" },
-      { protocol: "https", hostname: "utfs.io" },
+      // Uploaded brochure, hamper and portfolio images (see src/lib/uploads.ts).
+      { protocol: "https", hostname: "www.de-signplus.com", pathname: "/uploads/**" },
+      { protocol: "https", hostname: "de-signplus.com", pathname: "/uploads/**" },
     ],
   },
 };

@@ -3,7 +3,7 @@ import { cached, invalidateCachePrefix } from "@/lib/cache";
 
 export type BrochurePage = {
   url: string;
-  /** UploadThing file key, kept so the file can be deleted with the row. */
+  /** Upload key, kept so the file can be deleted with the row. */
   key: string;
   alt: string;
 };

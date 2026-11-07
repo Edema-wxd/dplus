@@ -7,7 +7,7 @@ import {
   updateHamper,
   type UpdateHamperInput,
 } from "@/lib/hampers";
-import { deleteUploadedFiles } from "@/lib/uploadthing";
+import { deleteUploadedFiles } from "@/lib/uploads";
 import { revalidateHampers } from "@/lib/revalidate";
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -62,7 +62,7 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
     return NextResponse.json({ error: "Address is required" }, { status: 400 });
   }
 
-  // Files dropped from the hamper leave UploadThing too.
+  // Files dropped from the hamper are deleted from the server too.
   const orphans: string[] = [];
   if (patch.pages) {
     const kept = new Set(patch.pages.map((p) => p.key));
