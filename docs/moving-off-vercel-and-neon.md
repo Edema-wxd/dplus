@@ -103,6 +103,7 @@ existing ones (auth secret, `CRON_SECRET`, Amrod) and set:
 | `AUTH_URL` | `https://www.de-signplus.com` |
 | `AUTH_TRUST_HOST` | `true` |
 | `PG_POOL_MAX` | `5` (optional) |
+| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret key (optional; turns the captcha on) |
 
 `AUTH_URL` matters: the CDN and LiteSpeed both add the host to
 `X-Forwarded-Host`, and NextAuth chokes on the doubled value
@@ -115,7 +116,9 @@ told the site's address.
 
 `NEXT_PUBLIC_SITE_URL` is baked in at build time and upload URLs are built from
 it. It defaults to `https://www.de-signplus.com`; if `.env.local` sets it, it
-must be that. Then:
+must be that. `NEXT_PUBLIC_TURNSTILE_SITE_KEY` is baked in the same way: deploy
+a build with it before setting `TURNSTILE_SECRET_KEY` on the server, or every
+form is turned away for lack of a token. Then:
 
 ```bash
 export DEPLOY_DIR=dplus24   # the default; the live app

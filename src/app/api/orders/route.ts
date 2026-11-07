@@ -4,6 +4,7 @@ import { parseOrderItem } from "@/lib/order-items";
 import { lineTotals } from "@/lib/branding-pricing";
 import { sendEmail } from "@/lib/email";
 import { orderReceiptHtml, orderAlertHtml } from "@/lib/email-templates";
+import { CAPTCHA_ERROR, CAPTCHA_FIELD, verifyCaptcha } from "@/lib/captcha";
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -18,6 +19,10 @@ export async function POST(req: Request) {
 
   if (!customerName || !customerEmail || !Array.isArray(items) || items.length === 0) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+  }
+
+  if (!(await verifyCaptcha(body[CAPTCHA_FIELD]))) {
+    return NextResponse.json({ error: CAPTCHA_ERROR }, { status: 400 });
   }
 
   const validatedItems: OrderItem[] = [];

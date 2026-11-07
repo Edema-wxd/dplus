@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { FaFacebookF, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 import { ArrowUp } from "lucide-react";
 import { useTheme } from "next-themes";
+import { Turnstile, captchaEnabled, type TurnstileHandle } from "@/components/Turnstile";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -44,6 +45,9 @@ export default function Footer() {
   const [email, setEmail] = useState("");
   const [subState, setSubState] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [subError, setSubError] = useState("");
+  const [wantsCaptcha, setWantsCaptcha] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captcha = useRef<TurnstileHandle>(null);
   const currentYear = new Date().getFullYear();
 
   useEffect(() => {
@@ -153,17 +157,23 @@ export default function Footer() {
               <form
                 onSubmit={async (e) => {
                   e.preventDefault();
+                  if (captchaEnabled && !captchaToken) {
+                    setSubError("Checking you're not a bot. Try again in a few seconds.");
+                    setSubState("error");
+                    return;
+                  }
                   setSubState("loading");
                   setSubError("");
                   try {
                     const res = await fetch("/api/newsletter", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ email }),
+                      body: JSON.stringify({ email, "cf-turnstile-response": captchaToken }),
                     });
                     if (res.ok) {
                       setSubState("done");
                     } else {
+                      captcha.current?.reset();
                       const data = await res.json().catch(() => ({}));
                       setSubError(
                         data.error ?? "Something went wrong. Please try again.",
@@ -171,6 +181,7 @@ export default function Footer() {
                       setSubState("error");
                     }
                   } catch {
+                    captcha.current?.reset();
                     setSubError("Something went wrong. Please try again.");
                     setSubState("error");
                   }
@@ -188,9 +199,15 @@ export default function Footer() {
                     }
                   }}
                   placeholder="Your email address"
+                  // The footer is on every page; only load the captcha once
+                  // someone starts signing up.
+                  onFocus={() => setWantsCaptcha(true)}
                   required
                   className={`w-full px-4 py-3 bg-foreground/5 border rounded-lg text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-colors duration-200 ${subState === "error" ? "border-red-400 focus:border-red-400" : "border-border focus:border-foreground/30"}`}
                 />
+                {wantsCaptcha && (
+                  <Turnstile ref={captcha} onToken={setCaptchaToken} />
+                )}
                 {subError && (
                   <p className="text-xs text-red-400 font-raleway">
                     {subError}
